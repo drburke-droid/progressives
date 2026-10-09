@@ -12,6 +12,23 @@ The tool loads cleanly, every control triggers a re-render, and the core chairsi
 
 Everything else is either a labelling inconsistency, a modelling choice worth revisiting, or an opportunity to make the demo more captivating.
 
+## Status (third commit: rebuild as the Progressive Lens Comparator)
+
+The page was rebuilt in the Visual Systems Lab style used by the Interactive Gaze Simulator: dark panel theme, topbar with Copy link / Save image / About, deep links in the hash, embed mode with height reporting, an About section with "The model, honestly", JSON-LD and social metadata. Everything from the earlier status list carries over. New in this version:
+
+- B2 done: prescriptions are power vectors (M, J0, J45). Cylinder and axis mismatch contribute to blur.
+- B3 done: viewing distance is chosen in cm (distance, TV, computer, reading, phone, custom). The need is the new distance prescription plus the dioptric demand, less the usable accommodation. "Add needed" is an output.
+- B5 done: unwanted astigmatism is modelled explicitly, shown as its own map, and the local mean power drops by half of it. The old peripheral and Minkwitz weighting inputs are gone.
+- B7 done: binocular mismatch uses signed residuals, computed on the full circle and displayed through the frame cut.
+- D2 done: "What the patient sees" blurs a letter chart by the residual blur at the pupil, worse eye, with an approximate acuity.
+- D4 done: a power profile strip beside each lens pair.
+- D6 done: "Save image" exports a labelled 1200 x 630 PNG. "Copy link" shares the full state.
+- D7: single-hue sequential amber ramp on the dark surface for magnitude maps and a blue / grey / red diverging ramp for the signed power map, following the data-visualization guidance (one hue for magnitude, two hues with a neutral midpoint for polarity). The pupil can be dragged on any map.
+- D8: advanced inputs are gone or folded into the design panel; the six readout pills became one sentence per panel.
+- Defaults: current -1.50 DS add +2.00, new -1.00 DS add +2.25, age 62 (no accommodation left on Hofstetter's minimum), 0.30 D depth of focus counted as clear.
+
+Still open: B6 (brand naming is kept, with an "illustrative" note), the design parameters remain the author's estimates, and vertex distance, pantoscopic tilt and prism are not modelled.
+
 ## Status (second commit)
 
 Applied in `index.html`:

@@ -1,2359 +1,1374 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Progressive Lens Analyzer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Progressive Lens Comparator: see where a progressive lens is clear</title>
+  <meta name="description" content="Free interactive progressive lens simulator. Compare a current and a new prescription across the whole lens, see where distance, computer and reading vision are clear, how a fitting error or a chin lift moves the clear zone, and what the patient would see. Created by Dr Robert Burke, optometrist.">
+  <meta name="author" content="Dr Robert Burke">
+  <meta name="theme-color" content="#0b0d12">
+  <link rel="canonical" href="https://calgaryvisioncentre.com/power-map">
+  <meta property="og:url" content="https://calgaryvisioncentre.com/power-map">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Calgary Vision Centre">
+  <meta property="og:title" content="Progressive Lens Comparator: see where a progressive lens is clear">
+  <meta property="og:description" content="Compare two prescriptions across the whole progressive lens, move the pupil through it, and see why an over-minused patient lifts the chin. Free, in the browser.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0d12'/%3E%3Cpath d='M12 22c6-8 34-8 40 0 4 12 2 24-6 28-9 4-19 4-28 0-8-4-10-16-6-28z' fill='%23181c25' stroke='%23e9edf4' stroke-width='2.5'/%3E%3Cpath d='M22 44c3-8 17-8 20 0' fill='none' stroke='%234cc9f0' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='27' r='3' fill='%234cc9f0'/%3E%3C/svg%3E">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["WebApplication", "LearningResource"],
+    "name": "Progressive Lens Comparator",
+    "url": "https://calgaryvisioncentre.com/power-map",
+    "description": "Interactive teaching model of a progressive addition lens: compare two prescriptions and two designs across the whole lens, move the pupil through it, simulate fitting errors, and see what the wearer would see at distance, computer and reading distance.",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any (web browser)",
+    "isAccessibleForFree": true,
+    "inLanguage": "en",
+    "educationalLevel": "Patients, students and eye-care professionals",
+    "learningResourceType": "Simulation",
+    "teaches": ["Progressive lens design", "Corridor length and inset", "Unwanted astigmatism", "Fitting height and centration", "Accommodation and presbyopia"],
+    "author": { "@type": "Person", "name": "Dr Robert Burke", "jobTitle": "Optometrist", "affiliation": { "@type": "Organization", "name": "Calgary Vision Centre", "url": "https://calgaryvisioncentre.com/" } },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" }
+  }
+  </script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body{
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-      min-height: 100vh;
-      padding: 2rem;
-      color: #1a202c;
-      line-height: 1.6;
-    }
-
-    #pal-tool{ max-width: 1400px; margin: 0 auto; }
-
-    .header{
-      text-align: center;
-      margin-bottom: 3rem;
-      animation: fadeInDown 0.6s ease-out;
-    }
-    .header h1{
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
-      letter-spacing: -0.5px;
-    }
-    .header p{
-      color: rgba(255,255,255,0.95);
-      font-size: 1.1rem;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .grid{
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .card{
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      transition: box-shadow 0.3s ease;
-      animation: fadeInUp 0.6s ease-out;
-    }
-
-    .panel-title{
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .panel-title::before{
-      content: '';
-      width: 4px;
-      height: 24px;
-      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
-      border-radius: 2px;
-    }
-
-    .rx-grid{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .rx-section{
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.08) 0%, rgba(15, 32, 39, 0.08) 100%);
-      border-radius: 16px;
-      padding: 1.5rem;
-      border: 1px solid rgba(44, 83, 100, 0.15);
-    }
-
-    .rx-label{
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #2c5364;
-      margin-bottom: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .row{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: flex-end;
-    }
-
-    .input-group{
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    label{
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #4a5568;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    input, select{
-      padding: 0.75rem 1rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      background: white;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      font-weight: 500;
-    }
-    input:focus, select:focus{
-      outline: none;
-      border-color: #2c5364;
-      box-shadow: 0 0 0 3px rgba(44, 83, 100, 0.15);
-    }
-
-    input{ width: 92px; max-width: 100%; }
-    input.small{ width: 78px; }
-
-    select{
-      min-width: 200px;
-      max-width: 100%;
-      cursor: pointer;
-    }
-
-    .pill{
-      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
-      color: white;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      align-self: center;
-    }
-
-    .step{
-      display: flex;
-      gap: 0.25rem;
-      margin-top: 0.25rem;
-    }
-    .step button{
-      flex: 1;
-      border: 1px solid #e2e8f0;
-      background: white;
-      color: #2c5364;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 0.2rem 0;
-      cursor: pointer;
-    }
-    .step button:hover{ background: rgba(44,83,100,0.08); }
-
-    .btn{
-      padding: 0.875rem 1.75rem;
-      border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      background: white;
-      color: #2c5364;
-      border: 2px solid #e2e8f0;
-    }
-    .btn:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    .btn.primary{
-      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
-      color: white;
-      border: none;
-      box-shadow: 0 4px 12px rgba(44, 83, 100, 0.4);
-    }
-    .btn.primary:hover{ box-shadow: 0 6px 20px rgba(44, 83, 100, 0.5); }
-
-    .btn.seg{ border-radius: 12px; padding: 0.75rem 1.5rem; }
-    .btn.seg.active{
-      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
-      color: white;
-      border: none;
-      box-shadow: 0 4px 12px rgba(44, 83, 100, 0.4);
-    }
-
-    .mode-strip{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.08) 0%, rgba(15, 32, 39, 0.08) 100%);
-      border-radius: 16px;
-    }
-
-    .hint{ font-size: 0.95rem; color: #4a5568; font-weight: 600; }
-
-    .kvs{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-
-    .kv{
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.12) 0%, rgba(15, 32, 39, 0.12) 100%);
-      color: #2d3748;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      border: 1px solid rgba(44, 83, 100, 0.25);
-    }
-
-    .note{
-      font-size: 0.875rem;
-      color: #718096;
-      font-style: italic;
-      margin-top: 1rem;
-    }
-
-    canvas{
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      width: 100%;
-      height: auto;
-      background: #fff;
-    }
-
-    .maps-top{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
-      gap: 2rem;
-      margin-top: 1.5rem;
-    }
-
-    .map-card{
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(15px);
-      border-radius: 20px;
-      padding: 1.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-    }
-
-    .map-head{
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .map-head .title{
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #2d3748;
-    }
-
-    .map-head .sub{
-      font-size: 0.85rem;
-      color: #718096;
-      font-weight: 500;
-    }
-
-    .eye-row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .eye-block{
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .eye-label{
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: #2c5364;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .strain{
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.08) 0%, rgba(15, 32, 39, 0.08) 100%);
-      border: 1px solid rgba(44, 83, 100, 0.25);
-      border-radius: 12px;
-      padding: 1rem;
-      font-size: 0.875rem;
-      width: 100%;
-    }
-
-    .strain .hdr{
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 0.75rem;
-    }
-
-    .strain .line{
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid rgba(44, 83, 100, 0.12);
-    }
-
-    .strain .line:last-of-type{ border-bottom: none; }
-
-    .strain .detail{
-      color: #718096;
-      font-size: 0.75rem;
-      margin: 2px 0 6px 0;
-    }
-
-    .strain small{
-      display: block;
-      color: #718096;
-      font-size: 0.75rem;
-      margin-top: 0.75rem;
-      font-style: italic;
-    }
-
-    details{
-      background: rgba(44, 83, 100, 0.08);
-      border: 1px solid rgba(44, 83, 100, 0.2);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-top: 1rem;
-    }
-
-    details summary{
-      cursor: pointer;
-      font-weight: 600;
-      color: #2d3748;
-      user-select: none;
-    }
-
-    details[open] summary{ margin-bottom: 1rem; }
-
-    .strain-legend{
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .strain-legend .item{
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 1rem;
-      font-size: 0.875rem;
-    }
-
-    .strain-legend .k{ font-weight: 700; color: #2d3748; }
-    .strain-legend .v{ color: #4a5568; }
-
-    .legend-wrap{
-      margin-top: 1.5rem;
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .legend-row{
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .legend-pill{
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.12) 0%, rgba(15, 32, 39, 0.12) 100%);
-      color: #2d3748;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      border: 1px solid rgba(44, 83, 100, 0.25);
-    }
-
-    .legend-bar{
-      height: 16px;
-      border-radius: 20px;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .legend-bar::after{
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
-      pointer-events: none;
-    }
-
-    .legend-ticks{
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: #718096;
-      font-weight: 600;
-    }
-
-    .two-cols{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .subcard{
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.08) 0%, rgba(15, 32, 39, 0.08) 100%);
-      border: 1px solid rgba(44, 83, 100, 0.2);
-      border-radius: 16px;
-      padding: 1.5rem;
-    }
-
-    .subcard .ttl{
-      font-size: 1rem;
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 1rem;
-    }
-
-    .inline{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: flex-end;
-    }
-
-    .divider{
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(44, 83, 100, 0.4), transparent);
-      margin: 1.5rem 0;
-    }
-
-    .hidden{ display: none !important; }
-
-    .metrics-grid{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .metric-card{
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.08) 0%, rgba(15, 32, 39, 0.08) 100%);
-      border: 1px solid rgba(44, 83, 100, 0.2);
-      border-radius: 16px;
-      padding: 1.25rem;
-    }
-
-    .metric-label{
-      font-size: 0.75rem;
-      color: #718096;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.5rem;
-    }
-
-    .metric-value{
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #2d3748;
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .metric-change{
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding: 0.25rem 0.5rem;
-      border-radius: 12px;
-    }
-
-    .metric-change.positive{ background: rgba(60, 200, 120, 0.15); color: #2d5f3d; }
-    .metric-change.negative{ background: rgba(220, 60, 60, 0.15); color: #8b2e2e; }
-    .metric-change.neutral { background: rgba(150, 150, 150, 0.15); color: #4a5568; }
-
-    .progress-bar-container{
-      width: 100%;
-      height: 8px;
-      background: rgba(0, 0, 0, 0.08);
-      border-radius: 20px;
-      overflow: hidden;
-      margin-top: 0.75rem;
-      position: relative;
-    }
-
-    .progress-bar{
-      height: 100%;
-      background: linear-gradient(90deg, #2c5364 0%, #0f2027 100%);
-      border-radius: 20px;
-      transition: width 0.6s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .progress-bar::after{
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      animation: shimmer 2s infinite;
-    }
-
-    @keyframes shimmer{
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-
-    .checkbox-label{
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #2d3748;
-      cursor: pointer;
-      user-select: none;
-    }
-    input[type="checkbox"]{ width: 20px; height: 20px; cursor: pointer; accent-color: #2c5364; }
-
-    .mono-note{
-      text-align: center;
-      font-size: 0.875rem;
-      color: #718096;
-      margin-top: 1rem;
-      font-style: italic;
-    }
-
-    /* Sliders */
-    .slider-row{ margin-bottom: 1rem; }
-    .slider-row label{
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 1rem;
-      margin-bottom: 0.35rem;
-    }
-    .slider-row label .sv{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 0.9rem;
-      color: #2c5364;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-    .slider-ends{
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.7rem;
-      color: #718096;
-      font-weight: 600;
-      margin-top: 0.15rem;
-    }
-    input[type="range"]{
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 10px;
-      padding: 0;
-      border: none;
-      border-radius: 20px;
-      background: linear-gradient(90deg, rgba(44,83,100,0.25), rgba(44,83,100,0.55), rgba(44,83,100,0.25));
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
-      cursor: pointer;
-    }
-    input[type="range"]:focus{ box-shadow: 0 0 0 3px rgba(44, 83, 100, 0.2); }
-    input[type="range"]::-webkit-slider-thumb{
-      -webkit-appearance: none;
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
-      border: 3px solid #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      cursor: grab;
-    }
-    input[type="range"]::-moz-range-thumb{
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
-      border: 3px solid #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      cursor: grab;
-    }
-
-    .fit-grid{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem;
-    }
-
-    .head-row{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-
-    .head-card{
-      background: linear-gradient(135deg, rgba(44, 83, 100, 0.08) 0%, rgba(15, 32, 39, 0.08) 100%);
-      border: 1px solid rgba(44, 83, 100, 0.2);
-      border-radius: 16px;
-      padding: 1.25rem;
-      display: grid;
-      grid-template-columns: 150px 1fr;
-      gap: 1.25rem;
-      align-items: center;
-    }
-    .head-card svg{ width: 150px; height: auto; display: block; }
-    .head-card .ttl{ font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 0.5rem; }
-    .head-card .big{
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: #2c5364;
-      line-height: 1.25;
-      margin-bottom: 0.5rem;
-    }
-    .head-card .big.good{ color: #2d5f3d; }
-    .head-card .big.bad{ color: #8b2e2e; }
-    .head-card .eye-line{
-      font-size: 0.85rem;
-      color: #2d3748;
-      display: flex;
-      gap: 0.5rem;
-      align-items: baseline;
-      flex-wrap: wrap;
-      margin-top: 0.25rem;
-    }
-    .head-card .eye-line b{ color: #2c5364; min-width: 1.6em; }
-    .verdict{
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.15rem 0.6rem;
-      border-radius: 20px;
-      border: 1px solid transparent;
-    }
-    .verdict.clear{ background: rgba(60,200,120,0.18); color: #2d5f3d; border-color: rgba(60,200,120,0.4); }
-    .verdict.mild{ background: rgba(235,210,70,0.22); color: #6b5a00; border-color: rgba(235,210,70,0.5); }
-    .verdict.bad{ background: rgba(220,60,60,0.15); color: #8b2e2e; border-color: rgba(220,60,60,0.4); }
-    .head-card .fine{ font-size: 0.75rem; color: #718096; margin-top: 0.5rem; }
-    .head-card .fine button{
-      border: none;
-      background: none;
-      color: #2c5364;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: underline;
-      font-size: 0.75rem;
-      padding: 0;
-    }
-
-    /* Constrain the big Map Appearance block */
-    #mapAppearanceDetails{ padding: 0; overflow: hidden; }
-    #mapAppearanceDetails > summary{ padding: 1rem 1.5rem; margin: 0; }
-    #mapAppearanceDetails[open] > summary{ margin-bottom: 0; }
-    #mapAppearanceDetails .details-body{
-      padding: 1rem 1.5rem 1.5rem 1.5rem;
-      max-height: 260px;
-      overflow: auto;
-      border-top: 1px solid rgba(44, 83, 100, 0.15);
-    }
-
-    .analysis-grid{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 2rem;
-      margin-top: 1.5rem;
-      align-items: start;
-    }
-    .analysis-grid .full-row{
-      grid-column: 1 / -1;
-    }
-
-    @keyframes fadeInDown{
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp{
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 1100px){
-      .analysis-grid{ grid-template-columns: 1fr; }
-      .analysis-grid .full-row{ grid-column: auto; }
-      .two-cols, .fit-grid, .head-row{ grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 768px){
-      body{ padding: 1rem; }
-      .card{ padding: 1.25rem; }
-      .header h1{ font-size: 1.75rem; }
-      .rx-grid, .maps-top{ grid-template-columns: 1fr; }
-      .eye-row{ grid-template-columns: 1fr; }
-      .head-card{ grid-template-columns: 110px 1fr; }
-      .head-card svg{ width: 110px; }
-      input{ width: 80px; }
-      input.small{ width: 70px; }
-      select{ min-width: 160px; }
+    :root {
+      --bg: #0b0d12;
+      --panel: #12151c;
+      --panel-2: #181c25;
+      --line: #262c39;
+      --text: #e9edf4;
+      --muted: #a9b2c3;
+      --accent: #4cc9f0;
+      --accent-ink: #062330;
+      --warn: #ffb703;
+      --bad: #ff6b85;
+      --good: #7ee0b5;
+      --violet: #c9a0ff;
+      --radius: 10px;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); }
+    a { color: var(--accent); }
+    h1, h2, h3 { line-height: 1.25; margin: 0; }
+    button, input, select { font: inherit; color: inherit; }
+    :focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+    .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .skip { position: absolute; left: 8px; top: -60px; background: var(--accent); color: var(--accent-ink); padding: 8px 12px; border-radius: 6px; z-index: 10; }
+    .skip:focus { top: 8px; }
+
+    /* ── Header ─────────────────────────────────────── */
+    .topbar { display: flex; align-items: center; gap: 16px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+    .brand { min-width: 0; flex: 1; }
+    .brand h1 { font-size: 18px; font-weight: 700; }
+    .brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-height: 40px; cursor: pointer; text-decoration: none; color: var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; }
+    .btn:hover { border-color: var(--accent); }
+    .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+    .btn.small { min-height: 32px; padding: 4px 10px; font-size: 13px; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Layout ─────────────────────────────────────── */
+    .app { max-width: 1320px; margin: 0 auto; padding: 14px 16px 20px; display: grid; gap: 14px; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; min-width: 0; }
+    .section-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .section-title .sub { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 12.5px; }
+    .hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+    .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+    /* Controls */
+    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); flex-wrap: wrap; }
+    .seg button { background: transparent; border: 0; padding: 6px 12px; min-height: 36px; cursor: pointer; font-size: 13.5px; white-space: nowrap; }
+    .seg button + button { border-left: 1px solid var(--line); }
+    .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+    .opt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .opt .label, label.label { font-size: 12px; color: var(--muted); }
+    .options { display: flex; gap: 10px 14px; flex-wrap: wrap; align-items: flex-end; }
+    .field { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; min-height: 36px; width: 78px; font-family: var(--mono); font-size: 14px; text-align: center; }
+    .field:focus { border-color: var(--accent); outline: none; }
+    select.field { font-family: var(--font); text-align: left; width: auto; min-width: 150px; cursor: pointer; }
+    .check { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; font-size: 14px; }
+    .check input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+
+    /* Rx grid */
+    .rx-wrap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .rx { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; }
+    .rx h3 { font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .rx h3 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .rx table { border-collapse: collapse; }
+    .rx th { font-size: 11.5px; color: var(--muted); font-weight: 600; text-align: left; padding: 0 4px 4px 0; }
+    .rx td { padding: 2px 6px 2px 0; vertical-align: middle; }
+    .rx td.eye { font-weight: 700; color: var(--muted); font-size: 13px; width: 2.2em; }
+    .rx .field { width: 72px; min-height: 34px; }
+    .rx .field.ax { width: 58px; }
+    .stepper { display: inline-flex; align-items: center; gap: 2px; }
+    .stepper button { width: 24px; height: 34px; border: 1px solid var(--line); background: var(--panel); border-radius: 6px; cursor: pointer; font-size: 15px; line-height: 1; padding: 0; color: var(--muted); }
+    .stepper button:hover { color: var(--text); border-color: var(--accent); }
+    .readline { font-size: 13px; color: var(--muted); margin-top: 8px; font-family: var(--mono); }
+    .readline b { color: var(--text); font-weight: 600; }
+
+    /* Target strip */
+    .target-strip { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: flex-end; }
+    .target-strip .demand { font-family: var(--mono); font-size: 13px; color: var(--muted); align-self: center; }
+
+    /* Stage: the maps */
+    .stage-tools { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px; }
+    .lenses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .lens-col { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; min-width: 0; }
+    .lens-col h3 { font-size: 15px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+    .lens-col h3 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .lens-col h3 .sub { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+    .maps { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 64px; gap: 8px; align-items: start; }
+    .map { position: relative; min-width: 0; }
+    .map canvas { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--panel); }
+    .map .eye { position: absolute; top: 6px; left: 8px; font-size: 12px; font-weight: 700; color: var(--muted); pointer-events: none; }
+    .profile canvas { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--panel); }
+    .bino { margin-top: 8px; }
+    .bino canvas { display: block; width: 100%; max-width: 360px; height: auto; border-radius: 8px; background: var(--panel); margin: 0 auto; }
+    .legend-bar { height: 10px; border-radius: 5px; margin-top: 10px; }
+    .legend-ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .map-caption { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+
+    /* Fit & gaze */
+    .slider { margin: 0 0 10px; }
+    .slider label { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+    .slider label b { font-family: var(--mono); font-weight: 600; color: var(--text); text-align: right; }
+    .slider input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; margin: 6px 0; border-radius: 4px; background: #2a303d; cursor: pointer; }
+    .slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); border: 3px solid var(--panel); box-shadow: 0 0 0 1px var(--line); cursor: grab; }
+    .slider input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); border: 3px solid var(--panel); cursor: grab; }
+    .slider .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+    .head-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .head-card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center; }
+    .head-card svg { width: 110px; height: auto; display: block; }
+    .head-card h3 { font-size: 13px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .head-card h3 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .head-card .big { font-size: 16px; font-weight: 700; line-height: 1.3; margin: 2px 0 4px; }
+    .head-card .big.good { color: var(--good); }
+    .head-card .big.bad { color: var(--bad); }
+    .head-card .eye-line { font-size: 13px; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; font-family: var(--mono); }
+    .head-card .eye-line b { color: var(--muted); font-weight: 600; }
+    .verdict { display: inline-block; font-family: var(--font); font-size: 11.5px; font-weight: 700; padding: 1px 7px; border-radius: 99px; border: 1px solid; }
+    .verdict.clear { color: var(--good); border-color: var(--good); }
+    .verdict.mild { color: var(--warn); border-color: var(--warn); }
+    .verdict.bad { color: var(--bad); border-color: var(--bad); }
+    .head-card .fine { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .linkish { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; font-size: inherit; }
+
+    /* Letter chart */
+    .sees { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .see { background: #f6f3ea; border-radius: 8px; padding: 0; overflow: hidden; position: relative; }
+    .see canvas { display: block; width: 100%; height: auto; }
+    .see .tag { position: absolute; left: 10px; top: 8px; font-size: 12px; font-weight: 700; color: #3a3a3a; display: flex; align-items: center; gap: 6px; }
+    .see .tag .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .see .va { position: absolute; right: 10px; top: 8px; font-family: var(--mono); font-size: 12px; color: #3a3a3a; }
+
+    /* Metrics */
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .metric { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+    .metric .label { font-size: 12px; color: var(--muted); }
+    .metric .vals { font-family: var(--mono); font-size: 15px; margin-top: 2px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .metric .delta { font-size: 12px; font-weight: 700; padding: 1px 6px; border-radius: 99px; border: 1px solid; }
+    .metric .delta.up { color: var(--good); border-color: var(--good); }
+    .metric .delta.down { color: var(--bad); border-color: var(--bad); }
+    .metric .delta.flat { color: var(--muted); border-color: var(--line); }
+    .bars { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+    .bar { height: 6px; background: #2a303d; border-radius: 3px; overflow: hidden; }
+    .bar i { display: block; height: 100%; border-radius: 3px; }
+
+    /* Strain tables */
+    .strain { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .strain th { text-align: left; color: var(--muted); font-weight: 600; font-size: 12px; padding: 4px 6px 4px 0; border-bottom: 1px solid var(--line); }
+    .strain td { padding: 5px 6px 5px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .strain td.z { font-weight: 600; white-space: nowrap; }
+    .strain small { display: block; color: var(--muted); }
+
+    details.panel > summary { cursor: pointer; font-weight: 700; font-size: 14px; list-style: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    details.panel > summary::-webkit-details-marker { display: none; }
+    details.panel > summary::before { content: "\25B8"; color: var(--muted); font-size: 13px; transition: transform .15s; }
+    details.panel[open] > summary::before { transform: rotate(90deg); }
+    details.panel > summary .sub { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+    details.panel > .body { margin-top: 12px; }
+    .samples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .samples .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .samples canvas { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--panel-2); }
+    .samples h3 { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+
+    /* Content below the app */
+    .embed-note { display: none; }
+    .content { max-width: 860px; margin: 0 auto; padding: 24px 16px 20px; }
+    .content h2 { font-size: 22px; margin: 28px 0 10px; }
+    .content p, .content li { color: #d3d9e4; }
+    .disclaimer { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; background: var(--panel); }
+    footer { border-top: 1px solid var(--line); padding: 18px 16px 28px; color: var(--muted); font-size: 13.5px; text-align: center; }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 20; }
+    .toast[hidden] { display: none; }
+    .credit { font-size: 12.5px; color: var(--muted); text-align: right; margin: 0; }
+    .credit a { color: var(--muted); }
+
+    .embed, .embed body { overflow: hidden; }
+    .embed .brand p, .embed #about, .embed footer, .embed .about-link { display: none; }
+    .embed .embed-note { display: block; text-align: center; color: var(--muted); font-size: 12.5px; padding: 0 16px 14px; }
+    .embed .toast { position: absolute; top: 12px; bottom: auto; }
+
+    @media (max-width: 1000px) {
+      .maps { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 56px; }
+    }
+    @media (max-width: 1100px) {
+      .lenses { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 820px) {
+      .two, .rx-wrap, .sees, .head-row, .samples { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .topbar { padding: 8px 12px; gap: 8px; }
+      .brand h1 { font-size: 16px; }
+      .brand p { display: none; }
+      .actions .btn { min-height: 36px; padding: 6px 10px; font-size: 13px; }
+      .app { padding: 10px 10px 16px; gap: 10px; }
+      .rx .field { width: 62px; }
+      .rx .field.ax { width: 50px; }
+      .stepper button { width: 22px; }
+      .head-card { grid-template-columns: 90px 1fr; }
+      .head-card svg { width: 90px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
     }
   </style>
 </head>
-
 <body>
-  <div id="pal-tool">
-    <div class="header">
-      <h1>Progressive Lens Analyzer</h1>
-      <p>See how a prescription change, a lens design, or a fitting error moves clear vision around a progressive lens</p>
+  <a class="skip" href="#stage">Skip to the lens maps</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <h1>Progressive Lens Comparator</h1>
+      <p>Compare two prescriptions and two designs across the whole lens, move the pupil through it, and see what the wearer would see.</p>
     </div>
+    <div class="actions">
+      <button class="btn" id="copy-link" type="button">Copy link</button>
+      <button class="btn" id="save-image" type="button">Save image</button>
+      <a class="btn about-link" href="#about">About</a>
+    </div>
+  </header>
 
-    <div class="grid">
-      <div class="card">
-        <div class="panel-title">Prescription Inputs</div>
+  <main id="main">
+    <div class="app">
 
-        <div class="rx-grid">
-          <div class="rx-section">
-            <div class="rx-label">Current Glasses Prescription</div>
-
-            <div class="row">
-              <div class="pill">OD</div>
-              <div class="input-group"><label for="hab_od_sph">Dist Sph</label><input id="hab_od_sph" inputmode="decimal" value="-1.50" /><div class="step"><button type="button" data-step="hab_od_sph" data-d="-0.25">&minus;</button><button type="button" data-step="hab_od_sph" data-d="0.25">+</button></div></div>
-              <div class="input-group"><label for="hab_od_cyl">Dist Cyl</label><input id="hab_od_cyl" inputmode="decimal" value="0.00" /></div>
-              <div class="input-group"><label for="hab_od_axis">Axis</label><input id="hab_od_axis" class="small" inputmode="numeric" value="180" /></div>
-              <div class="input-group"><label for="hab_od_add">Add</label><input id="hab_od_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="hab_od_add" data-d="-0.25">&minus;</button><button type="button" data-step="hab_od_add" data-d="0.25">+</button></div></div>
-            </div>
-
-            <div class="row" style="margin-top: 1rem;">
-              <div class="pill">OS</div>
-              <div class="input-group"><label for="hab_os_sph">Dist Sph</label><input id="hab_os_sph" inputmode="decimal" value="-1.50" /><div class="step"><button type="button" data-step="hab_os_sph" data-d="-0.25">&minus;</button><button type="button" data-step="hab_os_sph" data-d="0.25">+</button></div></div>
-              <div class="input-group"><label for="hab_os_cyl">Dist Cyl</label><input id="hab_os_cyl" inputmode="decimal" value="0.00" /></div>
-              <div class="input-group"><label for="hab_os_axis">Axis</label><input id="hab_os_axis" class="small" inputmode="numeric" value="180" /></div>
-              <div class="input-group"><label for="hab_os_add">Add</label><input id="hab_os_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="hab_os_add" data-d="-0.25">&minus;</button><button type="button" data-step="hab_os_add" data-d="0.25">+</button></div></div>
-            </div>
+      <!-- Prescriptions -->
+      <section class="panel" aria-labelledby="rx-title">
+        <h2 class="section-title" id="rx-title">Prescriptions <span class="sub">Sphere, cylinder and axis are all modelled (power vectors). Tap the arrows for 0.25 D steps.</span></h2>
+        <div class="rx-wrap">
+          <div class="rx" id="rx-cur">
+            <h3><span class="dot" style="background:var(--warn)"></span>Current glasses</h3>
+            <table>
+              <thead><tr><th></th><th>Sphere</th><th>Cylinder</th><th>Axis</th><th>Add</th></tr></thead>
+              <tbody>
+                <tr><td class="eye">OD</td>
+                  <td><span class="stepper"><button type="button" data-step="cur_od_sph" data-d="-0.25" aria-label="OD sphere minus 0.25">&minus;</button><input class="field" id="cur_od_sph" inputmode="decimal" value="-1.50" aria-label="Current OD sphere"><button type="button" data-step="cur_od_sph" data-d="0.25" aria-label="OD sphere plus 0.25">+</button></span></td>
+                  <td><span class="stepper"><button type="button" data-step="cur_od_cyl" data-d="-0.25" aria-label="OD cylinder minus 0.25">&minus;</button><input class="field" id="cur_od_cyl" inputmode="decimal" value="0.00" aria-label="Current OD cylinder"><button type="button" data-step="cur_od_cyl" data-d="0.25" aria-label="OD cylinder plus 0.25">+</button></span></td>
+                  <td><input class="field ax" id="cur_od_axis" inputmode="numeric" value="180" aria-label="Current OD axis"></td>
+                  <td><span class="stepper"><button type="button" data-step="cur_od_add" data-d="-0.25" aria-label="OD add minus 0.25">&minus;</button><input class="field" id="cur_od_add" inputmode="decimal" value="2.00" aria-label="Current OD add"><button type="button" data-step="cur_od_add" data-d="0.25" aria-label="OD add plus 0.25">+</button></span></td></tr>
+                <tr><td class="eye">OS</td>
+                  <td><span class="stepper"><button type="button" data-step="cur_os_sph" data-d="-0.25" aria-label="OS sphere minus 0.25">&minus;</button><input class="field" id="cur_os_sph" inputmode="decimal" value="-1.50" aria-label="Current OS sphere"><button type="button" data-step="cur_os_sph" data-d="0.25" aria-label="OS sphere plus 0.25">+</button></span></td>
+                  <td><span class="stepper"><button type="button" data-step="cur_os_cyl" data-d="-0.25" aria-label="OS cylinder minus 0.25">&minus;</button><input class="field" id="cur_os_cyl" inputmode="decimal" value="0.00" aria-label="Current OS cylinder"><button type="button" data-step="cur_os_cyl" data-d="0.25" aria-label="OS cylinder plus 0.25">+</button></span></td>
+                  <td><input class="field ax" id="cur_os_axis" inputmode="numeric" value="180" aria-label="Current OS axis"></td>
+                  <td><span class="stepper"><button type="button" data-step="cur_os_add" data-d="-0.25" aria-label="OS add minus 0.25">&minus;</button><input class="field" id="cur_os_add" inputmode="decimal" value="2.00" aria-label="Current OS add"><button type="button" data-step="cur_os_add" data-d="0.25" aria-label="OS add plus 0.25">+</button></span></td></tr>
+              </tbody>
+            </table>
+            <div class="readline" id="cur_readline"></div>
           </div>
 
-          <div class="rx-section">
-            <div class="rx-label">New Prescription</div>
-
-            <div class="row">
-              <div class="pill">OD</div>
-              <div class="input-group"><label for="opt_od_sph">Dist Sph</label><input id="opt_od_sph" inputmode="decimal" value="-1.00" /><div class="step"><button type="button" data-step="opt_od_sph" data-d="-0.25">&minus;</button><button type="button" data-step="opt_od_sph" data-d="0.25">+</button></div></div>
-              <div class="input-group"><label for="opt_od_cyl">Dist Cyl</label><input id="opt_od_cyl" inputmode="decimal" value="0.00" /></div>
-              <div class="input-group"><label for="opt_od_axis">Axis</label><input id="opt_od_axis" class="small" inputmode="numeric" value="180" /></div>
-              <div class="input-group"><label for="opt_od_add">Add</label><input id="opt_od_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="opt_od_add" data-d="-0.25">&minus;</button><button type="button" data-step="opt_od_add" data-d="0.25">+</button></div></div>
-            </div>
-
-            <div class="row" style="margin-top: 1rem;">
-              <div class="pill">OS</div>
-              <div class="input-group"><label for="opt_os_sph">Dist Sph</label><input id="opt_os_sph" inputmode="decimal" value="-1.00" /><div class="step"><button type="button" data-step="opt_os_sph" data-d="-0.25">&minus;</button><button type="button" data-step="opt_os_sph" data-d="0.25">+</button></div></div>
-              <div class="input-group"><label for="opt_os_cyl">Dist Cyl</label><input id="opt_os_cyl" inputmode="decimal" value="0.00" /></div>
-              <div class="input-group"><label for="opt_os_axis">Axis</label><input id="opt_os_axis" class="small" inputmode="numeric" value="180" /></div>
-              <div class="input-group"><label for="opt_os_add">Add</label><input id="opt_os_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="opt_os_add" data-d="-0.25">&minus;</button><button type="button" data-step="opt_os_add" data-d="0.25">+</button></div></div>
-            </div>
+          <div class="rx" id="rx-new">
+            <h3><span class="dot" style="background:var(--accent)"></span>New prescription <span class="hint" style="margin:0">(taken as the eye's true refraction)</span></h3>
+            <table>
+              <thead><tr><th></th><th>Sphere</th><th>Cylinder</th><th>Axis</th><th>Add</th></tr></thead>
+              <tbody>
+                <tr><td class="eye">OD</td>
+                  <td><span class="stepper"><button type="button" data-step="new_od_sph" data-d="-0.25" aria-label="OD sphere minus 0.25">&minus;</button><input class="field" id="new_od_sph" inputmode="decimal" value="-1.00" aria-label="New OD sphere"><button type="button" data-step="new_od_sph" data-d="0.25" aria-label="OD sphere plus 0.25">+</button></span></td>
+                  <td><span class="stepper"><button type="button" data-step="new_od_cyl" data-d="-0.25" aria-label="OD cylinder minus 0.25">&minus;</button><input class="field" id="new_od_cyl" inputmode="decimal" value="0.00" aria-label="New OD cylinder"><button type="button" data-step="new_od_cyl" data-d="0.25" aria-label="OD cylinder plus 0.25">+</button></span></td>
+                  <td><input class="field ax" id="new_od_axis" inputmode="numeric" value="180" aria-label="New OD axis"></td>
+                  <td><span class="stepper"><button type="button" data-step="new_od_add" data-d="-0.25" aria-label="OD add minus 0.25">&minus;</button><input class="field" id="new_od_add" inputmode="decimal" value="2.25" aria-label="New OD add"><button type="button" data-step="new_od_add" data-d="0.25" aria-label="OD add plus 0.25">+</button></span></td></tr>
+                <tr><td class="eye">OS</td>
+                  <td><span class="stepper"><button type="button" data-step="new_os_sph" data-d="-0.25" aria-label="OS sphere minus 0.25">&minus;</button><input class="field" id="new_os_sph" inputmode="decimal" value="-1.00" aria-label="New OS sphere"><button type="button" data-step="new_os_sph" data-d="0.25" aria-label="OS sphere plus 0.25">+</button></span></td>
+                  <td><span class="stepper"><button type="button" data-step="new_os_cyl" data-d="-0.25" aria-label="OS cylinder minus 0.25">&minus;</button><input class="field" id="new_os_cyl" inputmode="decimal" value="0.00" aria-label="New OS cylinder"><button type="button" data-step="new_os_cyl" data-d="0.25" aria-label="OS cylinder plus 0.25">+</button></span></td>
+                  <td><input class="field ax" id="new_os_axis" inputmode="numeric" value="180" aria-label="New OS axis"></td>
+                  <td><span class="stepper"><button type="button" data-step="new_os_add" data-d="-0.25" aria-label="OS add minus 0.25">&minus;</button><input class="field" id="new_os_add" inputmode="decimal" value="2.25" aria-label="New OS add"><button type="button" data-step="new_os_add" data-d="0.25" aria-label="OS add plus 0.25">+</button></span></td></tr>
+              </tbody>
+            </table>
+            <div class="readline" id="new_readline"></div>
           </div>
         </div>
 
-        <div class="row" style="margin-top: 1.5rem;">
-          <label class="checkbox-label">
-            <input type="checkbox" id="acc_on" />
-            Allow accommodation
-          </label>
-
-          <div class="input-group"><label for="acc_age">Age</label><input id="acc_age" class="small" inputmode="numeric" value="55" /></div>
-
-          <div class="input-group">
-            <label for="acc_model">Accommodation model</label>
-            <select id="acc_model">
+        <div class="options" style="margin-top:12px">
+          <label class="check"><input type="checkbox" id="acc_on" checked> Allow accommodation</label>
+          <div class="opt"><label class="label" for="acc_age">Age</label><input class="field" id="acc_age" inputmode="numeric" value="62"></div>
+          <div class="opt"><label class="label" for="acc_model">Amplitude model</label>
+            <select class="field" id="acc_model">
               <option value="min" selected>Hofstetter minimum</option>
               <option value="avg">Hofstetter average</option>
               <option value="max">Hofstetter maximum</option>
-            </select>
+            </select></div>
+          <div class="opt"><label class="label" for="acc_pct">Usable reserve %</label><input class="field" id="acc_pct" inputmode="numeric" value="50"></div>
+          <div class="opt"><label class="label" for="pupil_mm">Pupil (mm)</label><input class="field" id="pupil_mm" inputmode="decimal" value="3.5"></div>
+          <button class="btn" id="copy-rx" type="button" title="Copy the new prescription into the current glasses">Copy new &rarr; current</button>
+          <button class="btn" id="swap-rx" type="button" title="Swap the two prescriptions">Swap</button>
+        </div>
+        <p class="hint" id="acc_line"></p>
+      </section>
+
+      <!-- Target -->
+      <section class="panel" aria-labelledby="target-title">
+        <h2 class="section-title" id="target-title">Looking at <span class="sub">Maps and verdicts are computed for this viewing distance.</span></h2>
+        <div class="target-strip">
+          <div class="seg" id="target-picker" role="group" aria-label="Viewing distance">
+            <button type="button" data-cm="0">Distance</button>
+            <button type="button" data-cm="300">TV 3 m</button>
+            <button type="button" data-cm="65">Computer 65 cm</button>
+            <button type="button" data-cm="40">Reading 40 cm</button>
+            <button type="button" data-cm="33">Phone 33 cm</button>
           </div>
+          <div class="opt"><label class="label" for="target_cm">Custom (cm, 0 = infinity)</label><input class="field" id="target_cm" inputmode="numeric" value="0"></div>
+          <div class="demand" id="demand_line"></div>
+        </div>
+      </section>
 
-          <div class="input-group"><label for="acc_pct">Usable reserve %</label><input id="acc_pct" class="small" inputmode="numeric" value="30" /></div>
-
-          <label class="checkbox-label">
-            <input type="checkbox" id="bino_on" />
-            Binocular disparity view
-          </label>
-
-          <button class="btn" id="sync_hab_to_opt">Copy New Rx to Current</button>
-          <button class="btn primary" id="pal-generate">Update Analysis</button>
+      <!-- Maps -->
+      <section class="panel" id="stage" aria-labelledby="maps-title">
+        <h2 class="section-title" id="maps-title">Lens maps <span class="sub" id="maps-sub"></span></h2>
+        <div class="stage-tools">
+          <div class="opt"><span class="label" id="map-label">Show</span>
+            <div class="seg" id="map-picker" role="group" aria-labelledby="map-label">
+              <button type="button" data-map="blur">Blur for this distance</button>
+              <button type="button" data-map="astig">Unwanted astigmatism</button>
+              <button type="button" data-map="power">Mean power vs need</button>
+            </div></div>
+          <label class="check"><input type="checkbox" id="frame_on" checked> Frame cut</label>
+          <label class="check"><input type="checkbox" id="bino_on"> Binocular mismatch</label>
         </div>
 
-        <div class="kvs" id="pal-readouts"></div>
-        <div class="note">Accommodation is only used when needed to cover extra minus. Over plus is never fixed by accommodation. Cylinder is modelled as its spherical equivalent.</div>
+        <div class="lenses">
+          <div class="lens-col">
+            <h3><span class="dot" style="background:var(--warn)"></span>Current glasses <span class="sub" id="cur_design_sub"></span></h3>
+            <div class="maps">
+              <div class="map"><canvas id="map_cur_od" width="560" height="560" role="img" aria-label="Current glasses, right lens"></canvas><span class="eye">OD</span></div>
+              <div class="map"><canvas id="map_cur_os" width="560" height="560" role="img" aria-label="Current glasses, left lens"></canvas><span class="eye">OS</span></div>
+              <div class="profile"><canvas id="prof_cur" width="128" height="560" role="img" aria-label="Current glasses, power along the corridor"></canvas></div>
+            </div>
+            <div class="bino" id="bino_cur_wrap" hidden><canvas id="bino_cur" width="560" height="560"></canvas><p class="map-caption" style="text-align:center">Binocular mismatch: difference between the two eyes' residual blur. Alert above 0.50 D.</p></div>
+          </div>
+          <div class="lens-col">
+            <h3><span class="dot" style="background:var(--accent)"></span>New prescription <span class="sub" id="new_design_sub"></span></h3>
+            <div class="maps">
+              <div class="map"><canvas id="map_new_od" width="560" height="560" role="img" aria-label="New prescription, right lens"></canvas><span class="eye">OD</span></div>
+              <div class="map"><canvas id="map_new_os" width="560" height="560" role="img" aria-label="New prescription, left lens"></canvas><span class="eye">OS</span></div>
+              <div class="profile"><canvas id="prof_new" width="128" height="560" role="img" aria-label="New prescription, power along the corridor"></canvas></div>
+            </div>
+            <div class="bino" id="bino_new_wrap" hidden><canvas id="bino_new" width="560" height="560"></canvas><p class="map-caption" style="text-align:center">Binocular mismatch: difference between the two eyes' residual blur. Alert above 0.50 D.</p></div>
+          </div>
+        </div>
+        <div class="legend-bar" id="legend_bar"></div>
+        <div class="legend-ticks" id="legend_ticks"></div>
+        <p class="map-caption" id="map_caption"></p>
+        <p class="hint">Each lens is drawn as the wearer sees it from behind: N is the nose side, T the temple side. The circle is the pupil at the chosen gaze, the small cross is the lens' fitting cross, the dashed lines mark the fitting cross, half the add and the near reference point. The strip beside each pair plots power along the corridor (OD solid, OS dashed) against what the eye needs. Drag the pupil on any map, or use the gaze sliders below.</p>
+      </section>
+
+      <div class="two">
+        <!-- Fit & gaze -->
+        <section class="panel" aria-labelledby="fit-title">
+          <h2 class="section-title" id="fit-title">Fit and gaze <span class="sub">Move the lens on the face, or move the eye through the lens.</span></h2>
+          <div class="two" style="gap:14px">
+            <div>
+              <div class="slider"><label for="fit_h">Fitting height error <b id="fit_h_v">0.0 mm</b></label><input type="range" id="fit_h" min="-6" max="6" step="0.5" value="0"><div class="ends"><span>Fitted too low</span><span>Fitted too high</span></div></div>
+              <div class="slider"><label for="fit_pd">Centration (PD) error <b id="fit_pd_v">0.0 mm</b></label><input type="range" id="fit_pd" min="-4" max="4" step="0.5" value="0"><div class="ends"><span>Centres too wide</span><span>Centres too narrow</span></div></div>
+              <button class="btn small" id="fit_reset" type="button">Perfect fit</button>
+            </div>
+            <div>
+              <div class="slider"><label for="gaze_y">Vertical gaze <b id="gaze_y_v">0.0 mm</b></label><input type="range" id="gaze_y" min="-6" max="20" step="0.5" value="0"><div class="ends"><span>Looking up</span><span>Looking down (chin up)</span></div></div>
+              <div class="slider"><label for="gaze_x">Horizontal gaze <b id="gaze_x_v">0.0 mm</b></label><input type="range" id="gaze_x" min="-15" max="15" step="0.5" value="0"><div class="ends"><span>Patient's left</span><span>Patient's right</span></div></div>
+              <div class="options">
+                <button class="btn small" id="gaze_reset" type="button">Primary gaze</button>
+                <button class="btn small" id="find_cur" type="button">Find clear view: current</button>
+                <button class="btn small primary" id="find_new" type="button">Find clear view: new</button>
+              </div>
+            </div>
+          </div>
+          <div class="head-row">
+            <div class="head-card" id="head_cur" aria-live="polite"></div>
+            <div class="head-card" id="head_new" aria-live="polite"></div>
+          </div>
+          <p class="hint">"Find clear view" walks the pupil down the lens until the chosen distance comes into focus. For distance the head tilts by the angle that takes; for reading and screens the head stays level and the eyes drop (25 mm from lens to the eye's centre of rotation, so 1 mm is about 2.3&deg;).</p>
+        </section>
+
+        <!-- What the patient sees -->
+        <section class="panel" aria-labelledby="sees-title">
+          <h2 class="section-title" id="sees-title">What the patient sees <span class="sub">Through the pupil at the chosen gaze, worse eye.</span></h2>
+          <div class="sees">
+            <div class="see"><canvas id="see_cur" width="480" height="300"></canvas><span class="tag"><span class="dot" style="background:var(--warn)"></span>Current</span><span class="va" id="see_cur_va"></span></div>
+            <div class="see"><canvas id="see_new" width="480" height="300"></canvas><span class="tag"><span class="dot" style="background:var(--accent)"></span>New</span><span class="va" id="see_new_va"></span></div>
+          </div>
+          <p class="hint" id="sees_line"></p>
+
+          <h2 class="section-title" style="margin-top:14px">Whole-lens comparison <span class="sub">Share of the lens area, both eyes, at this distance.</span></h2>
+          <div class="metrics" id="metrics"></div>
+        </section>
       </div>
 
-      <details class="card" id="samplepoints_details">
-        <summary style="cursor:pointer;font-size:1.25rem;font-weight:700;color:#2d3748">
-          Sample Points (SE) Diagrams
-          <span style="font-size:0.875rem;color:#718096;margin-left:0.5rem;font-weight:400">(click to expand)</span>
-        </summary>
-
-        <div class="maps-top">
-          <div class="map-card">
-            <div class="map-head">
-              <div class="title">Current Glasses</div>
-              <div class="sub">Local power (SE), rounded to 0.25 D</div>
-            </div>
-            <div class="eye-row">
-              <div class="eye-block">
-                <div class="eye-label">OD</div>
-                <canvas id="can_hab_od" width="520" height="520"></canvas>
-              </div>
-              <div class="eye-block">
-                <div class="eye-label">OS</div>
-                <canvas id="can_hab_os" width="520" height="520"></canvas>
-              </div>
-            </div>
+      <!-- Designs -->
+      <section class="panel" aria-labelledby="design-title">
+        <h2 class="section-title" id="design-title">Lens designs <span class="sub">Illustrative design families, not manufacturer data.</span></h2>
+        <div class="two">
+          <div class="options">
+            <div class="opt"><label class="label" for="cur_design">Current glasses</label>
+              <select class="field" id="cur_design">
+                <option value="gen_hard">Generic PAL, hard</option>
+                <option value="gen_avg" selected>Generic PAL, average</option>
+                <option value="gen_soft">Generic PAL, soft</option>
+                <option value="nikon_seemax">Nikon SeeMax Ultimate</option>
+                <option value="hoya_mystyle3">Hoya MyStyle 3</option>
+              </select></div>
+            <div class="opt" id="cur_corridor_wrap"><label class="label" for="cur_corridor">Corridor</label>
+              <select class="field" id="cur_corridor"><option value="short">Short, 11 mm</option><option value="medium" selected>Medium, 14 mm</option><option value="long">Long, 17 mm</option></select></div>
+            <div class="opt" id="cur_emph_wrap"><label class="label" for="cur_emph">Emphasis</label>
+              <select class="field" id="cur_emph"><option value="balanced" selected>Balanced</option><option value="distance">Distance</option><option value="intermediate">Intermediate</option><option value="near">Near</option></select></div>
+            <div class="opt" id="cur_hoya_wrap" hidden><label class="label" for="cur_hoya">MyStyle 3 mode</label>
+              <select class="field" id="cur_hoya"><option value="tyro">Tyro</option><option value="expert" selected>Expert</option><option value="detail">Detail</option><option value="modern">Modern</option><option value="adventure">Adventure</option></select></div>
           </div>
-
-          <div class="map-card">
-            <div class="map-head">
-              <div class="title">New Prescription</div>
-              <div class="sub">Local power (SE), rounded to 0.25 D</div>
-            </div>
-            <div class="eye-row">
-              <div class="eye-block">
-                <div class="eye-label">OD</div>
-                <canvas id="can_opt_od" width="520" height="520"></canvas>
-              </div>
-              <div class="eye-block">
-                <div class="eye-label">OS</div>
-                <canvas id="can_opt_os" width="520" height="520"></canvas>
-              </div>
-            </div>
+          <div class="options">
+            <div class="opt"><label class="label" for="new_design">New prescription</label>
+              <select class="field" id="new_design">
+                <option value="gen_hard">Generic PAL, hard</option>
+                <option value="gen_avg" selected>Generic PAL, average</option>
+                <option value="gen_soft">Generic PAL, soft</option>
+                <option value="nikon_seemax">Nikon SeeMax Ultimate</option>
+                <option value="hoya_mystyle3">Hoya MyStyle 3</option>
+              </select></div>
+            <div class="opt" id="new_corridor_wrap"><label class="label" for="new_corridor">Corridor</label>
+              <select class="field" id="new_corridor"><option value="short">Short, 11 mm</option><option value="medium" selected>Medium, 14 mm</option><option value="long">Long, 17 mm</option></select></div>
+            <div class="opt" id="new_emph_wrap"><label class="label" for="new_emph">Emphasis</label>
+              <select class="field" id="new_emph"><option value="balanced" selected>Balanced</option><option value="distance">Distance</option><option value="intermediate">Intermediate</option><option value="near">Near</option></select></div>
+            <div class="opt" id="new_hoya_wrap" hidden><label class="label" for="new_hoya">MyStyle 3 mode</label>
+              <select class="field" id="new_hoya"><option value="tyro">Tyro</option><option value="expert" selected>Expert</option><option value="detail">Detail</option><option value="modern">Modern</option><option value="adventure">Adventure</option></select></div>
           </div>
+        </div>
+        <p class="hint">Generic designs use a fixed 14 mm corridor. The named designs stand in for an individualised premium family: wider corridor, softer periphery, selectable corridor length and emphasis. Their numbers are the author's estimates for teaching, not measured maps.</p>
+      </section>
+
+      <!-- Details -->
+      <details class="panel" id="strain_details">
+        <summary>Predicted eyestrain by zone <span class="sub">demand divided by usable accommodative reserve</span></summary>
+        <div class="body two" id="strain_body"></div>
+        <p class="hint">Bands: no strain below 0.10 of reserve, mild to 0.24, moderate to 0.79, significant to 1.99, beyond reserve at 2.00 or more. Over plus is reported as blur, since accommodation cannot remove it.</p>
+      </details>
+
+      <details class="panel" id="samples_details">
+        <summary>Sample point powers <span class="sub">local spherical equivalent, rounded to 0.25 D</span></summary>
+        <div class="body samples">
+          <div><h3>Current glasses</h3><div class="pair"><canvas id="sp_cur_od" width="420" height="420"></canvas><canvas id="sp_cur_os" width="420" height="420"></canvas></div></div>
+          <div><h3>New prescription</h3><div class="pair"><canvas id="sp_new_od" width="420" height="420"></canvas><canvas id="sp_new_os" width="420" height="420"></canvas></div></div>
         </div>
       </details>
 
-      <div class="card">
-        <div class="mode-strip" style="margin-bottom:1.5rem">
-          <div class="hint">Target Distance:</div>
-          <button class="btn seg active" data-mode="distance">Distance</button>
-          <button class="btn seg" data-mode="computer">Computer</button>
-          <button class="btn seg" data-mode="near">Near</button>
-        </div>
-
-        <details style="margin-bottom:1.5rem">
-          <summary style="cursor:pointer">Eyestrain definitions (ratio = demand divided by usable accommodative reserve)</summary>
-          <div class="strain-legend">
-            <div class="item"><div class="k">No strain</div><div class="v">ratio below 0.10</div></div>
-            <div class="item"><div class="k">Mild</div><div class="v">0.10 to 0.24. Low level effort for sustained viewing.</div></div>
-            <div class="item"><div class="k">Moderate</div><div class="v">0.25 to 0.79. Meaningful use of reserve, may fatigue over time.</div></div>
-            <div class="item"><div class="k">Significant</div><div class="v">0.80 to 1.99. Demand approaches or exceeds reserve, symptoms likely with sustained use and clarity may vary.</div></div>
-            <div class="item"><div class="k">Beyond reserve</div><div class="v">2.00 or higher. Physiologically unrealistic for sustained clarity, predicts failure, avoidance, or symptoms quickly.</div></div>
-          </div>
-        </details>
-
-        <div class="analysis-grid">
-          <div class="map-card">
-            <div class="map-head">
-              <div class="title">Lens Design and Map Settings</div>
-              <div class="sub">Design choices and display options</div>
-            </div>
-
-            <div class="two-cols" style="margin-top:0">
-              <div class="subcard">
-                <div class="ttl">Current Glasses Design</div>
-                <div class="inline">
-                  <div class="input-group">
-                    <label for="hab_design">Lens design</label>
-                    <select id="hab_design">
-                      <option value="gen_hard">Generic PAL hard</option>
-                      <option value="gen_avg" selected>Generic PAL average</option>
-                      <option value="gen_soft">Generic PAL soft</option>
-                      <option value="nikon_seemax">Nikon SeeMax Ultimate</option>
-                      <option value="hoya_mystyle3">Hoya MyStyle 3</option>
-                    </select>
-                  </div>
-
-                  <div id="hab_premium_controls">
-                    <div class="inline">
-                      <div class="input-group">
-                        <label for="hab_corridor">Corridor</label>
-                        <select id="hab_corridor">
-                          <option value="short">Short (11 mm)</option>
-                          <option value="medium" selected>Medium (14 mm)</option>
-                          <option value="long">Long (17 mm)</option>
-                        </select>
-                      </div>
-
-                      <div id="hab_generic_emph_wrap" class="input-group">
-                        <label for="hab_emph_generic">Emphasis</label>
-                        <select id="hab_emph_generic">
-                          <option value="balanced" selected>Balanced</option>
-                          <option value="distance">Distance</option>
-                          <option value="intermediate">Intermediate</option>
-                          <option value="near">Near</option>
-                        </select>
-                      </div>
-
-                      <div id="hab_hoya_mode_wrap" class="hidden input-group">
-                        <label for="hab_hoya_mode">MyStyle 3 mode</label>
-                        <select id="hab_hoya_mode">
-                          <option value="tyro">Tyro</option>
-                          <option value="expert" selected>Expert</option>
-                          <option value="detail">Detail</option>
-                          <option value="modern">Modern</option>
-                          <option value="adventure">Adventure</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="note" id="hab_generic_note">Generic PAL uses a fixed 14 mm corridor and balanced distribution, with narrower usable zones.</div>
-              </div>
-
-              <div class="subcard">
-                <div class="ttl">New Prescription Design</div>
-                <div class="inline">
-                  <div class="input-group">
-                    <label for="opt_design">Lens design</label>
-                    <select id="opt_design">
-                      <option value="gen_hard">Generic PAL hard</option>
-                      <option value="gen_avg" selected>Generic PAL average</option>
-                      <option value="gen_soft">Generic PAL soft</option>
-                      <option value="nikon_seemax">Nikon SeeMax Ultimate</option>
-                      <option value="hoya_mystyle3">Hoya MyStyle 3</option>
-                    </select>
-                  </div>
-
-                  <div id="opt_premium_controls">
-                    <div class="inline">
-                      <div class="input-group">
-                        <label for="opt_corridor">Corridor</label>
-                        <select id="opt_corridor">
-                          <option value="short">Short (11 mm)</option>
-                          <option value="medium" selected>Medium (14 mm)</option>
-                          <option value="long">Long (17 mm)</option>
-                        </select>
-                      </div>
-
-                      <div id="opt_generic_emph_wrap" class="input-group">
-                        <label for="opt_emph_generic">Emphasis</label>
-                        <select id="opt_emph_generic">
-                          <option value="balanced" selected>Balanced</option>
-                          <option value="distance">Distance</option>
-                          <option value="intermediate">Intermediate</option>
-                          <option value="near">Near</option>
-                        </select>
-                      </div>
-
-                      <div id="opt_hoya_mode_wrap" class="hidden input-group">
-                        <label for="opt_hoya_mode">MyStyle 3 mode</label>
-                        <select id="opt_hoya_mode">
-                          <option value="tyro">Tyro</option>
-                          <option value="expert" selected>Expert</option>
-                          <option value="detail">Detail</option>
-                          <option value="modern">Modern</option>
-                          <option value="adventure">Adventure</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="note" id="opt_generic_note">Generic PAL uses a fixed 14 mm corridor and balanced distribution, with narrower usable zones.</div>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <details class="subcard" id="mapAppearanceDetails">
-              <summary class="ttl" style="cursor:pointer;list-style:none">
-                Map Appearance and Peripheral Modeling
-                <span style="font-size:0.875rem;color:#718096;margin-left:0.5rem;font-weight:400">(advanced, click to expand)</span>
-              </summary>
-
-              <div class="details-body">
-                <div class="inline">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="frame_on" checked />
-                    Frame cut
-                  </label>
-
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="dist_on" checked />
-                    Show peripheral gradient
-                  </label>
-
-                  <div class="input-group"><label for="dist_w">Peripheral strength</label><input id="dist_w" class="small" inputmode="decimal" value="1.25" /></div>
-                  <div class="input-group"><label for="mink_w">Minkwitz strength</label><input id="mink_w" class="small" inputmode="decimal" value="1.10" /></div>
-                </div>
-                <div class="note">Geometry: 60 mm lens, fitting cross 7 mm above the geometric centre, 2.5 mm near inset, 25 mm from lens to the eye's centre of rotation.</div>
-              </div>
-            </details>
-          </div>
-
-          <div class="map-card">
-            <div class="map-head">
-              <div class="title">Real-Time Comparison Metrics</div>
-              <div class="sub">Current vs new, computed on the active target distance</div>
-            </div>
-            <div class="metrics-grid" id="comparison-metrics"></div>
-          </div>
-
-          <div class="map-card full-row" id="fitgaze">
-            <div class="map-head">
-              <div class="title">Fit and Gaze Simulator</div>
-              <div class="sub">Move the lens relative to the eye, or move the eye through the lens. The pupil marker on every map follows.</div>
-            </div>
-
-            <div class="fit-grid">
-              <div class="subcard">
-                <div class="ttl">Lens fit (applied to both eyes)</div>
-
-                <div class="slider-row">
-                  <label for="fit_h">Fitting height error <span class="sv" id="fit_h_v">0.0 mm</span></label>
-                  <input type="range" id="fit_h" min="-6" max="6" step="0.5" value="0" />
-                  <div class="slider-ends"><span>Fitted too low</span><span>Perfect</span><span>Fitted too high</span></div>
-                </div>
-
-                <div class="slider-row">
-                  <label for="fit_pd">Centration (PD) error <span class="sv" id="fit_pd_v">0.0 mm</span></label>
-                  <input type="range" id="fit_pd" min="-4" max="4" step="0.5" value="0" />
-                  <div class="slider-ends"><span>OCs too wide</span><span>Perfect</span><span>OCs too narrow</span></div>
-                </div>
-
-                <div class="inline">
-                  <button class="btn" id="fit_reset">Perfect fit</button>
-                </div>
-                <div class="note">A lens fitted too high puts add power in front of the pupil during distance gaze. Fitted too low, the patient runs out of near zone.</div>
-              </div>
-
-              <div class="subcard">
-                <div class="ttl">Gaze (where the pupil looks through the lens)</div>
-
-                <div class="slider-row">
-                  <label for="gaze_y">Vertical gaze <span class="sv" id="gaze_y_v">0.0 mm</span></label>
-                  <input type="range" id="gaze_y" min="-6" max="20" step="0.5" value="0" />
-                  <div class="slider-ends"><span>Looking up</span><span>Primary</span><span>Looking down (chin up)</span></div>
-                </div>
-
-                <div class="slider-row">
-                  <label for="gaze_x">Horizontal gaze <span class="sv" id="gaze_x_v">0.0 mm</span></label>
-                  <input type="range" id="gaze_x" min="-15" max="15" step="0.5" value="0" />
-                  <div class="slider-ends"><span>Patient's left</span><span>Straight</span><span>Patient's right</span></div>
-                </div>
-
-                <div class="inline">
-                  <button class="btn" id="gaze_reset">Primary gaze</button>
-                  <button class="btn" id="find_hab">Find clear view: current</button>
-                  <button class="btn primary" id="find_opt">Find clear view: new</button>
-                </div>
-                <div class="note">"Find clear view" walks the pupil down the lens until the active target is in focus, and tilts the head by the angle that takes.</div>
-              </div>
-            </div>
-
-            <div class="head-row">
-              <div class="head-card" id="head_hab"></div>
-              <div class="head-card" id="head_opt"></div>
-            </div>
-          </div>
-
-          <div class="map-card full-row">
-            <div class="map-head">
-              <div class="title">Heatmaps</div>
-              <div class="sub">Current vs new, same scale. Circle = pupil at the chosen gaze. Cross = the lens' fitting cross.</div>
-            </div>
-
-            <div class="two-cols" style="margin-top:0">
-              <div class="subcard" style="background:transparent;border:none;padding:0">
-                <div class="map-head" style="margin-bottom:0.75rem">
-                  <div class="title" style="font-size:1.05rem">Current Glasses Heatmap</div>
-                  <div class="sub" id="hm_sub_hab">0.00 D to 2.00 D</div>
-                </div>
-
-                <div class="eye-row" style="justify-items:center">
-                  <div class="eye-block" style="width:100%">
-                    <div class="eye-label">OD</div>
-                    <canvas id="can_del_od" width="720" height="720"></canvas>
-                    <details>
-                      <summary style="cursor:pointer;font-weight:600;color:#2d3748;font-size:0.9rem;padding:0.5rem 0">
-                        Predicted eyestrain through each zone
-                        <span style="font-size:0.75rem;color:#718096;margin-left:0.5rem;font-weight:400">(click to expand)</span>
-                      </summary>
-                      <div class="strain" id="strain_hab_od" style="margin-top:0.5rem"></div>
-                    </details>
-                  </div>
-
-                  <div class="eye-block" style="width:100%">
-                    <div class="eye-label">OS</div>
-                    <canvas id="can_del_os" width="720" height="720"></canvas>
-                    <details>
-                      <summary style="cursor:pointer;font-weight:600;color:#2d3748;font-size:0.9rem;padding:0.5rem 0">
-                        Predicted eyestrain through each zone
-                        <span style="font-size:0.75rem;color:#718096;margin-left:0.5rem;font-weight:400">(click to expand)</span>
-                      </summary>
-                      <div class="strain" id="strain_hab_os" style="margin-top:0.5rem"></div>
-                    </details>
-                  </div>
-                </div>
-
-                <div class="legend-wrap">
-                  <div class="legend-row">
-                    <div class="legend-pill">Scale: 0.00 D to 2.00 D</div>
-                    <div class="legend-pill">Green = clear</div>
-                    <div class="legend-pill">Red = blurred</div>
-                  </div>
-                  <div class="legend-bar" id="legendBarAbs1"></div>
-                  <div class="legend-ticks">
-                    <div>0.00</div><div>0.40</div><div>0.80</div><div>1.20</div><div>1.60</div><div>2.00</div>
-                  </div>
-                </div>
-
-                <div id="bino_hab_wrap" class="hidden" style="margin-top:1.5rem">
-                  <div class="eye-block" style="width:100%">
-                    <div class="eye-label">Binocular disparity map, alert threshold 0.50 D</div>
-                    <canvas id="can_bino_hab" width="720" height="720"></canvas>
-                    <div class="mono-note">Difference between the two eyes' signed residual error. Lower mismatch is better.</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="subcard" style="background:transparent;border:none;padding:0">
-                <div class="map-head" style="margin-bottom:0.75rem">
-                  <div class="title" style="font-size:1.05rem">New Lens Heatmap</div>
-                  <div class="sub" id="hm_sub_opt">0.00 D to 2.00 D</div>
-                </div>
-
-                <div class="eye-row" style="justify-items:center">
-                  <div class="eye-block" style="width:100%">
-                    <div class="eye-label">OD</div>
-                    <canvas id="can_optzone_od" width="720" height="720"></canvas>
-                    <details>
-                      <summary style="cursor:pointer;font-weight:600;color:#2d3748;font-size:0.9rem;padding:0.5rem 0">
-                        Predicted eyestrain through each zone
-                        <span style="font-size:0.75rem;color:#718096;margin-left:0.5rem;font-weight:400">(click to expand)</span>
-                      </summary>
-                      <div class="strain" id="strain_opt_od" style="margin-top:0.5rem"></div>
-                    </details>
-                  </div>
-
-                  <div class="eye-block" style="width:100%">
-                    <div class="eye-label">OS</div>
-                    <canvas id="can_optzone_os" width="720" height="720"></canvas>
-                    <details>
-                      <summary style="cursor:pointer;font-weight:600;color:#2d3748;font-size:0.9rem;padding:0.5rem 0">
-                        Predicted eyestrain through each zone
-                        <span style="font-size:0.75rem;color:#718096;margin-left:0.5rem;font-weight:400">(click to expand)</span>
-                      </summary>
-                      <div class="strain" id="strain_opt_os" style="margin-top:0.5rem"></div>
-                    </details>
-                  </div>
-                </div>
-
-                <div class="legend-wrap">
-                  <div class="legend-row">
-                    <div class="legend-pill">Same scale as current</div>
-                  </div>
-                  <div class="legend-bar" id="legendBarAbs2"></div>
-                  <div class="legend-ticks">
-                    <div>0.00</div><div>0.40</div><div>0.80</div><div>1.20</div><div>1.60</div><div>2.00</div>
-                  </div>
-                </div>
-
-                <div id="bino_opt_wrap" class="hidden" style="margin-top:1.5rem">
-                  <div class="eye-block" style="width:100%">
-                    <div class="eye-label">Binocular disparity map, alert threshold 0.50 D</div>
-                    <canvas id="can_bino_opt" width="720" height="720"></canvas>
-                    <div class="mono-note">Difference between the two eyes' signed residual error. Lower mismatch is better.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <p class="credit"><a href="https://calgaryvisioncentre.com/" target="_top" rel="author">Created by Dr Robert Burke</a></p>
     </div>
-  </div>
+    <p class="embed-note">Educational model, not a prescription or a fitting tool.</p>
+
+    <!-- About -->
+    <section class="content" id="about">
+      <h2>About this comparator</h2>
+      <p>The Progressive Lens Comparator shows how a progressive addition lens distributes power across its surface, and what that means for a particular wearer. Enter the glasses a patient is wearing and the prescription you have just measured, choose what they are looking at, and the two lenses are mapped side by side: where each one is clear, where it blurs, and what the eye has to do to compensate.</p>
+      <p>It was built for chairside conversations. Two of them come up every day. A patient whose current glasses are over-minused sees "fine" far away, but the map shows that the clear distance zone has slipped below the fitting cross, so they are lifting their chin to find the extra plus lower in the lens. And a small increase in plus at distance moves the whole corridor with it, so near vision improves too, which the sample-point powers show directly.</p>
+
+      <h2>How to use it</h2>
+      <ul>
+        <li><strong>Prescriptions:</strong> the new prescription is taken as the eye's true refraction, and everything is measured against it. Sphere, cylinder and axis are all modelled with power vectors, so an axis change alone produces blur.</li>
+        <li><strong>Looking at:</strong> pick a viewing distance. The lens needs the distance prescription plus the dioptric demand of that distance, less whatever accommodation the patient can comfortably supply. "Add needed" shows the result.</li>
+        <li><strong>Lens maps:</strong> "Blur" combines the residual spherical error, the prescription's cylinder mismatch and the lens' own unwanted astigmatism into one blur strength at every point. "Unwanted astigmatism" is the lens design on its own, as a manufacturer's plot would show it. "Mean power vs need" shows how far the local power sits from what the eye needs, minus in blue and plus in red.</li>
+        <li><strong>Fit and gaze:</strong> the fitting height and centration sliders move the lens relative to the eye. The gaze sliders move the pupil through the lens, and the pupil can also be dragged on any map. "Find clear view" finds the nearest posture that brings the chosen distance into focus and shows the chin lift it takes.</li>
+        <li><strong>What the patient sees:</strong> a letter chart blurred by the residual error at the pupil, for the worse eye, with an approximate acuity.</li>
+        <li><strong>Share:</strong> the address bar holds every setting, so "Copy link" reproduces exactly what you see. "Save image" downloads a labelled picture of both lenses.</li>
+      </ul>
+
+      <h2>The model, honestly</h2>
+      <p>This is a teaching model, not ray tracing of a real lens file. The geometry is in millimetres: a 60 mm lens, fitting cross 7 mm above the geometric centre, 2.5 mm near inset, corridors of 11, 14 or 17 mm from the fitting cross to the full add, and 25 mm from the lens to the eye's centre of rotation. The add rises along the corridor as a smooth curve. Unwanted astigmatism grows with distance from the corridor centre, is strongest beside the corridor and in the near periphery, and scales with the add and the design's hardness; the local mean power drops by half of it, as in a real lens. Blur strength is the length of the power-vector difference between what the lens provides and what the eye needs, after accommodation has covered what it can; up to 0.30 D is treated as within the eye's depth of focus and counted as clear. Accommodation follows Hofstetter's formulae and is only used for a shortfall of plus, never for an excess. The named designs are illustrative families, not measured manufacturer data.</p>
+      <p>Not modelled: vertex distance and pantoscopic tilt, prism and Prentice-rule effects, lens thickness, chromatic effects, and the real asymmetry of manufacturer designs. The acuity estimate converts blur strength and pupil size to a Snellen fraction with a simple empirical rule and is approximate.</p>
+
+      <h2>Author</h2>
+      <p>Created by <a href="https://calgaryvisioncentre.com/" rel="author">Dr Robert Burke</a>, optometrist, Calgary Vision Centre, Calgary, Alberta. Part of the <a href="https://calgaryvisioncentre.com/lab">Visual Systems Lab</a>.</p>
+
+      <div class="disclaimer" role="note">
+        <strong>Educational use only.</strong> This comparator illustrates how progressive lenses work. It does not examine anyone's eyes, does not replace a refraction or a dispensing measurement, and is not a substitute for an eye exam.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Progressive Lens Comparator &middot; Created by Dr Robert Burke, Calgary Vision Centre &middot; Educational use only &middot; <span id="version"></span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <div class="visually-hidden" id="status" role="status" aria-live="polite"></div>
+
+  <noscript><p style="padding:16px">The comparator needs JavaScript. The reference material on this page works without it.</p></noscript>
 
   <script>
-    (function(){
-      const els = (id)=>document.getElementById(id);
-
-      const modeButtons = Array.from(document.querySelectorAll('#pal-tool .btn.seg'));
-      let currentMode = 'distance';
-
-      // ---------- Geometry (millimetres) ----------
-      // The lens is a unit circle; 1.0 normalised unit = R_MM millimetres.
-      const R_MM = 30;                         // 60 mm lens diameter
-      const mm = (v)=>v / R_MM;                // mm -> normalised
-      const toMm = (v)=>v * R_MM;              // normalised -> mm
-      const FC_Y = -0.24;                      // fitting cross, 7.2 mm above geometric centre
-      const INSET_MM = 2.5;                    // near inset
-      const EYE_ROT_MM = 25;                   // lens plane to centre of rotation
-      const FIELD_N = 360;                     // internal field resolution per axis
-
-      const MAX_OFF = 2.00;
-      const ROUND_TO = 0.25;
-
-      const STRAIN_NONE_MAX = 0.10;
-      const STRAIN_MILD_MAX = 0.25;
-      const STRAIN_MOD_MAX  = 0.80;
-      const STRAIN_SIG_MAX  = 2.00;
-
-      const CLEAR_TOL = 0.125;                 // residual within this counts as clear
-      const BINO_ALERT = 0.50;
-
-      function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
-      function parseNum(v){
-        const x = Number(String(v).replace(',', '.').trim());
-        return Number.isFinite(x) ? x : 0;
-      }
-      function normAxis(a){
-        let ax = Math.round(parseNum(a));
-        if(!Number.isFinite(ax)) ax = 180;
-        ax = ax % 180;
-        if(ax <= 0) ax = 180;
-        return ax;
-      }
-      function sphEq(sph, cyl){
-        return parseNum(sph) + (parseNum(cyl) / 2);
-      }
-      function readRx(prefix){
-        const sph = parseNum(els(prefix + '_sph').value);
-        const cyl = parseNum(els(prefix + '_cyl').value);
-        const axis = normAxis(els(prefix + '_axis').value);
-        const add = clamp(parseNum(els(prefix + '_add').value), 0, 4);
-        return {sph, cyl, axis, add, se: sphEq(sph, cyl)};
-      }
-      function fmtD(v){ return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2); }
-      function fmtMm(v){ return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + ' mm'; }
-
-      // ---------- Colour ----------
-      function lerp(a,b,t){ return a + (b-a)*t; }
-      function rgb(r,g,b){ return {r:Math.round(r), g:Math.round(g), b:Math.round(b)}; }
-      function absColor(mag){
-        const m = clamp(mag, 0, MAX_OFF);
-        if(m < 0.02) return rgb(60, 200, 120);
-
-        const t = m / MAX_OFF;
-        const g = rgb(60, 200, 120);
-        const y = rgb(235, 210, 70);
-        const r = rgb(220, 60, 60);
-
-        if(t <= 0.5){
-          const tt = t / 0.5;
-          return rgb(lerp(g.r,y.r,tt), lerp(g.g,y.g,tt), lerp(g.b,y.b,tt));
-        } else {
-          const tt = (t - 0.5) / 0.5;
-          return rgb(lerp(y.r,r.r,tt), lerp(y.g,r.g,tt), lerp(y.b,r.b,tt));
-        }
-      }
-      const LUT_N = 256;
-      const colorLUT = new Uint8Array(LUT_N * 3);
-      for(let i=0;i<LUT_N;i++){
-        const c = absColor((i/(LUT_N-1)) * MAX_OFF);
-        colorLUT[i*3] = c.r; colorLUT[i*3+1] = c.g; colorLUT[i*3+2] = c.b;
-      }
-      function lutIndex(mag){ return Math.round(clamp(mag, 0, MAX_OFF) / MAX_OFF * (LUT_N-1)); }
-
-      function sigmoid(z){ return 1.0 / (1.0 + Math.exp(-z)); }
-      function logit(p){ const q = clamp(p, 1e-6, 1-1e-6); return Math.log(q/(1-q)); }
-      function rampSigmoid(p, mid, sharp){ return sigmoid((p - mid) * sharp); }
-
-      function insideCircle(xn, yn){ return (xn*xn + yn*yn) <= 1.0; }
-
-      // ---------- Frame shape ----------
-      const frameMaskCache = new Map();
-
-      function vsub(a,b){ return {x:a.x-b.x, y:a.y-b.y}; }
-      function vadd(a,b){ return {x:a.x+b.x, y:a.y+b.y}; }
-      function vmul(a,s){ return {x:a.x*s, y:a.y*s}; }
-      function vlen(a){ return Math.hypot(a.x, a.y); }
-      function vnorm(a){ const d=vlen(a)||1; return {x:a.x/d, y:a.y/d}; }
-      function vdot(a,b){ return a.x*b.x + a.y*b.y; }
-
-      function roundedPolyPath(ctx, pts, radii){
-        const n = pts.length;
-        const pin = new Array(n);
-        const pout = new Array(n);
-
-        for(let i=0;i<n;i++){
-          const p0 = pts[(i-1+n)%n];
-          const p1 = pts[i];
-          const p2 = pts[(i+1)%n];
-
-          const v0 = vsub(p0,p1);
-          const v1 = vsub(p2,p1);
-          const u0 = vnorm(v0);
-          const u1 = vnorm(v1);
-          const len0 = vlen(v0);
-          const len1 = vlen(v1);
-
-          const ang = Math.acos(clamp(vdot(vmul(u0,-1), u1), -1, 1));
-          const tan = Math.tan(ang/2) || 1e-6;
-
-          const rWant = Math.max(0, radii[i] || 0);
-          const rMax = 0.48 * Math.min(len0, len1) * tan;
-          const r = Math.min(rWant, rMax);
-          const t = r / tan;
-
-          pin[i]  = vadd(p1, vmul(u0, t));
-          pout[i] = vadd(p1, vmul(u1, t));
-        }
-
-        ctx.beginPath();
-        ctx.moveTo(pin[0].x, pin[0].y);
-        for(let i=0;i<n;i++){
-          const p1 = pts[i];
-          ctx.lineTo(pin[i].x, pin[i].y);
-          ctx.quadraticCurveTo(p1.x, p1.y, pout[i].x, pout[i].y);
-          ctx.lineTo(pin[(i+1)%n].x, pin[(i+1)%n].y);
-        }
-        ctx.closePath();
-      }
-
-      // Maps are drawn in the wearer's view for each eye: temporal is +x for OD and -x for OS.
-      function temporalDir(eye){ return (eye === 'OD') ? +1 : -1; }
-
-      function makeFramePath(ctx, w, h, eye){
-        const cx = w * 0.50;
-        const yTop = h * 0.20;
-        const yBot = h * 0.80;
-
-        const tDir = temporalDir(eye);
-        const nDir = -tDir;
-
-        const topTemp = w * 0.44;
-        const topNasal = w * 0.34;
-        const botTemp = w * 0.33;
-        const botNasal = w * 0.26;
-
-        const snX = cx + nDir * topNasal;
-        const inX = cx + nDir * (topNasal + w*0.03 + (botNasal - topNasal) * 0.10);
-        const stX = cx + tDir * topTemp;
-        const itX = cx + tDir * botTemp;
-
-        const ST = {x: stX, y: yTop};
-        const SN = {x: snX, y: yTop};
-        const IN = {x: inX, y: yBot};
-        const IT = {x: itX, y: yBot};
-
-        const sBase = Math.min(w,h) * 0.14;
-        roundedPolyPath(ctx, [ST, SN, IN, IT], [sBase*2.00, sBase*2.00, sBase*2.50, sBase*2.25]);
-      }
-
-      function getFrameMask(n, eye){
-        const key = eye + ':' + n;
-        if(frameMaskCache.has(key)) return frameMaskCache.get(key);
-
-        const c = document.createElement('canvas');
-        c.width = n; c.height = n;
-        const ctx = c.getContext('2d');
-        ctx.fillStyle = 'rgba(0,0,0,1)';
-        makeFramePath(ctx, n, n, eye);
-        ctx.fill();
-
-        const img = ctx.getImageData(0,0,n,n).data;
-        const mask = new Uint8Array(n*n);
-        for(let i=0;i<n*n;i++) mask[i] = img[i*4 + 3] > 0 ? 1 : 0;
-
-        frameMaskCache.set(key, mask);
-        return mask;
-      }
-
-      function circleMask(n){
-        const key = 'circle:' + n;
-        if(frameMaskCache.has(key)) return frameMaskCache.get(key);
-        const mask = new Uint8Array(n*n);
-        for(let py=0;py<n;py++){
-          const yn = (py/(n-1))*2 - 1;
-          for(let px=0;px<n;px++){
-            const xn = (px/(n-1))*2 - 1;
-            mask[py*n+px] = insideCircle(xn,yn) ? 1 : 0;
-          }
-        }
-        frameMaskCache.set(key, mask);
-        return mask;
-      }
-
-      function lensMask(n, eye, frameOn){
-        if(!frameOn) return circleMask(n);
-        const f = getFrameMask(n, eye);
-        const c = circleMask(n);
-        const key = 'both:' + eye + ':' + n;
-        if(frameMaskCache.has(key)) return frameMaskCache.get(key);
-        const m = new Uint8Array(n*n);
-        for(let i=0;i<n*n;i++) m[i] = (f[i] & c[i]);
-        frameMaskCache.set(key, m);
-        return m;
-      }
-
-      function maskAt(mask, n, xn, yn){
-        if(!insideCircle(xn, yn)) return false;
-        const px = Math.round((xn + 1) * 0.5 * (n-1));
-        const py = Math.round((yn + 1) * 0.5 * (n-1));
-        return mask[py*n + px] === 1;
-      }
-
-      // ---------- Accommodation ----------
-      function hofstetterAmplitude(age, model){
-        const a = Math.max(0, age);
-        if(model === 'max') return Math.max(0, 25.0 - 0.40 * a);
-        if(model === 'avg') return Math.max(0, 18.5 - 0.30 * a);
-        return Math.max(0, 15.0 - 0.25 * a);
-      }
-
-      function usableAccommodationReserve(age, model, usablePct){
-        const amp = hofstetterAmplitude(age, model);
-        const pct = clamp(usablePct, 0, 100) / 100;
-        return amp * pct;
-      }
-
-      function targetSE(optRx, mode){
-        if(mode === 'distance') return optRx.se;
-        if(mode === 'computer') return optRx.se + 0.50 * optRx.add;
-        return optRx.se + 1.00 * optRx.add;
-      }
-      function modeLabel(mode){
-        if(mode === 'computer') return 'computer';
-        if(mode === 'near') return 'near';
-        return 'distance';
-      }
-
-      // Signed residual after accommodation. Positive = too much plus (blur that cannot be
-      // cleared). Negative = short of plus that accommodation could not cover.
-      function signedResidual(lensPower, targetPower, allowAcc, reserve){
-        const err = lensPower - targetPower;
-        if(err >= 0) return err;
-        const demand = -err;
-        if(!allowAcc) return -demand;
-        return -Math.max(0, demand - reserve);
-      }
-
-      // ---------- Lens designs ----------
-      const PRESETS = {
-        gen_hard:      {name:'Generic PAL hard',      hardness:1.55, corrWidth:0.15, baseSharp:12.2, baseMid:0.52, periphBoost:2.03, minkBoost:2.18},
-        gen_avg:       {name:'Generic PAL average',   hardness:1.45, corrWidth:0.16, baseSharp:11.4, baseMid:0.52, periphBoost:1.92, minkBoost:2.03},
-        gen_soft:      {name:'Generic PAL soft',      hardness:1.35, corrWidth:0.17, baseSharp:10.6, baseMid:0.52, periphBoost:1.77, minkBoost:1.88},
-        nikon_seemax:  {name:'Nikon SeeMax Ultimate', hardness:0.96, corrWidth:0.30, baseSharp:8.6,  baseMid:0.52, periphBoost:0.92, minkBoost:0.90},
-        hoya_mystyle3: {name:'Hoya MyStyle 3',        hardness:0.95, corrWidth:0.30, baseSharp:8.6,  baseMid:0.52, periphBoost:0.92, minkBoost:0.88}
-      };
-
-      // Corridor length is fitting cross to full add, in mm.
-      function corridorProfile(corridor){
-        if(corridor === 'short')  return {lenMm:11, sharpMult:1.22};
-        if(corridor === 'long')   return {lenMm:17, sharpMult:0.88};
-        return {lenMm:14, sharpMult:1.00};
-      }
-
-      function emphasisToMidShift(emph){
-        if(emph === 'distance') return +0.06;
-        if(emph === 'near') return -0.06;
-        if(emph === 'intermediate') return +0.03;
-        return 0.00;
-      }
-
-      function hoyaModeToEmphasis(mode){
-        if(mode === 'modern') return 'intermediate';
-        if(mode === 'detail') return 'near';
-        if(mode === 'adventure') return 'distance';
-        return 'balanced';
-      }
-
-      function isGeneric(designId){ return designId.indexOf('gen_') === 0; }
-
-      function getDesignConfig(which){
-        const designId = els(which + '_design').value;
-        const preset = PRESETS[designId] || PRESETS.gen_avg;
-
-        let corridor = 'medium';
-        let emph = 'balanced';
-
-        if(!isGeneric(designId)){
-          corridor = els(which + '_corridor').value;
-          if(designId === 'hoya_mystyle3'){
-            emph = hoyaModeToEmphasis(els(which + '_hoya_mode').value);
-          } else {
-            emph = els(which + '_emph_generic').value;
-          }
-        }
-
-        const cp = corridorProfile(corridor);
-
-        return {
-          designId,
-          preset,
-          corridor,
-          emph,
-          corridorMm: cp.lenMm,
-          ySpan: mm(cp.lenMm),
-          rampSharp: preset.baseSharp * cp.sharpMult,
-          rampMid: clamp(preset.baseMid + emphasisToMidShift(emph), 0.38, 0.66),
-          corrWidth: preset.corrWidth,
-          hardness: preset.hardness,
-          periphBoost: preset.periphBoost || 1.0,
-          minkBoost: preset.minkBoost || 1.0
-        };
-      }
-
-      // A lens is evaluated in eye coordinates (pupil in primary gaze sits at (0, FC_Y) when
-      // the fit is perfect). fit.heightMm > 0 means the lens is fitted too high, so the design's
-      // fitting cross sits above the pupil. fit.pdMm > 0 means the optical centres are set too
-      // close together (design shifted nasally for both eyes).
-      function makeLens(rx, cfg, eye, fit){
-        const nasalDir = -temporalDir(eye);
-        const dyN = mm(fit.heightMm);
-        const dxN = -nasalDir * mm(fit.pdMm);
-
-        const yStart = FC_Y - mm(1.5);
-        const yEnd   = FC_Y + cfg.ySpan;
-        const addMax = rx.add;
-        const distSE = rx.se;
-
-        const addNarrowingFactor = 1.0 - (clamp(addMax - 1.0, 0, 2.0) * 0.175);
-        const rxNarrowingFactor = 1.0 - (clamp(Math.abs(distSE), 0, 6.0) * 0.033);
-        const effWidth = cfg.corrWidth * addNarrowingFactor * rxNarrowingFactor;
-        const addSteepness = 1.65 + (clamp(addMax - 1.0, 0, 2.0) * 0.20);
-        const penaltyScale = 0.70 * addMax
-                           * (0.85 + 0.55*(cfg.hardness - 1.0))
-                           * (1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.25));
-        const insetN = mm(INSET_MM);
-
-        function rampDesign(yd){
-          const p = clamp((yd - yStart) / (yEnd - yStart), 0, 1);
-          return rampSigmoid(p, cfg.rampMid, cfg.rampSharp);
-        }
-        function rampAt(y){ return rampDesign(y + dyN); }
-        function centerX(y){ return -dxN + nasalDir * insetN * rampDesign(y + dyN); }
-        function powerAt(x, y){
-          const xd = x + dxN;
-          const yd = y + dyN;
-          const r = rampDesign(yd);
-          const xs = xd - nasalDir * insetN * r;
-          const xTerm = Math.pow(Math.max(0, Math.abs(xs) - effWidth) / (1 - effWidth), addSteepness);
-          const yTerm = Math.pow(r, 1.30);
-          return distSE + addMax * r - penaltyScale * xTerm * yTerm;
-        }
-        // Eye y at which the ramp reaches a fraction of the add.
-        function yAtRamp(frac){
-          const p = cfg.rampMid + logit(frac) / cfg.rampSharp;
-          return yStart + p * (yEnd - yStart) - dyN;
-        }
-        // Minkwitz-style unwanted cylinder proxy, scaled so a 14 mm corridor matches the
-        // original tuning.
-        const slope = (addMax / Math.max(mm(8), cfg.ySpan)) * (mm(14) / 0.86)
-                    * (0.85 + 0.55*(cfg.hardness - 1.0))
-                    * (1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.15));
-        const addCylBoost = 1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.35);
-        const addScale = (0.65 + 0.35*clamp(addMax/2.5, 0, 1));
-        function minkwitzAt(xRel, r){
-          const midEmphasis = 4 * r * (1 - r);
-          return slope * Math.pow(Math.abs(xRel), 1.32) * addCylBoost * midEmphasis * addScale;
-        }
-
-        return {
-          rx, cfg, eye, fit,
-          se: distSE, add: addMax,
-          powerAt, rampAt, centerX, yAtRamp, minkwitzAt,
-          fcX: -dxN,
-          fcY: FC_Y - dyN,
-          nrpY: yEnd - dyN
-        };
-      }
-
-      // ---------- Field computation (one pass, reused for drawing, metrics and bino) ----------
-      function computeField(lens, target, o){
-        const N = o.N;
-        const mask = lensMask(N, lens.eye, o.frameOn);
-        const mag = new Float32Array(N*N);
-        const signed = new Float32Array(N*N);
-        const lensP = new Float32Array(N*N);
-
-        const wDist = clamp(o.distW, 0, 3) * lens.cfg.periphBoost;
-        const wMink = clamp(o.minkW, 0, 3) * lens.cfg.minkBoost;
-
-        for(let py=0; py<N; py++){
-          const yn = (py/(N-1))*2 - 1;
-          const cx = lens.centerX(yn);
-          const ref = lens.powerAt(cx, yn);
-          const r = lens.rampAt(yn);
-
-          for(let px=0; px<N; px++){
-            const i = py*N + px;
-            if(!mask[i]) continue;
-            const xn = (px/(N-1))*2 - 1;
-
-            const P = lens.powerAt(xn, yn);
-            const s = signedResidual(P, target, o.allowAcc, o.reserve);
-            let m = Math.abs(s);
-
-            if(o.distOn){
-              const dev = Math.abs(P - ref);
-              const mink = lens.minkwitzAt(xn - cx, r);
-              const periph = Math.max(wDist * dev, wMink * mink);
-              if(periph > m) m = periph;
-            }
-
-            lensP[i] = P;
-            mag[i] = m;
-            signed[i] = (s < 0) ? -m : m;
-          }
-        }
-        return {N, mask, mag, signed, lensP, target, lens};
-      }
-
-      // ---------- Drawing ----------
-      function paintField(ctx, W, H, N, mask, valueFn){
-        const img = ctx.createImageData(W, H);
-        const d = img.data;
-        for(let py=0; py<H; py++){
-          const fy = Math.min(N-1, Math.floor(py * N / H));
-          for(let px=0; px<W; px++){
-            const fx = Math.min(N-1, Math.floor(px * N / W));
-            const i = fy*N + fx;
-            const o = (py*W + px)*4;
-            if(!mask[i]){ d[o]=255; d[o+1]=255; d[o+2]=255; d[o+3]=0; continue; }
-            const li = lutIndex(valueFn(i)) * 3;
-            d[o] = colorLUT[li]; d[o+1] = colorLUT[li+1]; d[o+2] = colorLUT[li+2]; d[o+3] = 255;
-          }
-        }
-        ctx.putImageData(img, 0, 0);
-      }
-
-      function toPx(xn, w){ return (xn + 1) * 0.5 * (w-1); }
-
-      function drawLensOutline(ctx, w, h, frameOn, eye){
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0,0,0,0.22)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(w/2, h/2, Math.min(w,h)/2 - 2, 0, Math.PI*2);
-        ctx.stroke();
-
-        if(frameOn){
-          ctx.strokeStyle = 'rgba(0,0,0,0.34)';
-          ctx.lineWidth = 2.0;
-          makeFramePath(ctx, w, h, eye);
-          ctx.stroke();
-        }
-
-        // Nasal / temporal markers
-        const fs = Math.round(w * 0.022);
-        ctx.fillStyle = 'rgba(0,0,0,0.45)';
-        ctx.font = '700 ' + fs + 'px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-        ctx.textBaseline = 'middle';
-        const tDir = temporalDir(eye);
-        const yLab = toPx(FC_Y, h);
-        ctx.textAlign = 'center';
-        ctx.fillText('T', w/2 + tDir * w*0.465, yLab);
-        ctx.fillText('N', w/2 - tDir * w*0.465, yLab);
-        ctx.restore();
-      }
-
-      function drawGuides(ctx, w, h, lens, pupil, opts){
-        const scale = w / 720;
-        const fontPx = Math.round(13 * scale);
-        ctx.save();
-        ctx.font = fontPx + 'px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-        ctx.textBaseline = 'middle';
-
-        // Reference lines derived from the design: fitting cross, half add, full add (NRP)
-        const lines = [
-          {y: lens.fcY, label: 'FC'},
-          {y: lens.yAtRamp(0.5), label: '½ add'},
-          {y: lens.nrpY, label: 'Near'}
-        ];
-        ctx.strokeStyle = 'rgba(0,0,0,0.18)';
-        ctx.lineWidth = 1 * scale;
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        ctx.textAlign = 'left';
-        for(const L of lines){
-          const yy = toPx(L.y, h);
-          if(yy < 0 || yy > h) continue;
-          ctx.setLineDash([4*scale, 4*scale]);
-          ctx.beginPath(); ctx.moveTo(w*0.18, yy); ctx.lineTo(w*0.82, yy); ctx.stroke();
-          ctx.setLineDash([]);
-          ctx.fillText(L.label, w*0.83, yy);
-        }
-
-        // Fitting cross of the lens (moves with fit error)
-        const fx = toPx(lens.fcX, w), fy = toPx(lens.fcY, h);
-        ctx.strokeStyle = 'rgba(20,40,60,0.85)';
-        ctx.lineWidth = 2 * scale;
-        const a = 11 * scale;
-        ctx.beginPath();
-        ctx.moveTo(fx - a, fy); ctx.lineTo(fx + a, fy);
-        ctx.moveTo(fx, fy - a); ctx.lineTo(fx, fy + a);
-        ctx.stroke();
-
-        // Pupil at the chosen gaze
-        if(pupil){
-          const px = toPx(pupil.x, w), py = toPx(pupil.y, h);
-          const rr = 13 * scale;
-          ctx.fillStyle = 'rgba(0,0,0,0.10)';
-          ctx.beginPath(); ctx.arc(px, py, rr * 1.8, 0, Math.PI*2); ctx.fill();
-          ctx.strokeStyle = 'rgba(255,255,255,0.95)';
-          ctx.lineWidth = 4 * scale;
-          ctx.beginPath(); ctx.arc(px, py, rr, 0, Math.PI*2); ctx.stroke();
-          ctx.strokeStyle = 'rgba(15,32,39,0.95)';
-          ctx.lineWidth = 2 * scale;
-          ctx.beginPath(); ctx.arc(px, py, rr, 0, Math.PI*2); ctx.stroke();
-          ctx.fillStyle = 'rgba(15,32,39,0.95)';
-          ctx.beginPath(); ctx.arc(px, py, 2.5 * scale, 0, Math.PI*2); ctx.fill();
-
-          if(opts && opts.pupilText){
-            const t = opts.pupilText;
-            ctx.font = '700 ' + Math.round(15*scale) + 'px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-            const tw = ctx.measureText(t).width + 14*scale;
-            const bx = px + rr + 8*scale, by = py - 11*scale;
-            ctx.fillStyle = 'rgba(255,255,255,0.92)';
-            roundRect(ctx, bx, by, tw, 22*scale, 6*scale);
-            ctx.fill();
-            ctx.fillStyle = '#0f2027';
-            ctx.textAlign = 'left';
-            ctx.fillText(t, bx + 7*scale, py);
-          }
-        }
-        ctx.restore();
-      }
-
-      function roundRect(ctx, x, y, w, h, r){
-        ctx.beginPath();
-        ctx.moveTo(x+r, y);
-        ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-        ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-        ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-        ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
-        ctx.closePath();
-      }
-
-      function drawResidualHeatmap(canvas, field, frameOn, pupil, pupilText){
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width, h = canvas.height;
-        const mag = field.mag;
-        paintField(ctx, w, h, field.N, field.mask, (i)=>mag[i]);
-        drawLensOutline(ctx, w, h, frameOn, field.lens.eye);
-        drawGuides(ctx, w, h, field.lens, pupil, {pupilText});
-      }
-
-      function drawBinoDisparity(canvas, fOD, fOS, frameOn, pupil){
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width, h = canvas.height;
-        // Both fields are computed on the full circle; the OD frame cut is applied for display.
-        const N = fOD.N;
-        const mask = lensMask(N, 'OD', frameOn);
-        const disp = new Float32Array(N*N);
-        const base = absColor(0);
-        for(let i=0;i<N*N;i++){
-          if(!mask[i]) continue;
-          disp[i] = Math.abs(fOD.signed[i] - fOS.signed[i]);
-        }
-        // Below the alert threshold the colour is faded toward green.
-        const img = ctx.createImageData(w, h);
-        const d = img.data;
-        for(let py=0; py<h; py++){
-          const fy = Math.min(N-1, Math.floor(py * N / h));
-          for(let px=0; px<w; px++){
-            const fx = Math.min(N-1, Math.floor(px * N / w));
-            const i = fy*N + fx;
-            const o = (py*w + px)*4;
-            if(!mask[i]){ d[o]=255; d[o+1]=255; d[o+2]=255; d[o+3]=0; continue; }
-            const v = disp[i];
-            const li = lutIndex(v) * 3;
-            let r = colorLUT[li], g = colorLUT[li+1], b = colorLUT[li+2];
-            if(v < BINO_ALERT){
-              const tt = v / BINO_ALERT;
-              r = lerp(base.r, r, tt); g = lerp(base.g, g, tt); b = lerp(base.b, b, tt);
-            }
-            d[o] = r; d[o+1] = g; d[o+2] = b; d[o+3] = 255;
-          }
-        }
-        ctx.putImageData(img, 0, 0);
-        drawLensOutline(ctx, w, h, frameOn, 'OD');
-        drawGuides(ctx, w, h, fOD.lens, pupil, null);
-      }
-
-      function roundToStep(v, step){
-        if(step <= 0) return v;
-        return Math.round(v / step) * step;
-      }
-
-      // Sample points derived from the design, in mm relative to the fitting cross.
-      function samplePointsFor(lens){
-        const half = lens.yAtRamp(0.5);
-        const nrp = lens.nrpY;
-        const tDir = temporalDir(lens.eye);
-        const nasalX = -tDir * mm(12);
-        const tempX = tDir * mm(12);
-        return [
-          {name:'Distance', x: lens.fcX, y: lens.fcY - mm(9)},
-          {name:'FC',       x: lens.fcX, y: lens.fcY},
-          {name:'½ add', x: lens.centerX(half), y: half},
-          {name:'Near',     x: lens.centerX(nrp), y: nrp},
-          {name:'Below',    x: lens.centerX(nrp + mm(8)), y: nrp + mm(8)},
-          {name:'Temporal', x: tempX,  y: nrp},
-          {name:'Nasal',    x: nasalX, y: nrp},
-        ];
-      }
-
-      function drawSampleValues(canvas, lens, frameOn, pupil){
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width, h = canvas.height;
-        const N = FIELD_N;
-        const mask = lensMask(N, lens.eye, frameOn);
-
-        ctx.clearRect(0,0,w,h);
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0,0,w,h);
-
-        drawLensOutline(ctx, w, h, frameOn, lens.eye);
-        drawGuides(ctx, w, h, lens, pupil, null);
-
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        for(const p of samplePointsFor(lens)){
-          if(!maskAt(mask, N, p.x, p.y)) continue;
-
-          const px = toPx(p.x, w);
-          const py = toPx(p.y, h);
-          const v = lens.powerAt(p.x, p.y);
-          const vr = roundToStep(v, ROUND_TO);
-          const txt = fmtD(vr);
-
-          ctx.fillStyle = 'rgba(0,0,0,0.65)';
-          ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
-
-          ctx.font = '700 22px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-          const tw = ctx.measureText(txt).width + 12;
-          ctx.fillStyle = 'rgba(255,255,255,0.85)';
-          roundRect(ctx, px - tw/2, py - 36, tw, 26, 6); ctx.fill();
-          ctx.fillStyle = 'rgba(0,0,0,0.92)';
-          ctx.fillText(txt, px, py - 23);
-
-          ctx.fillStyle = 'rgba(0,0,0,0.72)';
-          ctx.font = '14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-          ctx.fillText(p.name, px, py + 15);
-        }
-        ctx.restore();
-      }
-
-      // ---------- Strain ----------
-      function strainBand(frac){
-        if(frac < STRAIN_NONE_MAX) return "No strain";
-        if(frac < STRAIN_MILD_MAX) return "Mild";
-        if(frac < STRAIN_MOD_MAX)  return "Moderate";
-        if(frac < STRAIN_SIG_MAX)  return "Significant";
-        return "Beyond reserve";
-      }
-
-      function strainBandDetail(band){
-        if(band === "Beyond reserve") return "Demand exceeds usable accommodative reserve. Sustained clarity is unlikely and symptoms are expected quickly.";
-        if(band === "Significant") return "Demand approaches or exceeds reserve, symptoms likely with sustained use and clarity may vary.";
-        if(band === "Moderate") return "Meaningful use of reserve, may fatigue over time.";
-        if(band === "Mild") return "Low level effort for sustained viewing.";
-        return "No meaningful accommodative effort required.";
-      }
-
-      function zoneAverageLensPower(lens, x, y){
-        const d = mm(1.8);
-        const pts = [[x, y],[x, y-d],[x, y+d],[x-d, y],[x+d, y]];
-        let sum = 0, n = 0;
-        for(const [px,py] of pts){
-          if(!insideCircle(px,py)) continue;
-          sum += lens.powerAt(px,py);
-          n += 1;
-        }
-        return n ? (sum/n) : lens.powerAt(x,y);
-      }
-
-      function zonesFor(lens){
-        const half = lens.yAtRamp(0.5);
-        return [
-          {key:"Distance (FC)",   x: lens.fcX, y: lens.fcY},
-          {key:"Intermediate",    x: lens.centerX(half), y: half},
-          {key:"Near",            x: lens.centerX(lens.nrpY), y: lens.nrpY},
-        ];
-      }
-
-      function buildZoneStrainHTML(label, lens, targetPower, allowAcc, reserve){
-        const r = Math.max(0.01, reserve);
-        let lines = '<div class="hdr">' + label + '</div>';
-
-        for(const z of zonesFor(lens)){
-          const lensP = zoneAverageLensPower(lens, z.x, z.y);
-          const err = lensP - targetPower;
-
-          if(err > CLEAR_TOL){
-            lines += '<div class="line"><div>' + z.key + '</div><div>Blurred by ' + fmtD(err) + ' D over plus (no accommodative effort)</div></div>';
-            continue;
-          }
-
-          const demand = Math.max(0, targetPower - lensP);
-          if(demand <= CLEAR_TOL){
-            lines += '<div class="line"><div>' + z.key + '</div><div>Clear, no strain</div></div>';
-            continue;
-          }
-
-          if(!allowAcc){
-            lines += '<div class="line"><div>' + z.key + '</div><div>Blurred by ' + demand.toFixed(2) + ' D short (accommodation off)</div></div>';
-            continue;
-          }
-
-          const ratio = demand / r;
-          const band = strainBand(ratio);
-          const pct = Math.round(ratio * 100);
-          const detail = strainBandDetail(band);
-          const covered = demand <= reserve;
-
-          lines += '<div class="line"><div>' + z.key +
-                   '</div><div>' + band + (covered ? '' : ', still blurred by ' + (demand - reserve).toFixed(2) + ' D') +
-                   ' (' + demand.toFixed(2) + ' D, ' + pct + '% of reserve)</div></div>' +
-                   '<div class="detail">' + detail + '</div>';
-        }
-
-        lines += '<small>Predicted eyestrain through each lens zone for this prescription at the active target. Ratio = demand divided by usable reserve' + (allowAcc ? '' : '. Turn on Allow accommodation to let the eye cover extra minus') + '.</small>';
-        return lines;
-      }
-
-      function setLegendBars(){
-        const grad = 'linear-gradient(90deg, rgb(60,200,120) 0%, rgb(235,210,70) 50%, rgb(220,60,60) 100%)';
-        if(els('legendBarAbs1')) els('legendBarAbs1').style.background = grad;
-        if(els('legendBarAbs2')) els('legendBarAbs2').style.background = grad;
-      }
-
-      function syncDesignUI(which){
-        const design = els(which + '_design') ? els(which + '_design').value : 'gen_avg';
-        const generic = isGeneric(design);
-        const isHoya = (design === 'hoya_mystyle3');
-
-        if(els(which + '_premium_controls')) els(which + '_premium_controls').classList.toggle('hidden', generic);
-        if(els(which + '_hoya_mode_wrap')) els(which + '_hoya_mode_wrap').classList.toggle('hidden', !isHoya);
-        if(els(which + '_generic_emph_wrap')) els(which + '_generic_emph_wrap').classList.toggle('hidden', isHoya);
-        if(els(which + '_generic_note')) els(which + '_generic_note').classList.toggle('hidden', !generic);
-      }
-
-      // ---------- Metrics from the computed fields ----------
-      function calculateMetrics(fields, allowAcc, reserve){
-        const rsv = Math.max(0.01, reserve);
-        const out = {total:0, habUsable:0, optUsable:0, habExcellent:0, optExcellent:0, habNoStrain:0, optNoStrain:0};
-
-        function noStrain(lensP, target){
-          const err = lensP - target;
-          if(err > CLEAR_TOL) return false;
-          const demand = Math.max(0, -err);
-          return (demand / rsv) < STRAIN_NONE_MAX;
-        }
-
-        for(const eye of ['OD','OS']){
-          const hab = fields.hab[eye], opt = fields.opt[eye];
-          const N = hab.N;
-          for(let i=0;i<N*N;i++){
-            if(!hab.mask[i]) continue;
-            out.total++;
-            if(hab.mag[i] < 0.50) out.habUsable++;
-            if(opt.mask[i] && opt.mag[i] < 0.50) out.optUsable++;
-            if(hab.mag[i] < 0.25) out.habExcellent++;
-            if(opt.mask[i] && opt.mag[i] < 0.25) out.optExcellent++;
-            if(allowAcc){
-              if(noStrain(hab.lensP[i], hab.target)) out.habNoStrain++;
-              if(opt.mask[i] && noStrain(opt.lensP[i], opt.target)) out.optNoStrain++;
-            }
-          }
-        }
-        const total = Math.max(1, out.total);
-        const pct = (n)=>(n/total)*100;
-        return {
-          habUsablePct: pct(out.habUsable), optUsablePct: pct(out.optUsable),
-          habExcellentPct: pct(out.habExcellent), optExcellentPct: pct(out.optExcellent),
-          habNoStrainPct: allowAcc ? pct(out.habNoStrain) : null,
-          optNoStrainPct: allowAcc ? pct(out.optNoStrain) : null
-        };
-      }
-
-      function renderComparisonMetrics(metrics){
-        const box = els('comparison-metrics');
-        if(!box) return;
-
-        function buildCard(label, curPct, newPct, note){
-          if(curPct === null || newPct === null){
-            return '<div class="metric-card"><div class="metric-label">' + label + '</div>' +
-                   '<div class="metric-value" style="font-size:0.95rem;color:#718096">' + note + '</div></div>';
-          }
-          const d = newPct - curPct;
-          const cls = Math.abs(d) <= 0.5 ? 'neutral' : (d > 0 ? 'positive' : 'negative');
-          const text = (d >= 0 ? '+' : '') + d.toFixed(1) + ' pts';
-          const progress = clamp(newPct, 0, 100);
-
-          return '' +
-            '<div class="metric-card">' +
-              '<div class="metric-label">' + label + '</div>' +
-              '<div class="metric-value">' +
-                '<span>' + curPct.toFixed(1) + '% → ' + newPct.toFixed(1) + '%</span>' +
-                '<span class="metric-change ' + cls + '">' + text + '</span>' +
-              '</div>' +
-              '<div class="progress-bar-container">' +
-                '<div class="progress-bar" style="width: ' + progress.toFixed(1) + '%"></div>' +
-              '</div>' +
-            '</div>';
-        }
-
-        box.innerHTML =
-          buildCard('Usable Area (under 0.50 D)', metrics.habUsablePct, metrics.optUsablePct) +
-          buildCard('Excellent Area (under 0.25 D)', metrics.habExcellentPct, metrics.optExcellentPct) +
-          buildCard('No Strain Area', metrics.habNoStrainPct, metrics.optNoStrainPct, 'Turn on Allow accommodation');
-      }
-
-      // ---------- Fit and gaze ----------
-      function readFit(){
-        return {
-          heightMm: parseNum(els('fit_h').value),
-          pdMm: parseNum(els('fit_pd').value)
-        };
-      }
-      function readGaze(){
-        return {
-          downMm: parseNum(els('gaze_y').value),
-          rightMm: parseNum(els('gaze_x').value)
-        };
-      }
-      // Pupil position in eye coordinates. +x is the patient's right in both maps.
-      function pupilFor(gaze){
-        return {x: mm(gaze.rightMm), y: FC_Y + mm(gaze.downMm)};
-      }
-      function chinLiftDeg(downMm){
-        return Math.atan2(downMm, EYE_ROT_MM) * 180 / Math.PI;
-      }
-
-      function verdictFor(lens, target, pupil, allowAcc, reserve){
-        const P = lens.powerAt(pupil.x, pupil.y);
-        const s = signedResidual(P, target, allowAcc, reserve);
-        const demand = Math.max(0, target - P);
-        let cls = 'clear', text = 'Clear';
-        if(s > CLEAR_TOL){
-          cls = s > 0.5 ? 'bad' : 'mild';
-          text = 'Blur ' + fmtD(s) + ' D (over plus)';
-        } else if(s < -CLEAR_TOL){
-          cls = -s > 0.5 ? 'bad' : 'mild';
-          text = 'Blur ' + fmtD(s) + ' D (short of plus)';
-        } else if(demand > CLEAR_TOL && allowAcc){
-          const band = strainBand(demand / Math.max(0.01, reserve));
-          cls = (band === 'No strain' || band === 'Mild') ? 'clear' : 'mild';
-          text = 'Clear using ' + demand.toFixed(2) + ' D accommodation (' + band.toLowerCase() + ')';
-        }
-        return {P, s, cls, text};
-      }
-
-      // Walk the pupil down the lens along the current horizontal gaze and find where the
-      // target comes into focus. Returns mm below the fitting cross.
-      function findClearGaze(lensOD, lensOS, tOD, tOS, rightMm, allowAcc, reserve){
-        // Prefer the clear point closest to primary gaze; otherwise the least-blurred point.
-        let best = {downMm: 0, worst: Infinity};
-        let nearest = null;
-        const x = mm(rightMm);
-        for(let d = -6; d <= 20; d += 0.25){
-          const y = FC_Y + mm(d);
-          if(!insideCircle(x, y)) continue;
-          const sOD = Math.abs(signedResidual(lensOD.powerAt(x, y), tOD, allowAcc, reserve));
-          const sOS = Math.abs(signedResidual(lensOS.powerAt(x, y), tOS, allowAcc, reserve));
-          const worst = Math.max(sOD, sOS);
-          if(worst < best.worst) best = {downMm: d, worst};
-          if(worst <= CLEAR_TOL && (nearest === null || Math.abs(d) < Math.abs(nearest.downMm))) nearest = {downMm: d, worst};
-        }
-        return nearest || best;
-      }
-
-      function headSVG(angleDeg, good){
-        // Side profile facing right. Rotation is about the eye. Chin up = nose rises.
-        const col = good ? '#2d5f3d' : '#2c5364';
-        const rot = (-angleDeg).toFixed(2);
-        return '' +
-          '<svg viewBox="0 0 150 150" aria-hidden="true">' +
-            '<defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">' +
-              '<path d="M0,0 L8,4 L0,8 z" fill="#8b2e2e"/></marker></defs>' +
-            '<line x1="0" y1="56" x2="150" y2="56" stroke="rgba(0,0,0,0.12)" stroke-dasharray="4 4"/>' +
-            '<g transform="rotate(' + rot + ' 84 56)">' +
-              '<path d="M 52 148 L 56 118 C 44 108 32 92 32 66 C 32 36 52 16 76 16 C 92 16 100 28 101 42 L 109 66 L 100 70 C 102 78 100 84 96 86 C 100 92 98 98 94 100 C 96 106 92 112 82 112 C 78 118 70 124 66 126 L 68 148 Z" ' +
-                    'fill="rgba(44,83,100,0.14)" stroke="' + col + '" stroke-width="2.5" stroke-linejoin="round"/>' +
-              '<circle cx="84" cy="56" r="3.2" fill="#0f2027"/>' +
-              '<line x1="118" y1="30" x2="118" y2="86" stroke="#0f2027" stroke-width="3" stroke-linecap="round"/>' +
-              '<line x1="112" y1="56" x2="124" y2="56" stroke="#0f2027" stroke-width="2"/>' +
-            '</g>' +
-            '<line x1="84" y1="56" x2="146" y2="56" stroke="#8b2e2e" stroke-width="2.5" marker-end="url(#arrowhead)"/>' +
-          '</svg>';
-      }
-
-      function renderHeadCard(id, title, lensOD, lensOS, tOD, tOS, gaze, allowAcc, reserve){
-        const box = els(id);
-        if(!box) return null;
-        const pupil = pupilFor(gaze);
-        const vOD = verdictFor(lensOD, tOD, pupil, allowAcc, reserve);
-        const vOS = verdictFor(lensOS, tOS, pupil, allowAcc, reserve);
-        const found = findClearGaze(lensOD, lensOS, tOD, tOS, gaze.rightMm, allowAcc, reserve);
-        const ang = chinLiftDeg(found.downMm);
-        const clearFound = found.worst <= CLEAR_TOL;
-        const mode = modeLabel(currentMode);
-
-        let big, bigCls;
-        if(clearFound && Math.abs(found.downMm) <= 1.0){
-          big = 'Clear ' + mode + ' vision in primary gaze';
-          bigCls = 'good';
-        } else if(clearFound){
-          const dir = found.downMm > 0 ? 'chin up' : 'chin down';
-          big = 'Needs ' + Math.abs(found.downMm).toFixed(1) + ' mm of gaze drop, about ' + Math.abs(ang).toFixed(0) + '° ' + dir + ', for clear ' + mode + ' vision';
-          bigCls = Math.abs(ang) >= 8 ? 'bad' : '';
-        } else {
-          big = 'No posture gives clear ' + mode + ' vision. Best is ' + Math.abs(found.downMm).toFixed(1) + ' mm ' + (found.downMm >= 0 ? 'down' : 'up') + ', still ' + found.worst.toFixed(2) + ' D of blur';
-          bigCls = 'bad';
-        }
-
-        box.innerHTML =
-          headSVG(ang, clearFound && Math.abs(found.downMm) <= 1.0) +
-          '<div>' +
-            '<div class="ttl">' + title + '</div>' +
-            '<div class="big ' + bigCls + '">' + big + '</div>' +
-            '<div class="eye-line"><b>OD</b> ' + fmtD(vOD.P) + ' D under pupil <span class="verdict ' + vOD.cls + '">' + vOD.text + '</span></div>' +
-            '<div class="eye-line"><b>OS</b> ' + fmtD(vOS.P) + ' D under pupil <span class="verdict ' + vOS.cls + '">' + vOS.text + '</span></div>' +
-            '<div class="fine">Pupil is ' + fmtMm(gaze.downMm) + ' from the fitting cross. Target ' + mode + ' = OD ' + fmtD(tOD) + ' / OS ' + fmtD(tOS) + ' D. ' +
-              (clearFound ? '<button type="button" data-goto="' + found.downMm + '">Show me</button>' : '') +
-            '</div>' +
-          '</div>';
-        return found;
-      }
-
-      // ---------- Render ----------
-      let renderQueued = false;
-      function scheduleRender(){
-        if(renderQueued) return;
-        renderQueued = true;
-        requestAnimationFrame(()=>{ renderQueued = false; render(); });
-      }
-
-      function render(){
-        syncDesignUI('hab');
-        syncDesignUI('opt');
-
-        const optOD = readRx('opt_od');
-        const optOS = readRx('opt_os');
-        const habOD = readRx('hab_od');
-        const habOS = readRx('hab_os');
-
-        const allowAcc = els('acc_on').checked;
-        const age = parseNum(els('acc_age').value);
-        const accModel = els('acc_model').value;
-        const accPct = parseNum(els('acc_pct').value);
-        const reserve = usableAccommodationReserve(age, accModel, accPct);
-
-        const binoOn = els('bino_on').checked;
-        els('bino_hab_wrap').classList.toggle('hidden', !binoOn);
-        els('bino_opt_wrap').classList.toggle('hidden', !binoOn);
-
-        const frameOn = els('frame_on').checked;
-        const distOn = els('dist_on').checked;
-        const distW = parseNum(els('dist_w').value);
-        const minkW = parseNum(els('mink_w').value);
-
-        const habCfg = getDesignConfig('hab');
-        const optCfg = getDesignConfig('opt');
-
-        const fit = readFit();
-        const gaze = readGaze();
-        els('fit_h_v').textContent = fmtMm(fit.heightMm);
-        els('fit_pd_v').textContent = fmtMm(fit.pdMm);
-        els('gaze_y_v').textContent = fmtMm(gaze.downMm) + (gaze.downMm ? ' (' + Math.abs(chinLiftDeg(gaze.downMm)).toFixed(0) + '°)' : '');
-        els('gaze_x_v').textContent = fmtMm(gaze.rightMm);
-        const pupil = pupilFor(gaze);
-
-        const habLensOD = makeLens(habOD, habCfg, 'OD', fit);
-        const habLensOS = makeLens(habOS, habCfg, 'OS', fit);
-        const optLensOD = makeLens(optOD, optCfg, 'OD', fit);
-        const optLensOS = makeLens(optOS, optCfg, 'OS', fit);
-
-        const tOD = targetSE(optOD, currentMode);
-        const tOS = targetSE(optOS, currentMode);
-
-        const box = els('pal-readouts');
-        box.innerHTML = '';
-        function addKV(text){
-          const d = document.createElement('div');
-          d.className = 'kv';
-          d.textContent = text;
-          box.appendChild(d);
-        }
-        addKV('Target: ' + modeLabel(currentMode) + ' (OD ' + fmtD(tOD) + ', OS ' + fmtD(tOS) + ' D)');
-        addKV('Usable reserve: ' + reserve.toFixed(2) + ' D' + (allowAcc ? '' : ' (off)'));
-        addKV('Current: ' + habCfg.preset.name + ', ' + habCfg.corridorMm + ' mm corridor');
-        addKV('New: ' + optCfg.preset.name + ', ' + optCfg.corridorMm + ' mm corridor');
-        addKV('Fit: height ' + fmtMm(fit.heightMm) + ', PD ' + fmtMm(fit.pdMm));
-        addKV('Frame cut: ' + (frameOn ? 'On' : 'Off'));
-
-        const fo = {N: FIELD_N, allowAcc, reserve, distOn, distW, minkW, frameOn};
-        const fields = {
-          hab: {OD: computeField(habLensOD, tOD, fo), OS: computeField(habLensOS, tOS, fo)},
-          opt: {OD: computeField(optLensOD, tOD, fo), OS: computeField(optLensOS, tOS, fo)}
-        };
-
-        const pupilLabel = (lens)=>fmtD(lens.powerAt(pupil.x, pupil.y)) + ' D';
-
-        drawResidualHeatmap(els('can_del_od'), fields.hab.OD, frameOn, pupil, pupilLabel(habLensOD));
-        drawResidualHeatmap(els('can_del_os'), fields.hab.OS, frameOn, pupil, pupilLabel(habLensOS));
-        drawResidualHeatmap(els('can_optzone_od'), fields.opt.OD, frameOn, pupil, pupilLabel(optLensOD));
-        drawResidualHeatmap(els('can_optzone_os'), fields.opt.OS, frameOn, pupil, pupilLabel(optLensOS));
-
-        const subText = 'Residual blur for ' + modeLabel(currentMode) + ', 0.00 D to 2.00 D';
-        els('hm_sub_hab').textContent = subText;
-        els('hm_sub_opt').textContent = subText;
-
-        if(els('samplepoints_details').open){
-          drawSampleValues(els('can_hab_od'), habLensOD, frameOn, pupil);
-          drawSampleValues(els('can_hab_os'), habLensOS, frameOn, pupil);
-          drawSampleValues(els('can_opt_od'), optLensOD, frameOn, pupil);
-          drawSampleValues(els('can_opt_os'), optLensOS, frameOn, pupil);
-        }
-
-        els('strain_hab_od').innerHTML = buildZoneStrainHTML('Current glasses, OD', habLensOD, tOD, allowAcc, reserve);
-        els('strain_hab_os').innerHTML = buildZoneStrainHTML('Current glasses, OS', habLensOS, tOS, allowAcc, reserve);
-        els('strain_opt_od').innerHTML = buildZoneStrainHTML('New prescription, OD', optLensOD, tOD, allowAcc, reserve);
-        els('strain_opt_os').innerHTML = buildZoneStrainHTML('New prescription, OS', optLensOS, tOS, allowAcc, reserve);
-
-        if(binoOn){
-          const foC = Object.assign({}, fo, {frameOn: false});
-          drawBinoDisparity(els('can_bino_hab'), computeField(habLensOD, tOD, foC), computeField(habLensOS, tOS, foC), frameOn, pupil);
-          drawBinoDisparity(els('can_bino_opt'), computeField(optLensOD, tOD, foC), computeField(optLensOS, tOS, foC), frameOn, pupil);
-        }
-
-        renderComparisonMetrics(calculateMetrics(fields, allowAcc, reserve));
-
-        renderHeadCard('head_hab', 'Current glasses', habLensOD, habLensOS, tOD, tOS, gaze, allowAcc, reserve);
-        renderHeadCard('head_opt', 'New prescription', optLensOD, optLensOS, tOD, tOS, gaze, allowAcc, reserve);
-      }
-
-      function setMode(m){
-        currentMode = m;
-        modeButtons.forEach(b=>b.classList.toggle('active', b.dataset.mode === m));
-        scheduleRender();
-      }
-
-      // Animate the vertical gaze slider to a value so the pupil visibly walks down the lens.
-      let gazeAnim = null;
-      function animateGazeTo(targetMm){
-        const el = els('gaze_y');
-        const from = parseNum(el.value);
-        const to = clamp(targetMm, parseNum(el.min), parseNum(el.max));
-        if(gazeAnim) cancelAnimationFrame(gazeAnim);
-        const t0 = performance.now();
-        const dur = 700;
-        function step(now){
-          const t = clamp((now - t0) / dur, 0, 1);
-          const e = 1 - Math.pow(1 - t, 3);
-          el.value = (from + (to - from) * e).toFixed(2);
-          render();
-          if(t < 1) gazeAnim = requestAnimationFrame(step);
-          else { el.value = to; render(); gazeAnim = null; }
-        }
-        gazeAnim = requestAnimationFrame(step);
-      }
-
-      function hookInputs(){
-        modeButtons.forEach(b=>b.addEventListener('click', ()=>setMode(b.dataset.mode)));
-        els('pal-generate').addEventListener('click', scheduleRender);
-
-        els('sync_hab_to_opt').addEventListener('click', ()=>{
-          for(const eye of ['od','os']){
-            for(const f of ['sph','cyl','axis','add']){
-              els('hab_' + eye + '_' + f).value = els('opt_' + eye + '_' + f).value;
-            }
-          }
-          scheduleRender();
-        });
-
-        Array.from(document.querySelectorAll('#pal-tool .step button')).forEach(b=>{
-          b.addEventListener('click', ()=>{
-            const inp = els(b.dataset.step);
-            const v = parseNum(inp.value) + parseNum(b.dataset.d);
-            inp.value = fmtD(roundToStep(v, 0.25)).replace('−', '-');
-            scheduleRender();
-          });
-        });
-
-        Array.from(document.querySelectorAll('#pal-tool input')).forEach(inp=>{
-          if(inp.type === 'range'){
-            inp.addEventListener('input', scheduleRender);
-          } else {
-            inp.addEventListener('change', scheduleRender);
-            inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') inp.blur(); });
-          }
-        });
-
-        Array.from(document.querySelectorAll('#pal-tool select')).forEach(sel=>{
-          sel.addEventListener('change', scheduleRender);
-        });
-
-        els('fit_reset').addEventListener('click', ()=>{
-          els('fit_h').value = 0; els('fit_pd').value = 0; scheduleRender();
-        });
-        els('gaze_reset').addEventListener('click', ()=>{
-          els('gaze_x').value = 0; animateGazeTo(0);
-        });
-
-        function findFor(which){
-          const fit = readFit();
-          const gaze = readGaze();
-          const allowAcc = els('acc_on').checked;
-          const reserve = usableAccommodationReserve(parseNum(els('acc_age').value), els('acc_model').value, parseNum(els('acc_pct').value));
-          const cfg = getDesignConfig(which);
-          const rxOD = readRx(which + '_od'), rxOS = readRx(which + '_os');
-          const optOD = readRx('opt_od'), optOS = readRx('opt_os');
-          const tOD = targetSE(optOD, currentMode), tOS = targetSE(optOS, currentMode);
-          const found = findClearGaze(makeLens(rxOD, cfg, 'OD', fit), makeLens(rxOS, cfg, 'OS', fit), tOD, tOS, gaze.rightMm, allowAcc, reserve);
-          animateGazeTo(found.downMm);
-        }
-        els('find_hab').addEventListener('click', ()=>findFor('hab'));
-        els('find_opt').addEventListener('click', ()=>findFor('opt'));
-
-        document.querySelectorAll('.head-card').forEach(card=>{
-          card.addEventListener('click', (e)=>{
-            const b = e.target.closest('button[data-goto]');
-            if(b) animateGazeTo(parseNum(b.dataset.goto));
-          });
-        });
-
-        els('samplepoints_details').addEventListener('toggle', ()=>{ if(els('samplepoints_details').open) scheduleRender(); });
-      }
-
-      setLegendBars();
-      hookInputs();
-      render();
+  (function () {
+    'use strict';
+    const VERSION = 'v2.0';
+    const $ = (id) => document.getElementById(id);
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+    // Embed mode: ?embed=1&parent=<page URL>. The host page forwards its #hash into the
+    // iframe and receives hash updates back, so shared links point at the host page.
+    const QS = new URLSearchParams(location.search);
+    const EMBED = QS.has('embed');
+    const PARENT = (() => {
+      try { const u = new URL(QS.get('parent') || ''); return u.protocol === 'https:' || u.hostname === 'localhost' || u.hostname === '127.0.0.1' ? u : null; } catch { return null; }
     })();
+    if (EMBED) document.documentElement.classList.add('embed');
+    const shareUrl = () => (PARENT ? `${PARENT.origin}${PARENT.pathname}${location.hash}` : location.href);
+
+    // ═══════════════════════════════════════════════════════════
+    // Geometry (millimetres). The lens is a unit circle of radius R_MM.
+    // ═══════════════════════════════════════════════════════════
+    const R_MM = 30;
+    const mm = (v) => v / R_MM;
+    const FC_Y = -0.24;            // fitting cross, 7.2 mm above the geometric centre
+    const INSET_MM = 2.5;
+    const EYE_ROT_MM = 25;
+    const FIELD_N = 300;           // internal field resolution
+    const MAX_D = 2.0;             // colour scale ceiling, dioptres
+    const CLEAR_TOL = 0.30;            // depth of focus: residual blur up to this counts as clear
+
+    const STRAIN = [[0.10, 'No strain'], [0.25, 'Mild'], [0.80, 'Moderate'], [2.00, 'Significant']];
+    function strainBand(ratio) { for (const [lim, name] of STRAIN) if (ratio < lim) return name; return 'Beyond reserve'; }
+
+    // ═══════════════════════════════════════════════════════════
+    // Colour ramps for the dark surface. Sequential amber: near zero recedes into the
+    // surface and magnitude brightens. Diverging blue/red with a neutral midpoint for signed power.
+    // ═══════════════════════════════════════════════════════════
+    function hex(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+    function rampLUT(stops) {
+      const N = 256, lut = new Uint8Array(N * 3);
+      for (let i = 0; i < N; i++) {
+        const t = i / (N - 1);
+        let k = 0; while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
+        const [t0, c0] = stops[k], [t1, c1] = stops[k + 1];
+        const u = clamp((t - t0) / (t1 - t0 || 1), 0, 1);
+        const a = hex(c0), b = hex(c1);
+        for (let c = 0; c < 3; c++) lut[i * 3 + c] = Math.round(a[c] + (b[c] - a[c]) * u);
+      }
+      return lut;
+    }
+    const SEQ_STOPS = [[0, '#171c27'], [0.25, '#4a3b1f'], [0.5, '#9a6414'], [0.75, '#dc9a12'], [1, '#ffd166']];
+    const DIV_STOPS = [[0, '#3987e5'], [0.5, '#383835'], [1, '#e66767']];
+    const SEQ = rampLUT(SEQ_STOPS), DIV = rampLUT(DIV_STOPS);
+    const cssGradient = (stops) => 'linear-gradient(90deg, ' + stops.map(([t, c]) => `${c} ${Math.round(t * 100)}%`).join(', ') + ')';
+    const SURFACE = hex('#12151c');
+
+    // ═══════════════════════════════════════════════════════════
+    // Prescriptions as power vectors
+    // ═══════════════════════════════════════════════════════════
+    function num(v, d = 0) { const x = Number(String(v).replace(',', '.').trim()); return Number.isFinite(x) ? x : d; }
+    function normAxis(a) { let ax = Math.round(num(a, 180)) % 180; if (ax <= 0) ax += 180; return ax; }
+    function readRx(prefix) {
+      const sph = clamp(num($(prefix + '_sph').value), -20, 20);
+      const cyl = clamp(num($(prefix + '_cyl').value), -8, 8);
+      const axis = normAxis($(prefix + '_axis').value);
+      const add = clamp(num($(prefix + '_add').value), 0, 4);
+      const th = axis * Math.PI / 180;
+      return { sph, cyl, axis, add, M: sph + cyl / 2, J0: -(cyl / 2) * Math.cos(2 * th), J45: -(cyl / 2) * Math.sin(2 * th) };
+    }
+    const fmtD = (v) => (v > 0.0001 ? '+' : v < -0.0001 ? '−' : '') + Math.abs(v).toFixed(2);
+    const fmtMm = (v) => (v > 0.01 ? '+' : v < -0.01 ? '−' : '') + Math.abs(v).toFixed(1) + ' mm';
+    const fmtRx = (rx) => fmtD(rx.sph) + (Math.abs(rx.cyl) > 0.001 ? ' ' + fmtD(rx.cyl) + ' × ' + rx.axis : ' DS') + (rx.add > 0 ? ' add ' + fmtD(rx.add) : '');
+
+    function hofstetter(age, model) {
+      const a = Math.max(0, age);
+      if (model === 'max') return Math.max(0, 25 - 0.4 * a);
+      if (model === 'avg') return Math.max(0, 18.5 - 0.3 * a);
+      return Math.max(0, 15 - 0.25 * a);
+    }
+
+    // Signed spherical residual after accommodation (+ = too much plus, which cannot be cleared).
+    function sphResidual(lensM, needM, allowAcc, reserve) {
+      const err = lensM - needM;
+      if (err >= 0) return err;
+      const demand = -err;
+      return allowAcc ? -Math.max(0, demand - reserve) : -demand;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Lens designs
+    // ═══════════════════════════════════════════════════════════
+    const PRESETS = {
+      gen_hard:      { name: 'Generic PAL, hard',     short: 'generic hard',    hardness: 1.15, corrWidth: 0.15, baseSharp: 12.2, baseMid: 0.52, fixed: true },
+      gen_avg:       { name: 'Generic PAL, average',  short: 'generic average', hardness: 1.00, corrWidth: 0.16, baseSharp: 11.4, baseMid: 0.52, fixed: true },
+      gen_soft:      { name: 'Generic PAL, soft',     short: 'generic soft',    hardness: 0.88, corrWidth: 0.17, baseSharp: 10.6, baseMid: 0.52, fixed: true },
+      nikon_seemax:  { name: 'Nikon SeeMax Ultimate', short: 'SeeMax Ultimate', hardness: 0.70, corrWidth: 0.30, baseSharp: 8.6,  baseMid: 0.52, fixed: false },
+      hoya_mystyle3: { name: 'Hoya MyStyle 3',        short: 'MyStyle 3',       hardness: 0.68, corrWidth: 0.30, baseSharp: 8.6,  baseMid: 0.52, fixed: false },
+    };
+    const CORRIDOR = { short: { lenMm: 11, sharpMult: 1.22 }, medium: { lenMm: 14, sharpMult: 1.0 }, long: { lenMm: 17, sharpMult: 0.88 } };
+    const EMPH_SHIFT = { balanced: 0, distance: 0.06, intermediate: 0.03, near: -0.06 };
+    const HOYA_EMPH = { tyro: 'balanced', expert: 'balanced', detail: 'near', modern: 'intermediate', adventure: 'distance' };
+
+    function designConfig(which) {
+      const id = $(which + '_design').value;
+      const p = PRESETS[id] || PRESETS.gen_avg;
+      let corridor = 'medium', emph = 'balanced';
+      if (!p.fixed) {
+        corridor = $(which + '_corridor').value;
+        emph = id === 'hoya_mystyle3' ? HOYA_EMPH[$(which + '_hoya').value] || 'balanced' : $(which + '_emph').value;
+      }
+      const c = CORRIDOR[corridor] || CORRIDOR.medium;
+      return {
+        id, preset: p, corridor, emph, corridorMm: c.lenMm, ySpan: mm(c.lenMm),
+        rampSharp: p.baseSharp * c.sharpMult,
+        rampMid: clamp(p.baseMid + (EMPH_SHIFT[emph] || 0), 0.38, 0.66),
+        corrWidth: p.corrWidth, hardness: p.hardness,
+      };
+    }
+    function syncDesignUI(which) {
+      const id = $(which + '_design').value;
+      const p = PRESETS[id] || PRESETS.gen_avg;
+      $(which + '_corridor_wrap').hidden = p.fixed;
+      $(which + '_emph_wrap').hidden = p.fixed || id === 'hoya_mystyle3';
+      $(which + '_hoya_wrap').hidden = id !== 'hoya_mystyle3';
+    }
+
+    const temporalDir = (eye) => (eye === 'OD' ? +1 : -1);
+    const sigmoid = (z) => 1 / (1 + Math.exp(-z));
+    const logit = (p) => { const q = clamp(p, 1e-6, 1 - 1e-6); return Math.log(q / (1 - q)); };
+
+    // A lens evaluated in eye coordinates: the pupil in primary gaze sits at (0, FC_Y) when the
+    // fit is perfect. fit.heightMm > 0: the lens is fitted too high (its fitting cross sits above
+    // the pupil). fit.pdMm > 0: the optical centres are set too close together.
+    function makeLens(rx, cfg, eye, fit) {
+      const nasalDir = -temporalDir(eye);
+      const dyN = mm(fit.heightMm);
+      const dxN = -nasalDir * mm(fit.pdMm);
+      const yStart = FC_Y - mm(1.5), yEnd = FC_Y + cfg.ySpan;
+      const add = rx.add;
+      const narrowing = (1 - clamp(add - 1, 0, 2) * 0.175) * (1 - clamp(Math.abs(rx.M), 0, 6) * 0.033);
+      const halfWidth = cfg.corrWidth * narrowing;        // corridor half width, normalised
+      const edgeN = mm(12);                                 // astigmatism reaches its maximum this far beyond the corridor
+      const Cmax = add * cfg.hardness * (1 + clamp(add - 1, 0, 2) * 0.1);
+      const insetN = mm(INSET_MM);
+
+      const rampD = (yd) => sigmoid((clamp((yd - yStart) / (yEnd - yStart), 0, 1) - cfg.rampMid) * cfg.rampSharp);
+      const rampAt = (y) => rampD(y + dyN);
+      const centerX = (y) => -dxN + nasalDir * insetN * rampD(y + dyN);
+      // Unwanted cylinder of the design at a point, dioptres.
+      function astigAt(x, y) {
+        const r = rampD(y + dyN);
+        const xs = (x + dxN) - nasalDir * insetN * r;
+        const f = Math.pow(clamp((Math.abs(xs) - halfWidth) / edgeN, 0, 1), 1.5);
+        const g = Math.max(Math.pow(r, 1.2), 0.85 * 4 * r * (1 - r));
+        return Cmax * f * g;
+      }
+      // Local mean power: distance M, the add that has arrived, less half the unwanted cylinder.
+      function powerAt(x, y) { return rx.M + add * rampD(y + dyN) - astigAt(x, y) / 2; }
+      const yAtRamp = (frac) => yStart + (cfg.rampMid + logit(frac) / cfg.rampSharp) * (yEnd - yStart) - dyN;
+      return { rx, cfg, eye, fit, add, powerAt, astigAt, rampAt, centerX, yAtRamp, fcX: -dxN, fcY: FC_Y - dyN, nrpY: yEnd - dyN };
+    }
+
+    // What the eye needs: the true distance refraction plus the demand of the viewing distance.
+    function needFor(newRx, demandD) { return { M: newRx.M + demandD, J0: newRx.J0, J45: newRx.J45 }; }
+
+    // Blur strength at a point: power-vector length of the residual error after accommodation,
+    // with the design's unwanted cylinder folded in (random orientation, so root-sum-square).
+    function blurAt(lens, need, x, y, o) {
+      const M = lens.powerAt(x, y);
+      const dM = sphResidual(M, need.M, o.allowAcc, o.reserve);
+      const dJ0 = lens.rx.J0 - need.J0, dJ45 = lens.rx.J45 - need.J45;
+      const cyl = lens.astigAt(x, y), Junw = cyl / 2;
+      return { M, dM, cyl, blur: Math.sqrt(dM * dM + dJ0 * dJ0 + dJ45 * dJ45 + Junw * Junw) };
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Frame shape and masks
+    // ═══════════════════════════════════════════════════════════
+    const maskCache = new Map();
+    function roundedPoly(ctx, pts, radii) {
+      const n = pts.length, pin = [], pout = [];
+      for (let i = 0; i < n; i++) {
+        const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n];
+        const v0 = { x: p0.x - p1.x, y: p0.y - p1.y }, v1 = { x: p2.x - p1.x, y: p2.y - p1.y };
+        const l0 = Math.hypot(v0.x, v0.y) || 1, l1 = Math.hypot(v1.x, v1.y) || 1;
+        const u0 = { x: v0.x / l0, y: v0.y / l0 }, u1 = { x: v1.x / l1, y: v1.y / l1 };
+        const ang = Math.acos(clamp(-(u0.x * u1.x + u0.y * u1.y), -1, 1));
+        const tan = Math.tan(ang / 2) || 1e-6;
+        const r = Math.min(radii[i], 0.48 * Math.min(l0, l1) * tan), t = r / tan;
+        pin[i] = { x: p1.x + u0.x * t, y: p1.y + u0.y * t };
+        pout[i] = { x: p1.x + u1.x * t, y: p1.y + u1.y * t };
+      }
+      ctx.beginPath();
+      ctx.moveTo(pin[0].x, pin[0].y);
+      for (let i = 0; i < n; i++) {
+        ctx.lineTo(pin[i].x, pin[i].y);
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, pout[i].x, pout[i].y);
+        ctx.lineTo(pin[(i + 1) % n].x, pin[(i + 1) % n].y);
+      }
+      ctx.closePath();
+    }
+    function framePath(ctx, w, h, eye) {
+      const cx = w / 2, tDir = temporalDir(eye), nDir = -tDir;
+      const yTop = h * 0.2, yBot = h * 0.8;
+      const ST = { x: cx + tDir * w * 0.44, y: yTop }, SN = { x: cx + nDir * w * 0.34, y: yTop };
+      const IN = { x: cx + nDir * (w * 0.34 + w * 0.03 + (w * 0.26 - w * 0.34) * 0.1), y: yBot }, IT = { x: cx + tDir * w * 0.33, y: yBot };
+      const s = Math.min(w, h) * 0.14;
+      roundedPoly(ctx, [ST, SN, IN, IT], [s * 2, s * 2, s * 2.5, s * 2.25]);
+    }
+    function lensMask(n, eye, frameOn) {
+      const key = (frameOn ? eye : 'circle') + ':' + n;
+      if (maskCache.has(key)) return maskCache.get(key);
+      const m = new Uint8Array(n * n);
+      let fm = null;
+      if (frameOn) {
+        const c = document.createElement('canvas'); c.width = n; c.height = n;
+        const g = c.getContext('2d'); g.fillStyle = '#000'; framePath(g, n, n, eye); g.fill();
+        fm = g.getImageData(0, 0, n, n).data;
+      }
+      for (let py = 0; py < n; py++) {
+        const yn = (py / (n - 1)) * 2 - 1;
+        for (let px = 0; px < n; px++) {
+          const xn = (px / (n - 1)) * 2 - 1;
+          const i = py * n + px;
+          m[i] = (xn * xn + yn * yn <= 1 && (!fm || fm[i * 4 + 3] > 0)) ? 1 : 0;
+        }
+      }
+      maskCache.set(key, m);
+      return m;
+    }
+    function maskAt(mask, n, x, y) {
+      if (x * x + y * y > 1) return false;
+      return mask[Math.round((y + 1) / 2 * (n - 1)) * n + Math.round((x + 1) / 2 * (n - 1))] === 1;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Fields: one pass per lens, reused for drawing, metrics and binocular mismatch
+    // ═══════════════════════════════════════════════════════════
+    function computeField(lens, need, o) {
+      const N = FIELD_N, mask = lensMask(N, lens.eye, o.frameOn);
+      const blur = new Float32Array(N * N), signed = new Float32Array(N * N), M = new Float32Array(N * N), cyl = new Float32Array(N * N);
+      for (let py = 0; py < N; py++) {
+        const y = (py / (N - 1)) * 2 - 1;
+        for (let px = 0; px < N; px++) {
+          const i = py * N + px;
+          if (!mask[i]) continue;
+          const x = (px / (N - 1)) * 2 - 1;
+          const b = blurAt(lens, need, x, y, o);
+          blur[i] = b.blur; signed[i] = b.dM < 0 ? -b.blur : b.blur; M[i] = b.M; cyl[i] = b.cyl;
+        }
+      }
+      return { N, mask, blur, signed, M, cyl, lens, need };
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Drawing
+    // ═══════════════════════════════════════════════════════════
+    const toPx = (v, w) => (v + 1) / 2 * (w - 1);
+    const FONT = () => getComputedStyle(document.body).fontFamily;
+    function paint(ctx, W, H, N, mask, valueFn, lut) {
+      const img = ctx.createImageData(W, H), d = img.data;
+      for (let py = 0; py < H; py++) {
+        const fy = Math.min(N - 1, Math.floor(py * N / H));
+        for (let px = 0; px < W; px++) {
+          const fx = Math.min(N - 1, Math.floor(px * N / W));
+          const i = fy * N + fx, o = (py * W + px) * 4;
+          if (!mask[i]) { d[o] = SURFACE[0]; d[o + 1] = SURFACE[1]; d[o + 2] = SURFACE[2]; d[o + 3] = 255; continue; }
+          const li = Math.round(clamp(valueFn(i), 0, 1) * 255) * 3;
+          d[o] = lut[li]; d[o + 1] = lut[li + 1]; d[o + 2] = lut[li + 2]; d[o + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+    function outline(ctx, w, h, frameOn, eye) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(233,237,244,0.18)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(w / 2, h / 2, Math.min(w, h) / 2 - 1.5, 0, Math.PI * 2); ctx.stroke();
+      if (frameOn) { ctx.strokeStyle = 'rgba(233,237,244,0.45)'; ctx.lineWidth = 2; framePath(ctx, w, h, eye); ctx.stroke(); }
+      const t = temporalDir(eye), fs = Math.round(w * 0.028);
+      ctx.fillStyle = 'rgba(169,178,195,0.9)'; ctx.font = `700 ${fs}px ${FONT()}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('T', w / 2 + t * w * 0.46, toPx(FC_Y, h)); ctx.fillText('N', w / 2 - t * w * 0.46, toPx(FC_Y, h));
+      ctx.restore();
+    }
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    }
+    function guides(ctx, w, h, lens, pupil, label) {
+      const s = w / 560;
+      ctx.save();
+      ctx.font = `${Math.round(12 * s)}px ${FONT()}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      ctx.strokeStyle = 'rgba(233,237,244,0.28)'; ctx.fillStyle = 'rgba(233,237,244,0.6)'; ctx.lineWidth = s;
+      for (const L of [{ y: lens.fcY, t: 'FC' }, { y: lens.yAtRamp(0.5), t: '½ add' }, { y: lens.nrpY, t: 'Near' }]) {
+        const yy = toPx(L.y, h); if (yy < 0 || yy > h) continue;
+        ctx.setLineDash([4 * s, 4 * s]); ctx.beginPath(); ctx.moveTo(w * 0.17, yy); ctx.lineTo(w * 0.8, yy); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillText(L.t, w * 0.815, yy);
+      }
+      const fx = toPx(lens.fcX, w), fy = toPx(lens.fcY, h), a = 9 * s;
+      ctx.strokeStyle = 'rgba(233,237,244,0.9)'; ctx.lineWidth = 2 * s;
+      ctx.beginPath(); ctx.moveTo(fx - a, fy); ctx.lineTo(fx + a, fy); ctx.moveTo(fx, fy - a); ctx.lineTo(fx, fy + a); ctx.stroke();
+      if (pupil) {
+        const px = toPx(pupil.x, w), py = toPx(pupil.y, h), rr = 12 * s;
+        ctx.fillStyle = 'rgba(76,201,240,0.18)'; ctx.beginPath(); ctx.arc(px, py, rr * 1.9, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#0b0d12'; ctx.lineWidth = 4 * s; ctx.beginPath(); ctx.arc(px, py, rr, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#4cc9f0'; ctx.lineWidth = 2 * s; ctx.beginPath(); ctx.arc(px, py, rr, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#4cc9f0'; ctx.beginPath(); ctx.arc(px, py, 2.2 * s, 0, Math.PI * 2); ctx.fill();
+        if (label) {
+          ctx.font = `700 ${Math.round(13 * s)}px ${FONT()}`;
+          const tw = ctx.measureText(label).width + 12 * s, bx = Math.min(px + rr + 6 * s, w - tw - 4), by = py - 10 * s;
+          ctx.fillStyle = 'rgba(11,13,18,0.85)'; roundRect(ctx, bx, by, tw, 20 * s, 5 * s); ctx.fill();
+          ctx.fillStyle = '#e9edf4'; ctx.fillText(label, bx + 6 * s, py);
+        }
+      }
+      ctx.restore();
+    }
+    function drawMap(canvas, field, mode, frameOn, pupil, label) {
+      const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+      if (mode === 'astig') paint(ctx, w, h, field.N, field.mask, (i) => field.cyl[i] / MAX_D, SEQ);
+      else if (mode === 'power') paint(ctx, w, h, field.N, field.mask, (i) => 0.5 + (field.M[i] - field.need.M) / (2 * MAX_D), DIV);
+      else paint(ctx, w, h, field.N, field.mask, (i) => field.blur[i] / MAX_D, SEQ);
+      outline(ctx, w, h, frameOn, field.lens.eye);
+      guides(ctx, w, h, field.lens, pupil, label);
+    }
+    function drawBino(canvas, fOD, fOS, frameOn, pupil) {
+      const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height, N = fOD.N;
+      const mask = lensMask(N, 'OD', frameOn);
+      paint(ctx, w, h, N, mask, (i) => Math.abs(fOD.signed[i] - fOS.signed[i]) / MAX_D, SEQ);
+      outline(ctx, w, h, frameOn, 'OD');
+      guides(ctx, w, h, fOD.lens, pupil, null);
+    }
+    // Power along the corridor centre, OD solid and OS dashed, with the need as a vertical line.
+    function drawProfile(canvas, lensOD, lensOS, need, pupil) {
+      const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+      ctx.fillStyle = '#12151c'; ctx.fillRect(0, 0, w, h);
+      const lo = Math.min(lensOD.rx.M, lensOS.rx.M, need.M) - 0.75, hi = Math.max(lensOD.rx.M + lensOD.add, lensOS.rx.M + lensOS.add, need.M) + 0.75;
+      const X = (p) => 12 + (p - lo) / (hi - lo) * (w - 24);
+      ctx.strokeStyle = 'rgba(233,237,244,0.12)'; ctx.lineWidth = 1;
+      for (let p = Math.ceil(lo); p <= hi; p += 1) { const x = X(p); ctx.beginPath(); ctx.moveTo(x, 6); ctx.lineTo(x, h - 28); ctx.stroke(); }
+      const tx = X(need.M);
+      ctx.strokeStyle = '#7ee0b5'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(tx, 6); ctx.lineTo(tx, h - 28); ctx.stroke(); ctx.setLineDash([]);
+      for (const [lens, dash] of [[lensOD, []], [lensOS, [6, 4]]]) {
+        ctx.strokeStyle = lens.eye === 'OD' ? '#e9edf4' : '#a9b2c3'; ctx.lineWidth = 2; ctx.setLineDash(dash);
+        ctx.beginPath(); let started = false;
+        for (let py = 0; py <= h; py += 2) {
+          const y = (py / h) * 2 - 1; if (y * y > 1) continue;
+          const x = X(lens.powerAt(lens.centerX(y), y));
+          if (!started) { ctx.moveTo(x, py); started = true; } else ctx.lineTo(x, py);
+        }
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      if (pupil) { const py = toPx(pupil.y, h); ctx.strokeStyle = '#4cc9f0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(4, py); ctx.lineTo(w - 4, py); ctx.stroke(); }
+      ctx.fillStyle = 'rgba(169,178,195,0.9)'; ctx.font = `11px ${FONT()}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(fmtD(lo + 0.75), X(lo + 0.75), h - 24); ctx.fillText(fmtD(hi - 0.75), X(hi - 0.75), h - 24);
+      ctx.fillText('D', w / 2, h - 12);
+      ctx.fillStyle = '#7ee0b5'; ctx.fillText('need', clamp(tx, 16, w - 16), 6);
+    }
+
+    // Sample points derived from the design, in mm relative to the fitting cross.
+    function samplePoints(lens) {
+      const half = lens.yAtRamp(0.5), nrp = lens.nrpY, t = temporalDir(lens.eye);
+      return [
+        { name: 'Distance', x: lens.fcX, y: lens.fcY - mm(9) },
+        { name: 'FC', x: lens.fcX, y: lens.fcY },
+        { name: '½ add', x: lens.centerX(half), y: half },
+        { name: 'Near', x: lens.centerX(nrp), y: nrp },
+        { name: 'Below', x: lens.centerX(nrp + mm(8)), y: nrp + mm(8) },
+        { name: 'Temporal', x: t * mm(12), y: nrp },
+        { name: 'Nasal', x: -t * mm(12), y: nrp },
+      ];
+    }
+    function drawSamples(canvas, lens, frameOn, pupil) {
+      const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+      const mask = lensMask(FIELD_N, lens.eye, frameOn);
+      ctx.fillStyle = '#181c25'; ctx.fillRect(0, 0, w, h);
+      outline(ctx, w, h, frameOn, lens.eye);
+      guides(ctx, w, h, lens, pupil, null);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      for (const p of samplePoints(lens)) {
+        if (!maskAt(mask, FIELD_N, p.x, p.y)) continue;
+        const px = toPx(p.x, w), py = toPx(p.y, h);
+        const v = Math.round(lens.powerAt(p.x, p.y) * 4) / 4, txt = fmtD(v);
+        ctx.fillStyle = '#e9edf4'; ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.font = `700 18px ${FONT()}`;
+        const tw = ctx.measureText(txt).width + 10;
+        ctx.fillStyle = 'rgba(11,13,18,0.8)'; roundRect(ctx, px - tw / 2, py - 30, tw, 22, 5); ctx.fill();
+        ctx.fillStyle = '#e9edf4'; ctx.fillText(txt, px, py - 19);
+        ctx.fillStyle = '#a9b2c3'; ctx.font = `11px ${FONT()}`; ctx.fillText(p.name, px, py + 13);
+      }
+    }
+
+    // What the patient sees: a letter chart blurred by the residual blur at the pupil.
+    const SLOAN = 'CDHKNORSVZ';
+    function letters(seed, n) { let s = seed, out = ''; for (let i = 0; i < n; i++) { s = (s * 9301 + 49297) % 233280; out += SLOAN[Math.floor(s / 233280 * SLOAN.length)]; } return out; }
+    function snellenDenom(blur, pupilMm) { const b = blur * (pupilMm / 3.5); return 20 * (1 + 1.2 * b + 0.6 * b * b); }
+    function drawSees(canvas, blur, pupilMm) {
+      const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+      ctx.filter = 'none';
+      ctx.fillStyle = '#f6f3ea'; ctx.fillRect(0, 0, w, h);
+      const k = 3.4;                                   // px per arcmin at the simulated distance
+      const arcmin = blur * pupilMm * 3.438;           // blur-circle diameter, arcmin
+      const sigma = Math.max(0, arcmin * k / 4);
+      const blurCss = sigma > 0.2 ? `blur(${sigma.toFixed(2)}px)` : 'none';
+      let y = 44;
+      for (const [den, n] of [[60, 5], [40, 6], [25, 7], [20, 8]]) {
+        const hpx = 5 * k * den / 20;
+        ctx.filter = 'none'; ctx.fillStyle = '#8a8a8a'; ctx.font = `600 11px ${FONT()}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText('20/' + den, 12, y + hpx / 2);
+        ctx.filter = blurCss; ctx.fillStyle = '#111'; ctx.textAlign = 'center';
+        ctx.font = `700 ${hpx.toFixed(1)}px "Helvetica Neue", Arial, sans-serif`;
+        ctx.fillText(letters(den * 7, n).split('').join(' '), w / 2 + 10, y + hpx / 2);
+        y += hpx + 18;
+      }
+      ctx.filter = 'none';
+    }
+
+    // Side profile of a head facing right, rotated about the eye. Chin up = nose rises.
+    // mode 'head': the head tilts so a horizontal gaze passes through the lens lower down.
+    // mode 'eyes': the head stays level and the eyes drop into the near zone.
+    function headSVG(angleDeg, good, mode) {
+      const col = good ? '#7ee0b5' : '#a9b2c3';
+      const headRot = mode === 'eyes' ? 0 : -angleDeg, gazeRot = mode === 'eyes' ? angleDeg : 0;
+      return `<svg viewBox="0 0 150 150" aria-hidden="true">
+        <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ff6b85"/></marker></defs>
+        <line x1="0" y1="56" x2="150" y2="56" stroke="rgba(233,237,244,0.15)" stroke-dasharray="4 4"/>
+        <g transform="rotate(${headRot.toFixed(2)} 84 56)">
+          <path d="M 52 148 L 56 118 C 44 108 32 92 32 66 C 32 36 52 16 76 16 C 92 16 100 28 101 42 L 109 66 L 100 70 C 102 78 100 84 96 86 C 100 92 98 98 94 100 C 96 106 92 112 82 112 C 78 118 70 124 66 126 L 68 148 Z" fill="rgba(233,237,244,0.08)" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="84" cy="56" r="3.2" fill="#e9edf4"/>
+          <line x1="118" y1="30" x2="118" y2="86" stroke="#4cc9f0" stroke-width="3" stroke-linecap="round"/>
+          <line x1="112" y1="56" x2="124" y2="56" stroke="#4cc9f0" stroke-width="2"/>
+        </g>
+        <line x1="84" y1="56" x2="146" y2="56" stroke="#ff6b85" stroke-width="2.5" marker-end="url(#ah)" transform="rotate(${gazeRot.toFixed(2)} 84 56)"/>
+      </svg>`;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // State and verdicts
+    // ═══════════════════════════════════════════════════════════
+    const ui = { targetCm: 0, map: 'blur', frameOn: true, bino: false };
+    const chinLiftDeg = (downMm) => Math.atan2(downMm, EYE_ROT_MM) * 180 / Math.PI;
+    const readFit = () => ({ heightMm: num($('fit_h').value), pdMm: num($('fit_pd').value) });
+    const readGaze = () => ({ downMm: num($('gaze_y').value), rightMm: num($('gaze_x').value) });
+    const pupilFor = (g) => ({ x: mm(g.rightMm), y: FC_Y + mm(g.downMm) });
+    const demandOf = (cm) => (cm > 0 ? 100 / cm : 0);
+    function targetName(cm) {
+      if (cm <= 0) return 'distance';
+      if (cm === 300) return 'the TV at 3 m';
+      if (cm === 65) return 'a computer at 65 cm';
+      if (cm === 40) return 'reading at 40 cm';
+      if (cm === 33) return 'a phone at 33 cm';
+      return cm >= 100 ? (cm / 100).toFixed(1).replace(/\.0$/, '') + ' m' : cm + ' cm';
+    }
+    function currentO() {
+      const amp = hofstetter(clamp(num($('acc_age').value, 62), 0, 110), $('acc_model').value);
+      return { allowAcc: $('acc_on').checked, reserve: amp * clamp(num($('acc_pct').value, 50), 0, 100) / 100, amp, frameOn: ui.frameOn };
+    }
+
+    function verdictFor(lens, need, pupil, o) {
+      const b = blurAt(lens, need, pupil.x, pupil.y, o);
+      const demand = Math.max(0, need.M - b.M);
+      let cls = 'clear', text = 'Clear';
+      if (b.blur > CLEAR_TOL) {
+        cls = b.blur > 0.5 ? 'bad' : 'mild';
+        const why = b.dM > CLEAR_TOL ? 'over plus' : b.dM < -CLEAR_TOL ? 'short of plus' : 'cylinder';
+        text = `Blur ${b.blur.toFixed(2)} D, ${why}`;
+      } else if (demand > CLEAR_TOL && o.allowAcc) {
+        const band = strainBand(demand / Math.max(0.01, o.reserve));
+        cls = (band === 'No strain' || band === 'Mild') ? 'clear' : 'mild';
+        text = `Clear, using ${demand.toFixed(2)} D of accommodation (${band.toLowerCase()})`;
+      }
+      return Object.assign(b, { cls, text });
+    }
+    // Walk the pupil down the lens along the current horizontal gaze; prefer the clear point
+    // nearest primary gaze, otherwise the least-blurred point.
+    function findClearGaze(lOD, lOS, needOD, needOS, rightMm, o) {
+      let best = { downMm: 0, worst: Infinity }, nearest = null;
+      const x = mm(rightMm);
+      for (let d = -6; d <= 20; d += 0.25) {
+        const y = FC_Y + mm(d);
+        if (x * x + y * y > 1) continue;
+        const worst = Math.max(blurAt(lOD, needOD, x, y, o).blur, blurAt(lOS, needOS, x, y, o).blur);
+        if (worst < best.worst) best = { downMm: d, worst };
+        if (worst <= CLEAR_TOL && (nearest === null || Math.abs(d) < Math.abs(nearest.downMm))) nearest = { downMm: d, worst };
+      }
+      return nearest || best;
+    }
+
+    function renderHead(id, title, color, lOD, lOS, needOD, needOS, gaze, o) {
+      const pupil = pupilFor(gaze);
+      const vOD = verdictFor(lOD, needOD, pupil, o), vOS = verdictFor(lOS, needOS, pupil, o);
+      const found = findClearGaze(lOD, lOS, needOD, needOS, gaze.rightMm, o);
+      const ang = chinLiftDeg(found.downMm), clear = found.worst <= CLEAR_TOL, primary = clear && Math.abs(found.downMm) <= 0.5;
+      const what = targetName(ui.targetCm);
+      const nearTask = demandOf(ui.targetCm) >= 1.0;      // reading and screens: the eyes drop, the head stays level
+      let big, cls = '';
+      if (primary) { big = `Clear for ${what} in primary gaze`; cls = 'good'; }
+      else if (clear && nearTask) { big = `Clear for ${what} with the eyes ${Math.abs(found.downMm).toFixed(1)} mm ${found.downMm > 0 ? 'down' : 'up'} the lens, about ${Math.abs(ang).toFixed(0)}° of eye drop`; cls = Math.abs(found.downMm) > 17 ? 'bad' : 'good'; }
+      else if (clear) { big = `Needs ${Math.abs(found.downMm).toFixed(1)} mm of gaze drop, about ${Math.abs(ang).toFixed(0)}° ${found.downMm > 0 ? 'chin up' : 'chin down'}, to clear ${what}`; cls = Math.abs(ang) >= 8 ? 'bad' : ''; }
+      else { big = `No posture clears ${what}. Best is ${Math.abs(found.downMm).toFixed(1)} mm ${found.downMm >= 0 ? 'down' : 'up'}, still ${found.worst.toFixed(2)} D of blur`; cls = 'bad'; }
+      $(id).innerHTML = headSVG(ang, primary || (clear && nearTask), nearTask ? 'eyes' : 'head') +
+        `<div><h3><span class="dot" style="background:${color}"></span>${title}</h3>
+          <div class="big ${cls}">${big}</div>
+          <div class="eye-line"><b>OD</b> ${fmtD(vOD.M)} D <span class="verdict ${vOD.cls}">${vOD.text}</span></div>
+          <div class="eye-line"><b>OS</b> ${fmtD(vOS.M)} D <span class="verdict ${vOS.cls}">${vOS.text}</span></div>
+          <div class="fine">Mean power under the pupil, ${fmtMm(gaze.downMm)} from the fitting cross. ${clear && !primary ? `<button type="button" class="linkish" data-goto="${found.downMm}">Show me</button>` : ''}</div>
+        </div>`;
+      return { vOD, vOS, found, big };
+    }
+
+    function strainRows(lens, need, o) {
+      const half = lens.yAtRamp(0.5);
+      const zones = [['Distance (FC)', lens.fcX, lens.fcY], ['Intermediate', lens.centerX(half), half], ['Near', lens.centerX(lens.nrpY), lens.nrpY]];
+      let rows = '';
+      for (const [name, x, y] of zones) {
+        let sum = 0, n = 0;
+        for (const [dx, dy] of [[0, 0], [0, -mm(1.8)], [0, mm(1.8)], [-mm(1.8), 0], [mm(1.8), 0]]) if ((x + dx) ** 2 + (y + dy) ** 2 <= 1) { sum += lens.powerAt(x + dx, y + dy); n++; }
+        const M = n ? sum / n : lens.powerAt(x, y), err = M - need.M;
+        let txt;
+        if (err > CLEAR_TOL) txt = `Blurred by ${fmtD(err)} D over plus<small>Accommodation cannot remove excess plus.</small>`;
+        else if (-err <= CLEAR_TOL) txt = 'Clear, no strain';
+        else if (!o.allowAcc) txt = `Blurred by ${(-err).toFixed(2)} D short<small>Accommodation is off.</small>`;
+        else {
+          const demand = -err, ratio = demand / Math.max(0.01, o.reserve), band = strainBand(ratio);
+          txt = `${band}${demand > o.reserve ? `, still blurred by ${(demand - o.reserve).toFixed(2)} D` : ''}<small>${demand.toFixed(2)} D of accommodation, ${Math.round(ratio * 100)}% of the usable reserve</small>`;
+        }
+        rows += `<tr><td class="z">${name}</td><td>${txt}</td></tr>`;
+      }
+      return rows;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Render
+    // ═══════════════════════════════════════════════════════════
+    let last = null;
+    let queued = false;
+    function scheduleRender() { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; render(); }); }
+
+    function render() {
+      syncDesignUI('cur'); syncDesignUI('new');
+      const cur = { OD: readRx('cur_od'), OS: readRx('cur_os') }, nw = { OD: readRx('new_od'), OS: readRx('new_os') };
+      const o = currentO(), { allowAcc, reserve, amp } = o;
+      const age = clamp(num($('acc_age').value, 62), 0, 110);
+      const pupilMm = clamp(num($('pupil_mm').value, 3.5), 1.5, 8);
+      const demand = demandOf(ui.targetCm);
+      const need = { OD: needFor(nw.OD, demand), OS: needFor(nw.OS, demand) };
+      const fit = readFit(), gaze = readGaze(), pupil = pupilFor(gaze);
+      const curCfg = designConfig('cur'), newCfg = designConfig('new');
+      const lens = {
+        cur: { OD: makeLens(cur.OD, curCfg, 'OD', fit), OS: makeLens(cur.OS, curCfg, 'OS', fit) },
+        new: { OD: makeLens(nw.OD, newCfg, 'OD', fit), OS: makeLens(nw.OS, newCfg, 'OS', fit) },
+      };
+      const what = targetName(ui.targetCm);
+
+      // Readouts
+      $('cur_readline').innerHTML = `OD <b>${fmtRx(cur.OD)}</b> · OS <b>${fmtRx(cur.OS)}</b>`;
+      $('new_readline').innerHTML = `OD <b>${fmtRx(nw.OD)}</b> · OS <b>${fmtRx(nw.OS)}</b>`;
+      $('acc_line').textContent = `Amplitude ${amp.toFixed(2)} D at age ${age}; usable reserve ${reserve.toFixed(2)} D${allowAcc ? ', applied to any shortfall of plus.' : '. Accommodation is off, so every shortfall counts as blur.'}`;
+      const addNeeded = Math.max(0, demand - (allowAcc ? reserve : 0));
+      $('demand_line').textContent = demand > 0
+        ? `Demand ${demand.toFixed(2)} D. Add needed with this patient's reserve: ${addNeeded.toFixed(2)} D (lens adds: current ${fmtD(cur.OD.add)}, new ${fmtD(nw.OD.add)}).`
+        : 'Demand 0.00 D. The distance prescription alone should be clear.';
+      for (const b of $('target-picker').children) b.setAttribute('aria-pressed', String(num(b.dataset.cm) === ui.targetCm));
+      for (const b of $('map-picker').children) b.setAttribute('aria-pressed', String(b.dataset.map === ui.map));
+      $('fit_h_v').textContent = fmtMm(fit.heightMm); $('fit_pd_v').textContent = fmtMm(fit.pdMm);
+      $('gaze_y_v').textContent = fmtMm(gaze.downMm) + (gaze.downMm ? ` (${Math.abs(chinLiftDeg(gaze.downMm)).toFixed(0)}° ${gaze.downMm > 0 ? 'chin up' : 'chin down'})` : '');
+      $('gaze_x_v').textContent = fmtMm(gaze.rightMm);
+      $('cur_design_sub').textContent = `${curCfg.preset.short}, ${curCfg.corridorMm} mm corridor`;
+      $('new_design_sub').textContent = `${newCfg.preset.short}, ${newCfg.corridorMm} mm corridor`;
+      $('maps-sub').textContent = `Looking at ${what}. Need OD ${fmtD(need.OD.M)} / OS ${fmtD(need.OS.M)} D mean power${allowAcc && reserve > 0.005 ? `, less up to ${reserve.toFixed(2)} D of accommodation` : ''}.`;
+
+      // Fields and maps
+      const fields = {};
+      for (const k of ['cur', 'new']) fields[k] = { OD: computeField(lens[k].OD, need.OD, o), OS: computeField(lens[k].OS, need.OS, o) };
+      const labelAt = (f) => {
+        const i = Math.round((pupil.y + 1) / 2 * (f.N - 1)) * f.N + Math.round((pupil.x + 1) / 2 * (f.N - 1));
+        if (pupil.x * pupil.x + pupil.y * pupil.y > 1 || !f.mask[i]) return null;
+        if (ui.map === 'astig') return f.cyl[i].toFixed(2) + ' D cyl';
+        if (ui.map === 'power') return fmtD(f.M[i]) + ' D';
+        return 'blur ' + f.blur[i].toFixed(2) + ' D';
+      };
+      drawMap($('map_cur_od'), fields.cur.OD, ui.map, ui.frameOn, pupil, labelAt(fields.cur.OD));
+      drawMap($('map_cur_os'), fields.cur.OS, ui.map, ui.frameOn, pupil, labelAt(fields.cur.OS));
+      drawMap($('map_new_od'), fields.new.OD, ui.map, ui.frameOn, pupil, labelAt(fields.new.OD));
+      drawMap($('map_new_os'), fields.new.OS, ui.map, ui.frameOn, pupil, labelAt(fields.new.OS));
+      drawProfile($('prof_cur'), lens.cur.OD, lens.cur.OS, need.OD, pupil);
+      drawProfile($('prof_new'), lens.new.OD, lens.new.OS, need.OD, pupil);
+
+      $('bino_cur_wrap').hidden = !ui.bino; $('bino_new_wrap').hidden = !ui.bino;
+      if (ui.bino) {
+        const oc = Object.assign({}, o, { frameOn: false });
+        drawBino($('bino_cur'), computeField(lens.cur.OD, need.OD, oc), computeField(lens.cur.OS, need.OS, oc), ui.frameOn, pupil);
+        drawBino($('bino_new'), computeField(lens.new.OD, need.OD, oc), computeField(lens.new.OS, need.OS, oc), ui.frameOn, pupil);
+      }
+
+      // Legend
+      const divg = ui.map === 'power';
+      $('legend_bar').style.background = cssGradient(divg ? DIV_STOPS : SEQ_STOPS);
+      $('legend_ticks').innerHTML = (divg ? ['−2.00', '−1.00', '0.00', '+1.00', '+2.00 D'] : ['0.00', '0.50', '1.00', '1.50', '2.00 D']).map((t) => `<span>${t}</span>`).join('');
+      $('map_caption').textContent = divg
+        ? 'Mean power relative to what the eye needs at this distance. Blue: short of plus (the eye must accommodate, or sees blur). Red: too much plus (blur that cannot be cleared).'
+        : ui.map === 'astig'
+          ? 'Unwanted cylinder of the lens design alone, in dioptres. Dark: clean optics. Bright: astigmatic blur and swim.'
+          : 'Blur strength at this distance after accommodation: spherical error, cylinder mismatch and the lens’ unwanted astigmatism combined. Dark: clear. Bright: blurred.';
+
+      // Metrics
+      const m = { total: 0, cur: { clear: 0, usable: 0, strain: 0 }, new: { clear: 0, usable: 0, strain: 0 } };
+      for (const eye of ['OD', 'OS']) {
+        const fc = fields.cur[eye], fn = fields.new[eye], N = fc.N;
+        for (let i = 0; i < N * N; i++) {
+          if (!fc.mask[i]) continue;
+          m.total++;
+          for (const [k, f] of [['cur', fc], ['new', fn]]) {
+            if (f.blur[i] <= CLEAR_TOL) m[k].clear++;
+            if (f.blur[i] < 0.5) m[k].usable++;
+            const err = f.M[i] - f.need.M;
+            if (allowAcc && err <= CLEAR_TOL && Math.max(0, -err) / Math.max(0.01, reserve) < 0.10) m[k].strain++;
+          }
+        }
+      }
+      const pct = (n) => (n / Math.max(1, m.total)) * 100;
+      const card = (label, a, b, note) => {
+        if (a === null) return `<div class="metric"><div class="label">${label}</div><div class="vals" style="color:var(--muted);font-size:13px;font-family:var(--font)">${note}</div></div>`;
+        const d = b - a, cls = Math.abs(d) <= 0.5 ? 'flat' : d > 0 ? 'up' : 'down';
+        return `<div class="metric"><div class="label">${label}</div><div class="vals"><span>${a.toFixed(0)}% → ${b.toFixed(0)}%</span><span class="delta ${cls}">${d >= 0 ? '+' : ''}${d.toFixed(0)} pts</span></div>
+          <div class="bars"><div class="bar"><i style="width:${a.toFixed(1)}%;background:var(--warn)"></i></div><div class="bar"><i style="width:${b.toFixed(1)}%;background:var(--accent)"></i></div></div></div>`;
+      };
+      $('metrics').innerHTML =
+        card(`Clear area (blur under ${CLEAR_TOL.toFixed(2)} D)`, pct(m.cur.clear), pct(m.new.clear)) +
+        card('Usable area (blur under 0.50 D)', pct(m.cur.usable), pct(m.new.usable)) +
+        (allowAcc ? card('No-strain area', pct(m.cur.strain), pct(m.new.strain)) : card('No-strain area', null, null, 'Turn on Allow accommodation'));
+
+      // Heads
+      const hc = renderHead('head_cur', 'Current glasses', 'var(--warn)', lens.cur.OD, lens.cur.OS, need.OD, need.OS, gaze, o);
+      const hn = renderHead('head_new', 'New prescription', 'var(--accent)', lens.new.OD, lens.new.OS, need.OD, need.OS, gaze, o);
+
+      // What the patient sees (worse eye at the pupil)
+      const worse = (h) => (h.vOD.blur >= h.vOS.blur ? ['OD', h.vOD.blur] : ['OS', h.vOS.blur]);
+      const [we, wb] = worse(hc), [ne, nb] = worse(hn);
+      drawSees($('see_cur'), wb, pupilMm); drawSees($('see_new'), nb, pupilMm);
+      $('see_cur_va').textContent = `≈ 20/${Math.round(snellenDenom(wb, pupilMm))} (${we})`;
+      $('see_new_va').textContent = `≈ 20/${Math.round(snellenDenom(nb, pupilMm))} (${ne})`;
+      $('sees_line').textContent = `Looking at ${what} through the point ${fmtMm(gaze.downMm)} from the fitting cross, with a ${pupilMm.toFixed(1)} mm pupil. Residual blur: current ${wb.toFixed(2)} D, new ${nb.toFixed(2)} D. Acuity is an approximate conversion.`;
+
+      // Strain tables
+      $('strain_body').innerHTML = [['Current glasses', 'cur'], ['New prescription', 'new']].map(([t, k]) =>
+        `<div><h3 style="font-size:13px;color:var(--muted);margin-bottom:6px">${t}</h3><table class="strain"><thead><tr><th>Zone</th><th>OD</th></tr></thead><tbody>${strainRows(lens[k].OD, need.OD, o)}</tbody></table>
+         <table class="strain" style="margin-top:8px"><thead><tr><th>Zone</th><th>OS</th></tr></thead><tbody>${strainRows(lens[k].OS, need.OS, o)}</tbody></table></div>`).join('');
+
+      if ($('samples_details').open) {
+        drawSamples($('sp_cur_od'), lens.cur.OD, ui.frameOn, pupil); drawSamples($('sp_cur_os'), lens.cur.OS, ui.frameOn, pupil);
+        drawSamples($('sp_new_od'), lens.new.OD, ui.frameOn, pupil); drawSamples($('sp_new_os'), lens.new.OS, ui.frameOn, pupil);
+      }
+
+      last = { cur, nw, need, lens, fields, gaze, fit, hc, hn, what, pupilMm, wb, nb };
+      document.title = EMBED ? 'Progressive Lens Comparator' : `${fmtRx(cur.OD)} vs ${fmtRx(nw.OD)} · Progressive Lens Comparator`;
+      scheduleHash();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Deep links: every setting in the hash
+    // ═══════════════════════════════════════════════════════════
+    const RX_FIELDS = ['sph', 'cyl', 'axis', 'add'];
+    const rxStr = (p) => ['od', 'os'].map((e) => RX_FIELDS.map((f) => $(`${p}_${e}_${f}`).value.trim()).join(',')).join(';');
+    function setRx(p, s) {
+      const eyes = String(s).split(';');
+      ['od', 'os'].forEach((e, i) => { const v = (eyes[i] || '').split(','); RX_FIELDS.forEach((f, j) => { if (v[j] !== undefined && v[j] !== '') $(`${p}_${e}_${f}`).value = v[j]; }); });
+    }
+    let hashTimer = 0;
+    function scheduleHash() { clearTimeout(hashTimer); hashTimer = setTimeout(writeHash, 150); }
+    function writeHash() {
+      const p = new URLSearchParams();
+      p.set('cur', rxStr('cur')); p.set('new', rxStr('new'));
+      if (!$('acc_on').checked) p.set('acc', '0');
+      p.set('age', $('acc_age').value.trim());
+      if ($('acc_model').value !== 'min') p.set('am', $('acc_model').value);
+      if ($('acc_pct').value.trim() !== '50') p.set('ap', $('acc_pct').value.trim());
+      if ($('pupil_mm').value.trim() !== '3.5') p.set('pupil', $('pupil_mm').value.trim());
+      if (ui.targetCm) p.set('cm', String(ui.targetCm));
+      if (ui.map !== 'blur') p.set('map', ui.map);
+      if (!ui.frameOn) p.set('frame', '0');
+      if (ui.bino) p.set('bino', '1');
+      for (const k of ['cur', 'new']) {
+        const d = $(k + '_design').value;
+        if (d !== 'gen_avg') p.set(k[0] + 'd', d);
+        if (!PRESETS[d].fixed) { p.set(k[0] + 'c', $(k + '_corridor').value); p.set(k[0] + 'e', d === 'hoya_mystyle3' ? $(k + '_hoya').value : $(k + '_emph').value); }
+      }
+      const fit = readFit(), gaze = readGaze();
+      if (fit.heightMm) p.set('fh', String(fit.heightMm)); if (fit.pdMm) p.set('fp', String(fit.pdMm));
+      if (gaze.downMm) p.set('gy', String(gaze.downMm)); if (gaze.rightMm) p.set('gx', String(gaze.rightMm));
+      const hash = '#' + p.toString().replace(/%2C/g, ',').replace(/%3B/g, ';');
+      if (hash !== location.hash) history.replaceState(null, '', hash);
+      if (PARENT && window.parent !== window) window.parent.postMessage({ type: 'pal-hash', hash }, PARENT.origin);
+    }
+    function readHash() {
+      const raw = location.hash.slice(1);
+      if (!raw.includes('=')) return false;
+      const p = new URLSearchParams(raw);
+      if (p.has('cur')) setRx('cur', p.get('cur')); if (p.has('new')) setRx('new', p.get('new'));
+      $('acc_on').checked = p.get('acc') !== '0';
+      if (p.has('age')) $('acc_age').value = p.get('age');
+      if (p.has('am')) $('acc_model').value = p.get('am');
+      if (p.has('ap')) $('acc_pct').value = p.get('ap');
+      if (p.has('pupil')) $('pupil_mm').value = p.get('pupil');
+      ui.targetCm = clamp(Math.round(num(p.get('cm'), 0)), 0, 1000); $('target_cm').value = ui.targetCm;
+      ui.map = ['blur', 'astig', 'power'].includes(p.get('map')) ? p.get('map') : 'blur';
+      ui.frameOn = p.get('frame') !== '0'; $('frame_on').checked = ui.frameOn;
+      ui.bino = p.get('bino') === '1'; $('bino_on').checked = ui.bino;
+      for (const k of ['cur', 'new']) {
+        const d = p.get(k[0] + 'd'); if (d && PRESETS[d]) $(k + '_design').value = d;
+        const c = p.get(k[0] + 'c'); if (c && CORRIDOR[c]) $(k + '_corridor').value = c;
+        const e = p.get(k[0] + 'e'); if (e) { if (HOYA_EMPH[e]) $(k + '_hoya').value = e; if (EMPH_SHIFT[e] !== undefined) $(k + '_emph').value = e; }
+      }
+      $('fit_h').value = clamp(num(p.get('fh')), -6, 6); $('fit_pd').value = clamp(num(p.get('fp')), -4, 4);
+      $('gaze_y').value = clamp(num(p.get('gy')), -6, 20); $('gaze_x').value = clamp(num(p.get('gx')), -15, 15);
+      return true;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Share: copy link, save a labelled image
+    // ═══════════════════════════════════════════════════════════
+    let toastTimer = 0;
+    function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2200); }
+    $('copy-link').addEventListener('click', async () => {
+      writeHash();
+      try { await navigator.clipboard.writeText(shareUrl()); toast('Link copied'); } catch { prompt('Copy this link:', shareUrl()); }
+    });
+    function exportImage() {
+      const W = 1200, H = 630, out = document.createElement('canvas'); out.width = W; out.height = H;
+      const g = out.getContext('2d'), sans = FONT();
+      g.fillStyle = '#0b0d12'; g.fillRect(0, 0, W, H);
+      const text = (str, x, y, font, color, maxW = 400) => {
+        g.font = font; g.fillStyle = color;
+        const lh = parseInt(/(\d+)px/.exec(font)[1], 10) * 1.25;
+        let line = '';
+        for (const w of String(str).split(' ')) { const t = line ? `${line} ${w}` : w; if (g.measureText(t).width > maxW && line) { g.fillText(line, x, y); y += lh; line = w; } else line = t; }
+        g.fillText(line, x, y); return y + lh;
+      };
+      const tile = (canvas, x, title, color) => {
+        g.drawImage(canvas, x, 70, 340, 340);
+        g.fillStyle = color; g.beginPath(); g.arc(x + 8, 52, 5, 0, Math.PI * 2); g.fill();
+        text(title, x + 20, 58, `700 17px ${sans}`, '#e9edf4', 320);
+      };
+      tile($('map_cur_od'), 30, 'Current glasses, OD', '#ffb703');
+      tile($('map_new_od'), 390, 'New prescription, OD', '#4cc9f0');
+      const lb = g.createLinearGradient(30, 0, 730, 0);
+      for (const [t, c] of (ui.map === 'power' ? DIV_STOPS : SEQ_STOPS)) lb.addColorStop(t, c);
+      g.fillStyle = lb; g.fillRect(30, 430, 700, 10);
+      text(ui.map === 'power' ? 'Mean power vs need, −2 to +2 D' : ui.map === 'astig' ? 'Unwanted astigmatism, 0 to 2 D' : `Blur for ${last.what}: dark is clear, bright is 2 D of blur`, 30, 462, `400 14px ${sans}`, '#a9b2c3', 700);
+      g.fillStyle = '#12151c'; g.fillRect(760, 0, 440, H); g.fillStyle = '#4cc9f0'; g.fillRect(760, 0, 4, H);
+      let y = 70;
+      y = text('PROGRESSIVE LENS COMPARATOR', 800, y, `600 15px ${sans}`, '#a9b2c3');
+      y = text(`Looking at ${last.what}`, 800, y + 20, `700 30px ${sans}`, '#e9edf4', 370);
+      y = text(`Current: OD ${fmtRx(last.cur.OD)}`, 800, y + 14, `400 15px ${sans}`, '#ffb703', 370);
+      y = text(`New: OD ${fmtRx(last.nw.OD)}`, 800, y + 2, `400 15px ${sans}`, '#4cc9f0', 370);
+      y = text('Current glasses: ' + last.hc.big, 800, y + 18, `600 16px ${sans}`, '#ffb703', 370);
+      y = text('New prescription: ' + last.hn.big, 800, y + 8, `600 16px ${sans}`, '#4cc9f0', 370);
+      text(`Approximate acuity: current 20/${Math.round(snellenDenom(last.wb, last.pupilMm))}, new 20/${Math.round(snellenDenom(last.nb, last.pupilMm))}`, 800, y + 10, `400 15px ${sans}`, '#d3d9e4', 370);
+      text('Created by Dr Robert Burke', 800, H - 74, `700 20px ${sans}`, '#e9edf4');
+      text('calgaryvisioncentre.com · educational use only', 800, H - 44, `400 15px ${sans}`, '#a9b2c3');
+      return out.toDataURL('image/png');
+    }
+    $('save-image').addEventListener('click', async () => {
+      const url = exportImage(), name = 'progressive-lens-comparison.png';
+      try {
+        const blob = await (await fetch(url)).blob();
+        const file = new File([blob], name, { type: 'image/png' });
+        if (matchMedia('(pointer: coarse)').matches && navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'Progressive Lens Comparator', text: shareUrl() }); return; }
+      } catch { /* fall through to download */ }
+      const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+      toast('Image saved');
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // Input wiring
+    // ═══════════════════════════════════════════════════════════
+    let gazeAnim = 0;
+    function animateGazeTo(target) {
+      const el = $('gaze_y'), from = num(el.value), to = clamp(target, num(el.min), num(el.max));
+      cancelAnimationFrame(gazeAnim);
+      const t0 = performance.now(), dur = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700;
+      const step = (now) => {
+        const t = dur ? clamp((now - t0) / dur, 0, 1) : 1, e = 1 - Math.pow(1 - t, 3);
+        el.value = (from + (to - from) * e).toFixed(2); render();
+        if (t < 1) gazeAnim = requestAnimationFrame(step); else { el.value = to; render(); }
+      };
+      gazeAnim = requestAnimationFrame(step);
+    }
+    function findFor(which) {
+      if (!last) return;
+      const f = findClearGaze(last.lens[which].OD, last.lens[which].OS, last.need.OD, last.need.OS, readGaze().rightMm, currentO());
+      animateGazeTo(f.downMm);
+    }
+
+    for (const b of document.querySelectorAll('[data-step]')) b.addEventListener('click', () => {
+      const inp = $(b.dataset.step), v = Math.round((num(inp.value) + num(b.dataset.d)) * 4) / 4;
+      inp.value = (v > 0 ? '+' : '') + v.toFixed(2); scheduleRender();
+    });
+    for (const inp of document.querySelectorAll('input.field')) {
+      inp.addEventListener('change', scheduleRender);
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+    }
+    for (const sel of document.querySelectorAll('select.field')) sel.addEventListener('change', scheduleRender);
+    for (const r of document.querySelectorAll('input[type="range"]')) r.addEventListener('input', scheduleRender);
+    $('acc_on').addEventListener('change', scheduleRender);
+    $('frame_on').addEventListener('change', () => { ui.frameOn = $('frame_on').checked; scheduleRender(); });
+    $('bino_on').addEventListener('change', () => { ui.bino = $('bino_on').checked; scheduleRender(); });
+    $('target_cm').addEventListener('change', () => { ui.targetCm = clamp(Math.round(num($('target_cm').value)), 0, 1000); $('target_cm').value = ui.targetCm; scheduleRender(); });
+    for (const b of $('target-picker').children) b.addEventListener('click', () => { ui.targetCm = num(b.dataset.cm); $('target_cm').value = ui.targetCm; scheduleRender(); });
+    for (const b of $('map-picker').children) b.addEventListener('click', () => { ui.map = b.dataset.map; scheduleRender(); });
+    $('copy-rx').addEventListener('click', () => { for (const e of ['od', 'os']) for (const f of RX_FIELDS) $(`cur_${e}_${f}`).value = $(`new_${e}_${f}`).value; scheduleRender(); toast('New prescription copied to current'); });
+    $('swap-rx').addEventListener('click', () => { for (const e of ['od', 'os']) for (const f of RX_FIELDS) { const a = $(`cur_${e}_${f}`), b = $(`new_${e}_${f}`); [a.value, b.value] = [b.value, a.value]; } scheduleRender(); });
+    $('fit_reset').addEventListener('click', () => { $('fit_h').value = 0; $('fit_pd').value = 0; scheduleRender(); });
+    $('gaze_reset').addEventListener('click', () => { $('gaze_x').value = 0; animateGazeTo(0); });
+    $('find_cur').addEventListener('click', () => findFor('cur'));
+    $('find_new').addEventListener('click', () => findFor('new'));
+    document.addEventListener('click', (e) => { const b = e.target.closest('button[data-goto]'); if (b) animateGazeTo(num(b.dataset.goto)); });
+    $('samples_details').addEventListener('toggle', () => { if ($('samples_details').open) scheduleRender(); });
+
+    // Drag the pupil on any map
+    for (const c of document.querySelectorAll('.map canvas, .bino canvas')) {
+      let dragging = false;
+      const move = (e) => {
+        const r = c.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width) * 2 - 1, y = ((e.clientY - r.top) / r.height) * 2 - 1;
+        $('gaze_x').value = clamp(Math.round(x * R_MM * 2) / 2, -15, 15);
+        $('gaze_y').value = clamp(Math.round((y - FC_Y) * R_MM * 2) / 2, -6, 20);
+        scheduleRender();
+      };
+      c.style.touchAction = 'none'; c.style.cursor = 'crosshair';
+      c.addEventListener('pointerdown', (e) => { dragging = true; c.setPointerCapture(e.pointerId); move(e); });
+      c.addEventListener('pointermove', (e) => { if (dragging) move(e); });
+      c.addEventListener('pointerup', () => { dragging = false; });
+      c.addEventListener('pointercancel', () => { dragging = false; });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Start
+    // ═══════════════════════════════════════════════════════════
+    $('version').textContent = VERSION;
+    readHash();
+    window.addEventListener('hashchange', () => { if (readHash()) scheduleRender(); });
+    render();
+
+    if (EMBED && window.parent !== window) {
+      let lastH = 0;
+      const report = () => { const h = Math.ceil(document.documentElement.getBoundingClientRect().height); if (Math.abs(h - lastH) > 1) { lastH = h; window.parent.postMessage({ type: 'pal-height', height: h }, PARENT ? PARENT.origin : '*'); } };
+      new ResizeObserver(report).observe(document.body); report();
+    }
+    window.__pal = { render, readHash, writeHash, exportImage, state: () => last, makeLens, blurAt, designConfig, readRx, findClearGaze, ui };
+  })();
   </script>
 </body>
 </html>
