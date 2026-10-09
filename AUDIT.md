@@ -12,6 +12,22 @@ The tool loads cleanly, every control triggers a re-render, and the core chairsi
 
 Everything else is either a labelling inconsistency, a modelling choice worth revisiting, or an opportunity to make the demo more captivating.
 
+## Status (second commit)
+
+Applied in `index.html`:
+
+- A1 to A11 all fixed: inset is nasal for both eyes, OS sample labels flip, Copy button renders once, Enter blurs instead of double rendering, strain thresholds and names match the legend, over-plus is reported as blur above 0.125 D, legend ticks are linear, sample labels no longer collide, reference lines are the fitting cross, half add and near reference point, dead code removed, phone layout no longer scrolls sideways, inputs use numeric keypads and labels are associated.
+- Section C: each map is computed once at 360 x 360 into typed arrays and reused for drawing, metrics and binocular disparity. Rendering runs through requestAnimationFrame. Measured render time dropped from 650 ms to about 100 to 180 ms.
+- B1: geometry is now in millimetres (60 mm lens, fitting cross 7.2 mm above centre, 2.5 mm inset, corridors 11 / 14 / 17 mm, 25 mm to the centre of rotation). The Minkwitz proxy is rescaled so a 14 mm corridor reproduces the original tuning.
+- B4: sample points, strain zones and map reference lines are derived from the ramp (fitting cross, 50 percent add, 100 percent add).
+- B7: binocular disparity uses signed residuals.
+- B8: the No Strain card says "Turn on Allow accommodation" when accommodation is off.
+- B9: defaults are the over-minus demo (current -1.50, new -1.00, add 2.00, age 55).
+- D1 and A5: new Fit and Gaze Simulator. Fitting height and PD error shift the lens design relative to the eye for both lenses. Vertical and horizontal gaze move the pupil marker on every map, with the local power printed beside it. "Find clear view" animates the pupil to the nearest posture that clears the active target and the head silhouette tilts by the computed angle.
+- D3: +0.25 / -0.25 step buttons on every sphere and add field.
+
+Still open: B2 (power-vector cylinder), B3 (working-distance targets), B5 (true Minkwitz astigmatism map), B6 (brand naming), D2 (blurred letter preview), D4 to D8.
+
 ## A. Defects (behaviour differs from the stated design)
 
 ### A1. Nasal inset goes temporal (model bug)

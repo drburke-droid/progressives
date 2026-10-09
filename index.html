@@ -50,12 +50,8 @@
       padding: 2rem;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      transition: all 0.3s ease;
+      transition: box-shadow 0.3s ease;
       animation: fadeInUp 0.6s ease-out;
-    }
-    .card:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
     }
 
     .panel-title{
@@ -77,7 +73,7 @@
 
     .rx-grid{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
       gap: 2rem;
       margin-bottom: 1.5rem;
     }
@@ -125,7 +121,7 @@
       border-radius: 12px;
       font-size: 0.95rem;
       background: white;
-      transition: all 0.3s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
       font-weight: 500;
     }
     input:focus, select:focus{
@@ -134,11 +130,12 @@
       box-shadow: 0 0 0 3px rgba(44, 83, 100, 0.15);
     }
 
-    input{ width: 100px; }
-    input.small{ width: 80px; }
+    input{ width: 92px; max-width: 100%; }
+    input.small{ width: 78px; }
 
     select{
       min-width: 200px;
+      max-width: 100%;
       cursor: pointer;
     }
 
@@ -154,6 +151,24 @@
       align-self: center;
     }
 
+    .step{
+      display: flex;
+      gap: 0.25rem;
+      margin-top: 0.25rem;
+    }
+    .step button{
+      flex: 1;
+      border: 1px solid #e2e8f0;
+      background: white;
+      color: #2c5364;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0;
+      cursor: pointer;
+    }
+    .step button:hover{ background: rgba(44,83,100,0.08); }
+
     .btn{
       padding: 0.875rem 1.75rem;
       border: none;
@@ -161,7 +176,7 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       background: white;
       color: #2c5364;
       border: 2px solid #e2e8f0;
@@ -228,13 +243,12 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       width: 100%;
       height: auto;
-      transition: transform 0.3s ease;
+      background: #fff;
     }
-    canvas:hover{ transform: scale(1.02); }
 
     .maps-top{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
       gap: 2rem;
       margin-top: 1.5rem;
     }
@@ -308,12 +322,19 @@
     .strain .line{
       display: flex;
       justify-content: space-between;
+      gap: 1rem;
       margin-bottom: 0.5rem;
       padding: 0.5rem 0;
-      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+      border-bottom: 1px solid rgba(44, 83, 100, 0.12);
     }
 
     .strain .line:last-of-type{ border-bottom: none; }
+
+    .strain .detail{
+      color: #718096;
+      font-size: 0.75rem;
+      margin: 2px 0 6px 0;
+    }
 
     .strain small{
       display: block;
@@ -450,11 +471,6 @@
       border: 1px solid rgba(44, 83, 100, 0.2);
       border-radius: 16px;
       padding: 1.25rem;
-      transition: all 0.3s ease;
-    }
-    .metric-card:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(44, 83, 100, 0.15);
     }
 
     .metric-label{
@@ -539,18 +555,139 @@
       font-style: italic;
     }
 
+    /* Sliders */
+    .slider-row{ margin-bottom: 1rem; }
+    .slider-row label{
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 0.35rem;
+    }
+    .slider-row label .sv{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9rem;
+      color: #2c5364;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .slider-ends{
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: #718096;
+      font-weight: 600;
+      margin-top: 0.15rem;
+    }
+    input[type="range"]{
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 10px;
+      padding: 0;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(90deg, rgba(44,83,100,0.25), rgba(44,83,100,0.55), rgba(44,83,100,0.25));
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+    input[type="range"]:focus{ box-shadow: 0 0 0 3px rgba(44, 83, 100, 0.2); }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance: none;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      cursor: grab;
+    }
+    input[type="range"]::-moz-range-thumb{
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      cursor: grab;
+    }
+
+    .fit-grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+
+    .head-row{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .head-card{
+      background: linear-gradient(135deg, rgba(44, 83, 100, 0.08) 0%, rgba(15, 32, 39, 0.08) 100%);
+      border: 1px solid rgba(44, 83, 100, 0.2);
+      border-radius: 16px;
+      padding: 1.25rem;
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 1.25rem;
+      align-items: center;
+    }
+    .head-card svg{ width: 150px; height: auto; display: block; }
+    .head-card .ttl{ font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 0.5rem; }
+    .head-card .big{
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #2c5364;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+    }
+    .head-card .big.good{ color: #2d5f3d; }
+    .head-card .big.bad{ color: #8b2e2e; }
+    .head-card .eye-line{
+      font-size: 0.85rem;
+      color: #2d3748;
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-top: 0.25rem;
+    }
+    .head-card .eye-line b{ color: #2c5364; min-width: 1.6em; }
+    .verdict{
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid transparent;
+    }
+    .verdict.clear{ background: rgba(60,200,120,0.18); color: #2d5f3d; border-color: rgba(60,200,120,0.4); }
+    .verdict.mild{ background: rgba(235,210,70,0.22); color: #6b5a00; border-color: rgba(235,210,70,0.5); }
+    .verdict.bad{ background: rgba(220,60,60,0.15); color: #8b2e2e; border-color: rgba(220,60,60,0.4); }
+    .head-card .fine{ font-size: 0.75rem; color: #718096; margin-top: 0.5rem; }
+    .head-card .fine button{
+      border: none;
+      background: none;
+      color: #2c5364;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.75rem;
+      padding: 0;
+    }
+
     /* Constrain the big Map Appearance block */
     #mapAppearanceDetails{ padding: 0; overflow: hidden; }
     #mapAppearanceDetails > summary{ padding: 1rem 1.5rem; margin: 0; }
     #mapAppearanceDetails[open] > summary{ margin-bottom: 0; }
     #mapAppearanceDetails .details-body{
       padding: 1rem 1.5rem 1.5rem 1.5rem;
-      max-height: 220px;
+      max-height: 260px;
       overflow: auto;
       border-top: 1px solid rgba(44, 83, 100, 0.15);
     }
 
-    /* New layout: top row has settings + metrics, then heatmaps full width */
     .analysis-grid{
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -575,14 +712,20 @@
     @media (max-width: 1100px){
       .analysis-grid{ grid-template-columns: 1fr; }
       .analysis-grid .full-row{ grid-column: auto; }
-      .two-cols{ grid-template-columns: 1fr; }
+      .two-cols, .fit-grid, .head-row{ grid-template-columns: 1fr; }
     }
 
     @media (max-width: 768px){
       body{ padding: 1rem; }
+      .card{ padding: 1.25rem; }
       .header h1{ font-size: 1.75rem; }
       .rx-grid, .maps-top{ grid-template-columns: 1fr; }
       .eye-row{ grid-template-columns: 1fr; }
+      .head-card{ grid-template-columns: 110px 1fr; }
+      .head-card svg{ width: 110px; }
+      input{ width: 80px; }
+      input.small{ width: 70px; }
+      select{ min-width: 160px; }
     }
   </style>
 </head>
@@ -591,7 +734,7 @@
   <div id="pal-tool">
     <div class="header">
       <h1>Progressive Lens Analyzer</h1>
-      <p>Advanced optical analysis and prescription comparison tool</p>
+      <p>See how a prescription change, a lens design, or a fitting error moves clear vision around a progressive lens</p>
     </div>
 
     <div class="grid">
@@ -604,18 +747,18 @@
 
             <div class="row">
               <div class="pill">OD</div>
-              <div class="input-group"><label>Dist Sph</label><input id="hab_od_sph" value="-1.00" /></div>
-              <div class="input-group"><label>Dist Cyl</label><input id="hab_od_cyl" value="0.00" /></div>
-              <div class="input-group"><label>Axis</label><input id="hab_od_axis" class="small" value="180" /></div>
-              <div class="input-group"><label>Add</label><input id="hab_od_add" value="2.00" /></div>
+              <div class="input-group"><label for="hab_od_sph">Dist Sph</label><input id="hab_od_sph" inputmode="decimal" value="-1.50" /><div class="step"><button type="button" data-step="hab_od_sph" data-d="-0.25">&minus;</button><button type="button" data-step="hab_od_sph" data-d="0.25">+</button></div></div>
+              <div class="input-group"><label for="hab_od_cyl">Dist Cyl</label><input id="hab_od_cyl" inputmode="decimal" value="0.00" /></div>
+              <div class="input-group"><label for="hab_od_axis">Axis</label><input id="hab_od_axis" class="small" inputmode="numeric" value="180" /></div>
+              <div class="input-group"><label for="hab_od_add">Add</label><input id="hab_od_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="hab_od_add" data-d="-0.25">&minus;</button><button type="button" data-step="hab_od_add" data-d="0.25">+</button></div></div>
             </div>
 
             <div class="row" style="margin-top: 1rem;">
               <div class="pill">OS</div>
-              <div class="input-group"><label>Dist Sph</label><input id="hab_os_sph" value="-1.00" /></div>
-              <div class="input-group"><label>Dist Cyl</label><input id="hab_os_cyl" value="0.00" /></div>
-              <div class="input-group"><label>Axis</label><input id="hab_os_axis" class="small" value="180" /></div>
-              <div class="input-group"><label>Add</label><input id="hab_os_add" value="2.00" /></div>
+              <div class="input-group"><label for="hab_os_sph">Dist Sph</label><input id="hab_os_sph" inputmode="decimal" value="-1.50" /><div class="step"><button type="button" data-step="hab_os_sph" data-d="-0.25">&minus;</button><button type="button" data-step="hab_os_sph" data-d="0.25">+</button></div></div>
+              <div class="input-group"><label for="hab_os_cyl">Dist Cyl</label><input id="hab_os_cyl" inputmode="decimal" value="0.00" /></div>
+              <div class="input-group"><label for="hab_os_axis">Axis</label><input id="hab_os_axis" class="small" inputmode="numeric" value="180" /></div>
+              <div class="input-group"><label for="hab_os_add">Add</label><input id="hab_os_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="hab_os_add" data-d="-0.25">&minus;</button><button type="button" data-step="hab_os_add" data-d="0.25">+</button></div></div>
             </div>
           </div>
 
@@ -624,18 +767,18 @@
 
             <div class="row">
               <div class="pill">OD</div>
-              <div class="input-group"><label>Dist Sph</label><input id="opt_od_sph" value="0.00" /></div>
-              <div class="input-group"><label>Dist Cyl</label><input id="opt_od_cyl" value="0.00" /></div>
-              <div class="input-group"><label>Axis</label><input id="opt_od_axis" class="small" value="180" /></div>
-              <div class="input-group"><label>Add</label><input id="opt_od_add" value="2.00" /></div>
+              <div class="input-group"><label for="opt_od_sph">Dist Sph</label><input id="opt_od_sph" inputmode="decimal" value="-1.00" /><div class="step"><button type="button" data-step="opt_od_sph" data-d="-0.25">&minus;</button><button type="button" data-step="opt_od_sph" data-d="0.25">+</button></div></div>
+              <div class="input-group"><label for="opt_od_cyl">Dist Cyl</label><input id="opt_od_cyl" inputmode="decimal" value="0.00" /></div>
+              <div class="input-group"><label for="opt_od_axis">Axis</label><input id="opt_od_axis" class="small" inputmode="numeric" value="180" /></div>
+              <div class="input-group"><label for="opt_od_add">Add</label><input id="opt_od_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="opt_od_add" data-d="-0.25">&minus;</button><button type="button" data-step="opt_od_add" data-d="0.25">+</button></div></div>
             </div>
 
             <div class="row" style="margin-top: 1rem;">
               <div class="pill">OS</div>
-              <div class="input-group"><label>Dist Sph</label><input id="opt_os_sph" value="0.00" /></div>
-              <div class="input-group"><label>Dist Cyl</label><input id="opt_os_cyl" value="0.00" /></div>
-              <div class="input-group"><label>Axis</label><input id="opt_os_axis" class="small" value="180" /></div>
-              <div class="input-group"><label>Add</label><input id="opt_os_add" value="2.00" /></div>
+              <div class="input-group"><label for="opt_os_sph">Dist Sph</label><input id="opt_os_sph" inputmode="decimal" value="-1.00" /><div class="step"><button type="button" data-step="opt_os_sph" data-d="-0.25">&minus;</button><button type="button" data-step="opt_os_sph" data-d="0.25">+</button></div></div>
+              <div class="input-group"><label for="opt_os_cyl">Dist Cyl</label><input id="opt_os_cyl" inputmode="decimal" value="0.00" /></div>
+              <div class="input-group"><label for="opt_os_axis">Axis</label><input id="opt_os_axis" class="small" inputmode="numeric" value="180" /></div>
+              <div class="input-group"><label for="opt_os_add">Add</label><input id="opt_os_add" inputmode="decimal" value="2.00" /><div class="step"><button type="button" data-step="opt_os_add" data-d="-0.25">&minus;</button><button type="button" data-step="opt_os_add" data-d="0.25">+</button></div></div>
             </div>
           </div>
         </div>
@@ -646,10 +789,10 @@
             Allow accommodation
           </label>
 
-          <div class="input-group"><label>Age</label><input id="acc_age" class="small" value="50" /></div>
+          <div class="input-group"><label for="acc_age">Age</label><input id="acc_age" class="small" inputmode="numeric" value="55" /></div>
 
           <div class="input-group">
-            <label>Accommodation model</label>
+            <label for="acc_model">Accommodation model</label>
             <select id="acc_model">
               <option value="min" selected>Hofstetter minimum</option>
               <option value="avg">Hofstetter average</option>
@@ -657,7 +800,7 @@
             </select>
           </div>
 
-          <div class="input-group"><label>Usable reserve %</label><input id="acc_pct" class="small" value="30" /></div>
+          <div class="input-group"><label for="acc_pct">Usable reserve %</label><input id="acc_pct" class="small" inputmode="numeric" value="30" /></div>
 
           <label class="checkbox-label">
             <input type="checkbox" id="bino_on" />
@@ -669,7 +812,7 @@
         </div>
 
         <div class="kvs" id="pal-readouts"></div>
-        <div class="note">Accommodation is only used when needed to cover extra minus. Over plus is never fixed by accommodation.</div>
+        <div class="note">Accommodation is only used when needed to cover extra minus. Over plus is never fixed by accommodation. Cylinder is modelled as its spherical equivalent.</div>
       </div>
 
       <details class="card" id="samplepoints_details">
@@ -682,7 +825,7 @@
           <div class="map-card">
             <div class="map-head">
               <div class="title">Current Glasses</div>
-              <div class="sub">Sample points (SE)</div>
+              <div class="sub">Local power (SE), rounded to 0.25 D</div>
             </div>
             <div class="eye-row">
               <div class="eye-block">
@@ -699,7 +842,7 @@
           <div class="map-card">
             <div class="map-head">
               <div class="title">New Prescription</div>
-              <div class="sub">Sample points (SE)</div>
+              <div class="sub">Local power (SE), rounded to 0.25 D</div>
             </div>
             <div class="eye-row">
               <div class="eye-block">
@@ -726,11 +869,11 @@
         <details style="margin-bottom:1.5rem">
           <summary style="cursor:pointer">Eyestrain definitions (ratio = demand divided by usable accommodative reserve)</summary>
           <div class="strain-legend">
-            <div class="item"><div class="k">No strain</div><div class="v">ratio &lt; 0.10</div></div>
-            <div class="item"><div class="k">Mild</div><div class="v">0.10 to 0.24</div></div>
+            <div class="item"><div class="k">No strain</div><div class="v">ratio below 0.10</div></div>
+            <div class="item"><div class="k">Mild</div><div class="v">0.10 to 0.24. Low level effort for sustained viewing.</div></div>
             <div class="item"><div class="k">Moderate</div><div class="v">0.25 to 0.79. Meaningful use of reserve, may fatigue over time.</div></div>
             <div class="item"><div class="k">Significant</div><div class="v">0.80 to 1.99. Demand approaches or exceeds reserve, symptoms likely with sustained use and clarity may vary.</div></div>
-            <div class="item"><div class="k">Extreme</div><div class="v">2.00 or higher. Physiologically unrealistic for sustained clarity, predicts failure, avoidance, or symptoms quickly.</div></div>
+            <div class="item"><div class="k">Beyond reserve</div><div class="v">2.00 or higher. Physiologically unrealistic for sustained clarity, predicts failure, avoidance, or symptoms quickly.</div></div>
           </div>
         </details>
 
@@ -746,7 +889,7 @@
                 <div class="ttl">Current Glasses Design</div>
                 <div class="inline">
                   <div class="input-group">
-                    <label>Lens design</label>
+                    <label for="hab_design">Lens design</label>
                     <select id="hab_design">
                       <option value="gen_hard">Generic PAL hard</option>
                       <option value="gen_avg" selected>Generic PAL average</option>
@@ -759,16 +902,16 @@
                   <div id="hab_premium_controls">
                     <div class="inline">
                       <div class="input-group">
-                        <label>Corridor</label>
+                        <label for="hab_corridor">Corridor</label>
                         <select id="hab_corridor">
-                          <option value="short">Short</option>
-                          <option value="medium" selected>Medium</option>
-                          <option value="long">Long</option>
+                          <option value="short">Short (11 mm)</option>
+                          <option value="medium" selected>Medium (14 mm)</option>
+                          <option value="long">Long (17 mm)</option>
                         </select>
                       </div>
 
                       <div id="hab_generic_emph_wrap" class="input-group">
-                        <label>Emphasis</label>
+                        <label for="hab_emph_generic">Emphasis</label>
                         <select id="hab_emph_generic">
                           <option value="balanced" selected>Balanced</option>
                           <option value="distance">Distance</option>
@@ -778,7 +921,7 @@
                       </div>
 
                       <div id="hab_hoya_mode_wrap" class="hidden input-group">
-                        <label>MyStyle 3 mode</label>
+                        <label for="hab_hoya_mode">MyStyle 3 mode</label>
                         <select id="hab_hoya_mode">
                           <option value="tyro">Tyro</option>
                           <option value="expert" selected>Expert</option>
@@ -790,14 +933,14 @@
                     </div>
                   </div>
                 </div>
-                <div class="note" id="hab_generic_note">Generic PAL uses fixed corridor and balanced distribution, with narrower usable zones.</div>
+                <div class="note" id="hab_generic_note">Generic PAL uses a fixed 14 mm corridor and balanced distribution, with narrower usable zones.</div>
               </div>
 
               <div class="subcard">
                 <div class="ttl">New Prescription Design</div>
                 <div class="inline">
                   <div class="input-group">
-                    <label>Lens design</label>
+                    <label for="opt_design">Lens design</label>
                     <select id="opt_design">
                       <option value="gen_hard">Generic PAL hard</option>
                       <option value="gen_avg" selected>Generic PAL average</option>
@@ -810,16 +953,16 @@
                   <div id="opt_premium_controls">
                     <div class="inline">
                       <div class="input-group">
-                        <label>Corridor</label>
+                        <label for="opt_corridor">Corridor</label>
                         <select id="opt_corridor">
-                          <option value="short">Short</option>
-                          <option value="medium" selected>Medium</option>
-                          <option value="long">Long</option>
+                          <option value="short">Short (11 mm)</option>
+                          <option value="medium" selected>Medium (14 mm)</option>
+                          <option value="long">Long (17 mm)</option>
                         </select>
                       </div>
 
                       <div id="opt_generic_emph_wrap" class="input-group">
-                        <label>Emphasis</label>
+                        <label for="opt_emph_generic">Emphasis</label>
                         <select id="opt_emph_generic">
                           <option value="balanced" selected>Balanced</option>
                           <option value="distance">Distance</option>
@@ -829,7 +972,7 @@
                       </div>
 
                       <div id="opt_hoya_mode_wrap" class="hidden input-group">
-                        <label>MyStyle 3 mode</label>
+                        <label for="opt_hoya_mode">MyStyle 3 mode</label>
                         <select id="opt_hoya_mode">
                           <option value="tyro">Tyro</option>
                           <option value="expert" selected>Expert</option>
@@ -841,7 +984,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="note" id="opt_generic_note">Generic PAL uses fixed corridor and balanced distribution, with narrower usable zones.</div>
+                <div class="note" id="opt_generic_note">Generic PAL uses a fixed 14 mm corridor and balanced distribution, with narrower usable zones.</div>
               </div>
             </div>
 
@@ -850,7 +993,7 @@
             <details class="subcard" id="mapAppearanceDetails">
               <summary class="ttl" style="cursor:pointer;list-style:none">
                 Map Appearance and Peripheral Modeling
-                <span style="font-size:0.875rem;color:#718096;margin-left:0.5rem;font-weight:400">(click to expand)</span>
+                <span style="font-size:0.875rem;color:#718096;margin-left:0.5rem;font-weight:400">(advanced, click to expand)</span>
               </summary>
 
               <div class="details-body">
@@ -865,18 +1008,10 @@
                     Show peripheral gradient
                   </label>
 
-                  <div class="input-group"><label>Peripheral strength</label><input id="dist_w" class="small" value="1.25" /></div>
-                  <div class="input-group"><label>Minkwitz strength</label><input id="mink_w" class="small" value="1.10" /></div>
-
-                  <div class="input-group">
-                    <label>OC fit</label>
-                    <select id="oc_fit">
-                      <option value="standard" selected>Standard</option>
-                      <option value="toward_intermediate">Toward intermediate</option>
-                      <option value="toward_distance">Toward distance</option>
-                    </select>
-                  </div>
+                  <div class="input-group"><label for="dist_w">Peripheral strength</label><input id="dist_w" class="small" inputmode="decimal" value="1.25" /></div>
+                  <div class="input-group"><label for="mink_w">Minkwitz strength</label><input id="mink_w" class="small" inputmode="decimal" value="1.10" /></div>
                 </div>
+                <div class="note">Geometry: 60 mm lens, fitting cross 7 mm above the geometric centre, 2.5 mm near inset, 25 mm from lens to the eye's centre of rotation.</div>
               </div>
             </details>
           </div>
@@ -889,17 +1024,75 @@
             <div class="metrics-grid" id="comparison-metrics"></div>
           </div>
 
+          <div class="map-card full-row" id="fitgaze">
+            <div class="map-head">
+              <div class="title">Fit and Gaze Simulator</div>
+              <div class="sub">Move the lens relative to the eye, or move the eye through the lens. The pupil marker on every map follows.</div>
+            </div>
+
+            <div class="fit-grid">
+              <div class="subcard">
+                <div class="ttl">Lens fit (applied to both eyes)</div>
+
+                <div class="slider-row">
+                  <label for="fit_h">Fitting height error <span class="sv" id="fit_h_v">0.0 mm</span></label>
+                  <input type="range" id="fit_h" min="-6" max="6" step="0.5" value="0" />
+                  <div class="slider-ends"><span>Fitted too low</span><span>Perfect</span><span>Fitted too high</span></div>
+                </div>
+
+                <div class="slider-row">
+                  <label for="fit_pd">Centration (PD) error <span class="sv" id="fit_pd_v">0.0 mm</span></label>
+                  <input type="range" id="fit_pd" min="-4" max="4" step="0.5" value="0" />
+                  <div class="slider-ends"><span>OCs too wide</span><span>Perfect</span><span>OCs too narrow</span></div>
+                </div>
+
+                <div class="inline">
+                  <button class="btn" id="fit_reset">Perfect fit</button>
+                </div>
+                <div class="note">A lens fitted too high puts add power in front of the pupil during distance gaze. Fitted too low, the patient runs out of near zone.</div>
+              </div>
+
+              <div class="subcard">
+                <div class="ttl">Gaze (where the pupil looks through the lens)</div>
+
+                <div class="slider-row">
+                  <label for="gaze_y">Vertical gaze <span class="sv" id="gaze_y_v">0.0 mm</span></label>
+                  <input type="range" id="gaze_y" min="-6" max="20" step="0.5" value="0" />
+                  <div class="slider-ends"><span>Looking up</span><span>Primary</span><span>Looking down (chin up)</span></div>
+                </div>
+
+                <div class="slider-row">
+                  <label for="gaze_x">Horizontal gaze <span class="sv" id="gaze_x_v">0.0 mm</span></label>
+                  <input type="range" id="gaze_x" min="-15" max="15" step="0.5" value="0" />
+                  <div class="slider-ends"><span>Patient's left</span><span>Straight</span><span>Patient's right</span></div>
+                </div>
+
+                <div class="inline">
+                  <button class="btn" id="gaze_reset">Primary gaze</button>
+                  <button class="btn" id="find_hab">Find clear view: current</button>
+                  <button class="btn primary" id="find_opt">Find clear view: new</button>
+                </div>
+                <div class="note">"Find clear view" walks the pupil down the lens until the active target is in focus, and tilts the head by the angle that takes.</div>
+              </div>
+            </div>
+
+            <div class="head-row">
+              <div class="head-card" id="head_hab"></div>
+              <div class="head-card" id="head_opt"></div>
+            </div>
+          </div>
+
           <div class="map-card full-row">
             <div class="map-head">
               <div class="title">Heatmaps</div>
-              <div class="sub">Current vs new, same scale</div>
+              <div class="sub">Current vs new, same scale. Circle = pupil at the chosen gaze. Cross = the lens' fitting cross.</div>
             </div>
 
             <div class="two-cols" style="margin-top:0">
               <div class="subcard" style="background:transparent;border:none;padding:0">
                 <div class="map-head" style="margin-bottom:0.75rem">
                   <div class="title" style="font-size:1.05rem">Current Glasses Heatmap</div>
-                  <div class="sub">0.00 D to 2.00 D</div>
+                  <div class="sub" id="hm_sub_hab">0.00 D to 2.00 D</div>
                 </div>
 
                 <div class="eye-row" style="justify-items:center">
@@ -931,12 +1124,12 @@
                 <div class="legend-wrap">
                   <div class="legend-row">
                     <div class="legend-pill">Scale: 0.00 D to 2.00 D</div>
-                    <div class="legend-pill">Green = ideal</div>
-                    <div class="legend-pill">Red = not ideal</div>
+                    <div class="legend-pill">Green = clear</div>
+                    <div class="legend-pill">Red = blurred</div>
                   </div>
                   <div class="legend-bar" id="legendBarAbs1"></div>
                   <div class="legend-ticks">
-                    <div>0.00</div><div>0.25</div><div>0.50</div><div>1.00</div><div>1.50</div><div>2.00</div>
+                    <div>0.00</div><div>0.40</div><div>0.80</div><div>1.20</div><div>1.60</div><div>2.00</div>
                   </div>
                 </div>
 
@@ -944,7 +1137,7 @@
                   <div class="eye-block" style="width:100%">
                     <div class="eye-label">Binocular disparity map, alert threshold 0.50 D</div>
                     <canvas id="can_bino_hab" width="720" height="720"></canvas>
-                    <div class="mono-note">Lower mismatch is better.</div>
+                    <div class="mono-note">Difference between the two eyes' signed residual error. Lower mismatch is better.</div>
                   </div>
                 </div>
               </div>
@@ -952,7 +1145,7 @@
               <div class="subcard" style="background:transparent;border:none;padding:0">
                 <div class="map-head" style="margin-bottom:0.75rem">
                   <div class="title" style="font-size:1.05rem">New Lens Heatmap</div>
-                  <div class="sub">0.00 D to 2.00 D</div>
+                  <div class="sub" id="hm_sub_opt">0.00 D to 2.00 D</div>
                 </div>
 
                 <div class="eye-row" style="justify-items:center">
@@ -987,7 +1180,7 @@
                   </div>
                   <div class="legend-bar" id="legendBarAbs2"></div>
                   <div class="legend-ticks">
-                    <div>0.00</div><div>0.25</div><div>0.50</div><div>1.00</div><div>1.50</div><div>2.00</div>
+                    <div>0.00</div><div>0.40</div><div>0.80</div><div>1.20</div><div>1.60</div><div>2.00</div>
                   </div>
                 </div>
 
@@ -995,7 +1188,7 @@
                   <div class="eye-block" style="width:100%">
                     <div class="eye-label">Binocular disparity map, alert threshold 0.50 D</div>
                     <canvas id="can_bino_opt" width="720" height="720"></canvas>
-                    <div class="mono-note">Lower mismatch is better.</div>
+                    <div class="mono-note">Difference between the two eyes' signed residual error. Lower mismatch is better.</div>
                   </div>
                 </div>
               </div>
@@ -1014,18 +1207,26 @@
       const modeButtons = Array.from(document.querySelectorAll('#pal-tool .btn.seg'));
       let currentMode = 'distance';
 
+      // ---------- Geometry (millimetres) ----------
+      // The lens is a unit circle; 1.0 normalised unit = R_MM millimetres.
+      const R_MM = 30;                         // 60 mm lens diameter
+      const mm = (v)=>v / R_MM;                // mm -> normalised
+      const toMm = (v)=>v * R_MM;              // normalised -> mm
+      const FC_Y = -0.24;                      // fitting cross, 7.2 mm above geometric centre
+      const INSET_MM = 2.5;                    // near inset
+      const EYE_ROT_MM = 25;                   // lens plane to centre of rotation
+      const FIELD_N = 360;                     // internal field resolution per axis
+
       const MAX_OFF = 2.00;
       const ROUND_TO = 0.25;
 
-      const STRAIN_NONE_MAX = 0.19;
+      const STRAIN_NONE_MAX = 0.10;
       const STRAIN_MILD_MAX = 0.25;
       const STRAIN_MOD_MAX  = 0.80;
       const STRAIN_SIG_MAX  = 2.00;
 
-      const OVERPLUS_BLUR = 1.00;
+      const CLEAR_TOL = 0.125;                 // residual within this counts as clear
       const BINO_ALERT = 0.50;
-
-      const NASAL_SHIFT_NORM = 0.08;
 
       function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
       function parseNum(v){
@@ -1046,10 +1247,13 @@
         const sph = parseNum(els(prefix + '_sph').value);
         const cyl = parseNum(els(prefix + '_cyl').value);
         const axis = normAxis(els(prefix + '_axis').value);
-        const add = parseNum(els(prefix + '_add').value);
+        const add = clamp(parseNum(els(prefix + '_add').value), 0, 4);
         return {sph, cyl, axis, add, se: sphEq(sph, cyl)};
       }
+      function fmtD(v){ return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2); }
+      function fmtMm(v){ return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + ' mm'; }
 
+      // ---------- Colour ----------
       function lerp(a,b,t){ return a + (b-a)*t; }
       function rgb(r,g,b){ return {r:Math.round(r), g:Math.round(g), b:Math.round(b)}; }
       function absColor(mag){
@@ -1069,17 +1273,21 @@
           return rgb(lerp(y.r,r.r,tt), lerp(y.g,r.g,tt), lerp(y.b,r.b,tt));
         }
       }
+      const LUT_N = 256;
+      const colorLUT = new Uint8Array(LUT_N * 3);
+      for(let i=0;i<LUT_N;i++){
+        const c = absColor((i/(LUT_N-1)) * MAX_OFF);
+        colorLUT[i*3] = c.r; colorLUT[i*3+1] = c.g; colorLUT[i*3+2] = c.b;
+      }
+      function lutIndex(mag){ return Math.round(clamp(mag, 0, MAX_OFF) / MAX_OFF * (LUT_N-1)); }
 
       function sigmoid(z){ return 1.0 / (1.0 + Math.exp(-z)); }
-      function rampSigmoid(p, mid, sharp){
-        const z = (p - mid) * sharp;
-        return sigmoid(z);
-      }
+      function logit(p){ const q = clamp(p, 1e-6, 1-1e-6); return Math.log(q/(1-q)); }
+      function rampSigmoid(p, mid, sharp){ return sigmoid((p - mid) * sharp); }
 
-      function insideCircle(xn, yn){
-        return (xn*xn + yn*yn) <= 1.0;
-      }
+      function insideCircle(xn, yn){ return (xn*xn + yn*yn) <= 1.0; }
 
+      // ---------- Frame shape ----------
       const frameMaskCache = new Map();
 
       function vsub(a,b){ return {x:a.x-b.x, y:a.y-b.y}; }
@@ -1101,10 +1309,8 @@
 
           const v0 = vsub(p0,p1);
           const v1 = vsub(p2,p1);
-
           const u0 = vnorm(v0);
           const u1 = vnorm(v1);
-
           const len0 = vlen(v0);
           const len1 = vlen(v1);
 
@@ -1114,7 +1320,6 @@
           const rWant = Math.max(0, radii[i] || 0);
           const rMax = 0.48 * Math.min(len0, len1) * tan;
           const r = Math.min(rWant, rMax);
-
           const t = r / tan;
 
           pin[i]  = vadd(p1, vmul(u0, t));
@@ -1132,24 +1337,24 @@
         ctx.closePath();
       }
 
+      // Maps are drawn in the wearer's view for each eye: temporal is +x for OD and -x for OS.
+      function temporalDir(eye){ return (eye === 'OD') ? +1 : -1; }
+
       function makeFramePath(ctx, w, h, eye){
         const cx = w * 0.50;
-
         const yTop = h * 0.20;
         const yBot = h * 0.80;
 
-        const tDir = (eye === 'OD') ? +1 : -1;
+        const tDir = temporalDir(eye);
         const nDir = -tDir;
 
         const topTemp = w * 0.44;
         const topNasal = w * 0.34;
-
         const botTemp = w * 0.33;
         const botNasal = w * 0.26;
 
         const snX = cx + nDir * topNasal;
         const inX = cx + nDir * (topNasal + w*0.03 + (botNasal - topNasal) * 0.10);
-
         const stX = cx + tDir * topTemp;
         const itX = cx + tDir * botTemp;
 
@@ -1159,138 +1364,63 @@
         const IT = {x: itX, y: yBot};
 
         const sBase = Math.min(w,h) * 0.14;
-        const rST = sBase * 2.00;
-        const rSN = sBase * 2.00;
-        const rIT = sBase * 2.25;
-        const rIN = sBase * 2.50;
-
-        roundedPolyPath(ctx, [ST, SN, IN, IT], [rST, rSN, rIN, rIT]);
+        roundedPolyPath(ctx, [ST, SN, IN, IT], [sBase*2.00, sBase*2.00, sBase*2.50, sBase*2.25]);
       }
 
-      function getFrameMask(w, h, eye){
-        const key = eye + ':' + w + 'x' + h;
+      function getFrameMask(n, eye){
+        const key = eye + ':' + n;
         if(frameMaskCache.has(key)) return frameMaskCache.get(key);
 
         const c = document.createElement('canvas');
-        c.width = w;
-        c.height = h;
+        c.width = n; c.height = n;
         const ctx = c.getContext('2d');
-
-        ctx.clearRect(0,0,w,h);
-        ctx.save();
         ctx.fillStyle = 'rgba(0,0,0,1)';
-        makeFramePath(ctx, w, h, eye);
+        makeFramePath(ctx, n, n, eye);
         ctx.fill();
-        ctx.restore();
 
-        const img = ctx.getImageData(0,0,w,h).data;
-        const mask = new Uint8Array(w*h);
-        for(let i=0;i<w*h;i++){
-          mask[i] = img[i*4 + 3] > 0 ? 1 : 0;
-        }
+        const img = ctx.getImageData(0,0,n,n).data;
+        const mask = new Uint8Array(n*n);
+        for(let i=0;i<n*n;i++) mask[i] = img[i*4 + 3] > 0 ? 1 : 0;
 
         frameMaskCache.set(key, mask);
         return mask;
       }
 
-      function maskInside(xn, yn, frameOn, w, h, frameMask){
-        if(!insideCircle(xn, yn)) return false;
-        if(!frameOn) return true;
-
-        const px = Math.round((xn + 1) * 0.5 * (w-1));
-        const py = Math.round((yn + 1) * 0.5 * (h-1));
-        const idx = py*w + px;
-        return frameMask[idx] === 1;
-      }
-
-      function pupilYN(designId, corridor){
-        return -0.10;
-      }
-
-      function ocFitDeltaY(){
-        const v = els('oc_fit') ? els('oc_fit').value : 'standard';
-        if(v === 'toward_intermediate') return +0.08;
-        if(v === 'toward_distance') return -0.08;
-        return 0.00;
-      }
-
-      function drawLensOutline(ctx, w, h, frameOn, eye){
-        ctx.save();
-
-        ctx.strokeStyle = 'rgba(0,0,0,0.22)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(w/2, h/2, Math.min(w,h)/2 - 2, 0, Math.PI*2);
-        ctx.stroke();
-
-        if(frameOn){
-          ctx.strokeStyle = 'rgba(0,0,0,0.34)';
-          ctx.lineWidth = 2.0;
-          makeFramePath(ctx, w, h, eye);
-          ctx.stroke();
+      function circleMask(n){
+        const key = 'circle:' + n;
+        if(frameMaskCache.has(key)) return frameMaskCache.get(key);
+        const mask = new Uint8Array(n*n);
+        for(let py=0;py<n;py++){
+          const yn = (py/(n-1))*2 - 1;
+          for(let px=0;px<n;px++){
+            const xn = (px/(n-1))*2 - 1;
+            mask[py*n+px] = insideCircle(xn,yn) ? 1 : 0;
+          }
         }
-
-        ctx.restore();
+        frameMaskCache.set(key, mask);
+        return mask;
       }
 
-      function drawGuides(ctx, w, h, pupilYn){
-        ctx.save();
-
-        const fx = w/2;
-        const fy = (pupilYn + 1) * 0.5 * (h-1);
-
-        ctx.fillStyle = 'rgba(0,0,0,0.08)';
-        ctx.beginPath();
-        ctx.arc(fx, fy, 22, 0, Math.PI*2);
-        ctx.fill();
-
-        ctx.strokeStyle = 'rgba(0,0,0,0.55)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(fx, fy, 10, 0, Math.PI*2);
-        ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(0,0,0,0.60)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(fx-18, fy); ctx.lineTo(fx+18, fy);
-        ctx.moveTo(fx, fy-18); ctx.lineTo(fx, fy+18);
-        ctx.stroke();
-
-        ctx.fillStyle = 'rgba(0,0,0,0.68)';
-        ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('Pupil', fx + 16, fy - 18);
-
-        ctx.strokeStyle = 'rgba(0,0,0,0.16)';
-        ctx.lineWidth = 1;
-
-        const yDist = Math.round(h*0.22);
-        ctx.beginPath(); ctx.moveTo(w*0.22, yDist); ctx.lineTo(w*0.78, yDist); ctx.stroke();
-
-        const yNear = Math.round(h*0.72);
-        ctx.beginPath(); ctx.moveTo(w*0.22, yNear); ctx.lineTo(w*0.78, yNear); ctx.stroke();
-
-        ctx.restore();
+      function lensMask(n, eye, frameOn){
+        if(!frameOn) return circleMask(n);
+        const f = getFrameMask(n, eye);
+        const c = circleMask(n);
+        const key = 'both:' + eye + ':' + n;
+        if(frameMaskCache.has(key)) return frameMaskCache.get(key);
+        const m = new Uint8Array(n*n);
+        for(let i=0;i<n*n;i++) m[i] = (f[i] & c[i]);
+        frameMaskCache.set(key, m);
+        return m;
       }
 
-      const SAMPLE_POINTS = [
-        {name:'Top',       x: 0.00, y:-0.85},
-        {name:'Above FC',  x: 0.00, y:-0.35},
-        {name:'FC',        x: 0.00, y:-0.24},
-        {name:'Mid',       x: 0.00, y: 0.05},
-        {name:'Comp',      x: 0.00, y: 0.35},
-        {name:'Near',      x: 0.00, y: 0.72},
-        {name:'Temp',      x: 0.45, y: 0.35},
-        {name:'Nas',       x:-0.45, y: 0.35},
-      ];
-
-      function roundToStep(v, step){
-        if(step <= 0) return v;
-        return Math.round(v / step) * step;
+      function maskAt(mask, n, xn, yn){
+        if(!insideCircle(xn, yn)) return false;
+        const px = Math.round((xn + 1) * 0.5 * (n-1));
+        const py = Math.round((yn + 1) * 0.5 * (n-1));
+        return mask[py*n + px] === 1;
       }
 
+      // ---------- Accommodation ----------
       function hofstetterAmplitude(age, model){
         const a = Math.max(0, age);
         if(model === 'max') return Math.max(0, 25.0 - 0.40 * a);
@@ -1309,7 +1439,23 @@
         if(mode === 'computer') return optRx.se + 0.50 * optRx.add;
         return optRx.se + 1.00 * optRx.add;
       }
+      function modeLabel(mode){
+        if(mode === 'computer') return 'computer';
+        if(mode === 'near') return 'near';
+        return 'distance';
+      }
 
+      // Signed residual after accommodation. Positive = too much plus (blur that cannot be
+      // cleared). Negative = short of plus that accommodation could not cover.
+      function signedResidual(lensPower, targetPower, allowAcc, reserve){
+        const err = lensPower - targetPower;
+        if(err >= 0) return err;
+        const demand = -err;
+        if(!allowAcc) return -demand;
+        return -Math.max(0, demand - reserve);
+      }
+
+      // ---------- Lens designs ----------
       const PRESETS = {
         gen_hard:      {name:'Generic PAL hard',      hardness:1.55, corrWidth:0.15, baseSharp:12.2, baseMid:0.52, periphBoost:2.03, minkBoost:2.18},
         gen_avg:       {name:'Generic PAL average',   hardness:1.45, corrWidth:0.16, baseSharp:11.4, baseMid:0.52, periphBoost:1.92, minkBoost:2.03},
@@ -1318,10 +1464,11 @@
         hoya_mystyle3: {name:'Hoya MyStyle 3',        hardness:0.95, corrWidth:0.30, baseSharp:8.6,  baseMid:0.52, periphBoost:0.92, minkBoost:0.88}
       };
 
+      // Corridor length is fitting cross to full add, in mm.
       function corridorProfile(corridor){
-        if(corridor === 'short')  return {ySpan:0.70, sharpMult:1.22};
-        if(corridor === 'long')   return {ySpan:1.06, sharpMult:0.88};
-        return {ySpan:0.86, sharpMult:1.00};
+        if(corridor === 'short')  return {lenMm:11, sharpMult:1.22};
+        if(corridor === 'long')   return {lenMm:17, sharpMult:0.88};
+        return {lenMm:14, sharpMult:1.00};
       }
 
       function emphasisToMidShift(emph){
@@ -1335,13 +1482,10 @@
         if(mode === 'modern') return 'intermediate';
         if(mode === 'detail') return 'near';
         if(mode === 'adventure') return 'distance';
-        if(mode === 'tyro') return 'balanced';
         return 'balanced';
       }
 
-      function isGeneric(designId){
-        return designId.indexOf('gen_') === 0;
-      }
+      function isGeneric(designId){ return designId.indexOf('gen_') === 0; }
 
       function getDesignConfig(which){
         const designId = els(which + '_design').value;
@@ -1360,16 +1504,15 @@
         }
 
         const cp = corridorProfile(corridor);
-        const ySpan = isGeneric(designId) ? corridorProfile('medium').ySpan : cp.ySpan;
-        const rampSharp = preset.baseSharp * (isGeneric(designId) ? corridorProfile('medium').sharpMult : cp.sharpMult);
 
         return {
           designId,
           preset,
           corridor,
           emph,
-          ySpan,
-          rampSharp,
+          corridorMm: cp.lenMm,
+          ySpan: mm(cp.lenMm),
+          rampSharp: preset.baseSharp * cp.sharpMult,
           rampMid: clamp(preset.baseMid + emphasisToMidShift(emph), 0.38, 0.66),
           corrWidth: preset.corrWidth,
           hardness: preset.hardness,
@@ -1378,248 +1521,353 @@
         };
       }
 
-      function applyNasalShift(x, ramp01, eye){
-        const dir = (eye === 'OD') ? -1 : +1;
-        return x + dir * NASAL_SHIFT_NORM * ramp01;
-      }
+      // A lens is evaluated in eye coordinates (pupil in primary gaze sits at (0, FC_Y) when
+      // the fit is perfect). fit.heightMm > 0 means the lens is fitted too high, so the design's
+      // fitting cross sits above the pupil. fit.pdMm > 0 means the optical centres are set too
+      // close together (design shifted nasally for both eyes).
+      function makeLens(rx, cfg, eye, fit){
+        const nasalDir = -temporalDir(eye);
+        const dyN = mm(fit.heightMm);
+        const dxN = -nasalDir * mm(fit.pdMm);
 
-      function palLocalSE(distSE, addMax, x, y, cfg, eye){
-        const yCross = -0.24;
-        const yStart = yCross - 0.05;
-        const yEnd   = yCross + cfg.ySpan;
-
-        const p = clamp((y - yStart) / (yEnd - yStart), 0, 1);
-        const ramp01 = rampSigmoid(p, cfg.rampMid, cfg.rampSharp);
-        const localAdd = addMax * ramp01;
-
-        const xs = applyNasalShift(x, ramp01, eye);
+        const yStart = FC_Y - mm(1.5);
+        const yEnd   = FC_Y + cfg.ySpan;
+        const addMax = rx.add;
+        const distSE = rx.se;
 
         const addNarrowingFactor = 1.0 - (clamp(addMax - 1.0, 0, 2.0) * 0.175);
-        const absSE = Math.abs(distSE);
-        const rxNarrowingFactor = 1.0 - (clamp(absSE, 0, 6.0) * 0.033);
-        const totalNarrowing = addNarrowingFactor * rxNarrowingFactor;
-        const effectiveCorridorWidth = cfg.corrWidth * totalNarrowing;
-
+        const rxNarrowingFactor = 1.0 - (clamp(Math.abs(distSE), 0, 6.0) * 0.033);
+        const effWidth = cfg.corrWidth * addNarrowingFactor * rxNarrowingFactor;
         const addSteepness = 1.65 + (clamp(addMax - 1.0, 0, 2.0) * 0.20);
-        const xTerm = Math.pow(Math.max(0, Math.abs(xs) - effectiveCorridorWidth) / (1 - effectiveCorridorWidth), addSteepness);
-        const yTerm = Math.pow(ramp01, 1.30);
+        const penaltyScale = 0.70 * addMax
+                           * (0.85 + 0.55*(cfg.hardness - 1.0))
+                           * (1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.25));
+        const insetN = mm(INSET_MM);
 
-        const basePenalty = 0.70 * addMax;
-        const hardnessFactor = (0.85 + 0.55*(cfg.hardness - 1.0));
-        const addPenaltyBoost = 1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.25);
+        function rampDesign(yd){
+          const p = clamp((yd - yStart) / (yEnd - yStart), 0, 1);
+          return rampSigmoid(p, cfg.rampMid, cfg.rampSharp);
+        }
+        function rampAt(y){ return rampDesign(y + dyN); }
+        function centerX(y){ return -dxN + nasalDir * insetN * rampDesign(y + dyN); }
+        function powerAt(x, y){
+          const xd = x + dxN;
+          const yd = y + dyN;
+          const r = rampDesign(yd);
+          const xs = xd - nasalDir * insetN * r;
+          const xTerm = Math.pow(Math.max(0, Math.abs(xs) - effWidth) / (1 - effWidth), addSteepness);
+          const yTerm = Math.pow(r, 1.30);
+          return distSE + addMax * r - penaltyScale * xTerm * yTerm;
+        }
+        // Eye y at which the ramp reaches a fraction of the add.
+        function yAtRamp(frac){
+          const p = cfg.rampMid + logit(frac) / cfg.rampSharp;
+          return yStart + p * (yEnd - yStart) - dyN;
+        }
+        // Minkwitz-style unwanted cylinder proxy, scaled so a 14 mm corridor matches the
+        // original tuning.
+        const slope = (addMax / Math.max(mm(8), cfg.ySpan)) * (mm(14) / 0.86)
+                    * (0.85 + 0.55*(cfg.hardness - 1.0))
+                    * (1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.15));
+        const addCylBoost = 1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.35);
+        const addScale = (0.65 + 0.35*clamp(addMax/2.5, 0, 1));
+        function minkwitzAt(xRel, r){
+          const midEmphasis = 4 * r * (1 - r);
+          return slope * Math.pow(Math.abs(xRel), 1.32) * addCylBoost * midEmphasis * addScale;
+        }
 
-        const penalty = basePenalty * xTerm * yTerm * hardnessFactor * addPenaltyBoost;
-        return distSE + localAdd - penalty;
+        return {
+          rx, cfg, eye, fit,
+          se: distSE, add: addMax,
+          powerAt, rampAt, centerX, yAtRamp, minkwitzAt,
+          fcX: -dxN,
+          fcY: FC_Y - dyN,
+          nrpY: yEnd - dyN
+        };
       }
 
-      function drawSampleValues(canvas, fnValue, frameOn, pupilYn, eye){
+      // ---------- Field computation (one pass, reused for drawing, metrics and bino) ----------
+      function computeField(lens, target, o){
+        const N = o.N;
+        const mask = lensMask(N, lens.eye, o.frameOn);
+        const mag = new Float32Array(N*N);
+        const signed = new Float32Array(N*N);
+        const lensP = new Float32Array(N*N);
+
+        const wDist = clamp(o.distW, 0, 3) * lens.cfg.periphBoost;
+        const wMink = clamp(o.minkW, 0, 3) * lens.cfg.minkBoost;
+
+        for(let py=0; py<N; py++){
+          const yn = (py/(N-1))*2 - 1;
+          const cx = lens.centerX(yn);
+          const ref = lens.powerAt(cx, yn);
+          const r = lens.rampAt(yn);
+
+          for(let px=0; px<N; px++){
+            const i = py*N + px;
+            if(!mask[i]) continue;
+            const xn = (px/(N-1))*2 - 1;
+
+            const P = lens.powerAt(xn, yn);
+            const s = signedResidual(P, target, o.allowAcc, o.reserve);
+            let m = Math.abs(s);
+
+            if(o.distOn){
+              const dev = Math.abs(P - ref);
+              const mink = lens.minkwitzAt(xn - cx, r);
+              const periph = Math.max(wDist * dev, wMink * mink);
+              if(periph > m) m = periph;
+            }
+
+            lensP[i] = P;
+            mag[i] = m;
+            signed[i] = (s < 0) ? -m : m;
+          }
+        }
+        return {N, mask, mag, signed, lensP, target, lens};
+      }
+
+      // ---------- Drawing ----------
+      function paintField(ctx, W, H, N, mask, valueFn){
+        const img = ctx.createImageData(W, H);
+        const d = img.data;
+        for(let py=0; py<H; py++){
+          const fy = Math.min(N-1, Math.floor(py * N / H));
+          for(let px=0; px<W; px++){
+            const fx = Math.min(N-1, Math.floor(px * N / W));
+            const i = fy*N + fx;
+            const o = (py*W + px)*4;
+            if(!mask[i]){ d[o]=255; d[o+1]=255; d[o+2]=255; d[o+3]=0; continue; }
+            const li = lutIndex(valueFn(i)) * 3;
+            d[o] = colorLUT[li]; d[o+1] = colorLUT[li+1]; d[o+2] = colorLUT[li+2]; d[o+3] = 255;
+          }
+        }
+        ctx.putImageData(img, 0, 0);
+      }
+
+      function toPx(xn, w){ return (xn + 1) * 0.5 * (w-1); }
+
+      function drawLensOutline(ctx, w, h, frameOn, eye){
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0,0,0,0.22)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(w/2, h/2, Math.min(w,h)/2 - 2, 0, Math.PI*2);
+        ctx.stroke();
+
+        if(frameOn){
+          ctx.strokeStyle = 'rgba(0,0,0,0.34)';
+          ctx.lineWidth = 2.0;
+          makeFramePath(ctx, w, h, eye);
+          ctx.stroke();
+        }
+
+        // Nasal / temporal markers
+        const fs = Math.round(w * 0.022);
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.font = '700 ' + fs + 'px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+        ctx.textBaseline = 'middle';
+        const tDir = temporalDir(eye);
+        const yLab = toPx(FC_Y, h);
+        ctx.textAlign = 'center';
+        ctx.fillText('T', w/2 + tDir * w*0.465, yLab);
+        ctx.fillText('N', w/2 - tDir * w*0.465, yLab);
+        ctx.restore();
+      }
+
+      function drawGuides(ctx, w, h, lens, pupil, opts){
+        const scale = w / 720;
+        const fontPx = Math.round(13 * scale);
+        ctx.save();
+        ctx.font = fontPx + 'px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+        ctx.textBaseline = 'middle';
+
+        // Reference lines derived from the design: fitting cross, half add, full add (NRP)
+        const lines = [
+          {y: lens.fcY, label: 'FC'},
+          {y: lens.yAtRamp(0.5), label: '½ add'},
+          {y: lens.nrpY, label: 'Near'}
+        ];
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+        ctx.lineWidth = 1 * scale;
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.textAlign = 'left';
+        for(const L of lines){
+          const yy = toPx(L.y, h);
+          if(yy < 0 || yy > h) continue;
+          ctx.setLineDash([4*scale, 4*scale]);
+          ctx.beginPath(); ctx.moveTo(w*0.18, yy); ctx.lineTo(w*0.82, yy); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillText(L.label, w*0.83, yy);
+        }
+
+        // Fitting cross of the lens (moves with fit error)
+        const fx = toPx(lens.fcX, w), fy = toPx(lens.fcY, h);
+        ctx.strokeStyle = 'rgba(20,40,60,0.85)';
+        ctx.lineWidth = 2 * scale;
+        const a = 11 * scale;
+        ctx.beginPath();
+        ctx.moveTo(fx - a, fy); ctx.lineTo(fx + a, fy);
+        ctx.moveTo(fx, fy - a); ctx.lineTo(fx, fy + a);
+        ctx.stroke();
+
+        // Pupil at the chosen gaze
+        if(pupil){
+          const px = toPx(pupil.x, w), py = toPx(pupil.y, h);
+          const rr = 13 * scale;
+          ctx.fillStyle = 'rgba(0,0,0,0.10)';
+          ctx.beginPath(); ctx.arc(px, py, rr * 1.8, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+          ctx.lineWidth = 4 * scale;
+          ctx.beginPath(); ctx.arc(px, py, rr, 0, Math.PI*2); ctx.stroke();
+          ctx.strokeStyle = 'rgba(15,32,39,0.95)';
+          ctx.lineWidth = 2 * scale;
+          ctx.beginPath(); ctx.arc(px, py, rr, 0, Math.PI*2); ctx.stroke();
+          ctx.fillStyle = 'rgba(15,32,39,0.95)';
+          ctx.beginPath(); ctx.arc(px, py, 2.5 * scale, 0, Math.PI*2); ctx.fill();
+
+          if(opts && opts.pupilText){
+            const t = opts.pupilText;
+            ctx.font = '700 ' + Math.round(15*scale) + 'px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+            const tw = ctx.measureText(t).width + 14*scale;
+            const bx = px + rr + 8*scale, by = py - 11*scale;
+            ctx.fillStyle = 'rgba(255,255,255,0.92)';
+            roundRect(ctx, bx, by, tw, 22*scale, 6*scale);
+            ctx.fill();
+            ctx.fillStyle = '#0f2027';
+            ctx.textAlign = 'left';
+            ctx.fillText(t, bx + 7*scale, py);
+          }
+        }
+        ctx.restore();
+      }
+
+      function roundRect(ctx, x, y, w, h, r){
+        ctx.beginPath();
+        ctx.moveTo(x+r, y);
+        ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+        ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+        ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+        ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+        ctx.closePath();
+      }
+
+      function drawResidualHeatmap(canvas, field, frameOn, pupil, pupilText){
         if(!canvas) return;
-
         const ctx = canvas.getContext('2d');
-        if(!ctx) return;
-
         const w = canvas.width, h = canvas.height;
-        const frameMask = frameOn ? getFrameMask(w,h,eye) : null;
+        const mag = field.mag;
+        paintField(ctx, w, h, field.N, field.mask, (i)=>mag[i]);
+        drawLensOutline(ctx, w, h, frameOn, field.lens.eye);
+        drawGuides(ctx, w, h, field.lens, pupil, {pupilText});
+      }
+
+      function drawBinoDisparity(canvas, fOD, fOS, frameOn, pupil){
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        // Both fields are computed on the full circle; the OD frame cut is applied for display.
+        const N = fOD.N;
+        const mask = lensMask(N, 'OD', frameOn);
+        const disp = new Float32Array(N*N);
+        const base = absColor(0);
+        for(let i=0;i<N*N;i++){
+          if(!mask[i]) continue;
+          disp[i] = Math.abs(fOD.signed[i] - fOS.signed[i]);
+        }
+        // Below the alert threshold the colour is faded toward green.
+        const img = ctx.createImageData(w, h);
+        const d = img.data;
+        for(let py=0; py<h; py++){
+          const fy = Math.min(N-1, Math.floor(py * N / h));
+          for(let px=0; px<w; px++){
+            const fx = Math.min(N-1, Math.floor(px * N / w));
+            const i = fy*N + fx;
+            const o = (py*w + px)*4;
+            if(!mask[i]){ d[o]=255; d[o+1]=255; d[o+2]=255; d[o+3]=0; continue; }
+            const v = disp[i];
+            const li = lutIndex(v) * 3;
+            let r = colorLUT[li], g = colorLUT[li+1], b = colorLUT[li+2];
+            if(v < BINO_ALERT){
+              const tt = v / BINO_ALERT;
+              r = lerp(base.r, r, tt); g = lerp(base.g, g, tt); b = lerp(base.b, b, tt);
+            }
+            d[o] = r; d[o+1] = g; d[o+2] = b; d[o+3] = 255;
+          }
+        }
+        ctx.putImageData(img, 0, 0);
+        drawLensOutline(ctx, w, h, frameOn, 'OD');
+        drawGuides(ctx, w, h, fOD.lens, pupil, null);
+      }
+
+      function roundToStep(v, step){
+        if(step <= 0) return v;
+        return Math.round(v / step) * step;
+      }
+
+      // Sample points derived from the design, in mm relative to the fitting cross.
+      function samplePointsFor(lens){
+        const half = lens.yAtRamp(0.5);
+        const nrp = lens.nrpY;
+        const tDir = temporalDir(lens.eye);
+        const nasalX = -tDir * mm(12);
+        const tempX = tDir * mm(12);
+        return [
+          {name:'Distance', x: lens.fcX, y: lens.fcY - mm(9)},
+          {name:'FC',       x: lens.fcX, y: lens.fcY},
+          {name:'½ add', x: lens.centerX(half), y: half},
+          {name:'Near',     x: lens.centerX(nrp), y: nrp},
+          {name:'Below',    x: lens.centerX(nrp + mm(8)), y: nrp + mm(8)},
+          {name:'Temporal', x: tempX,  y: nrp},
+          {name:'Nasal',    x: nasalX, y: nrp},
+        ];
+      }
+
+      function drawSampleValues(canvas, lens, frameOn, pupil){
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        const N = FIELD_N;
+        const mask = lensMask(N, lens.eye, frameOn);
 
         ctx.clearRect(0,0,w,h);
-        ctx.save();
         ctx.fillStyle = '#fff';
         ctx.fillRect(0,0,w,h);
-        ctx.restore();
+
+        drawLensOutline(ctx, w, h, frameOn, lens.eye);
+        drawGuides(ctx, w, h, lens, pupil, null);
 
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        for(const p of SAMPLE_POINTS){
-          if(!maskInside(p.x, p.y, frameOn, w, h, frameMask)) continue;
+        for(const p of samplePointsFor(lens)){
+          if(!maskAt(mask, N, p.x, p.y)) continue;
 
-          const px = (p.x + 1) * 0.5 * (w-1);
-          const py = (p.y + 1) * 0.5 * (h-1);
-
-          const v = fnValue(p.x, p.y);
+          const px = toPx(p.x, w);
+          const py = toPx(p.y, h);
+          const v = lens.powerAt(p.x, p.y);
           const vr = roundToStep(v, ROUND_TO);
-          const txt = (vr >= 0 ? '+' : '') + vr.toFixed(2);
+          const txt = fmtD(vr);
 
           ctx.fillStyle = 'rgba(0,0,0,0.65)';
-          ctx.beginPath();
-          ctx.arc(px, py, 4, 0, Math.PI*2);
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
 
+          ctx.font = '700 22px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+          const tw = ctx.measureText(txt).width + 12;
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          roundRect(ctx, px - tw/2, py - 36, tw, 26, 6); ctx.fill();
           ctx.fillStyle = 'rgba(0,0,0,0.92)';
-          ctx.font = '24px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-          ctx.fillText(txt, px, py - 24);
+          ctx.fillText(txt, px, py - 23);
 
           ctx.fillStyle = 'rgba(0,0,0,0.72)';
-          ctx.font = '16px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-          ctx.fillText(p.name, px, py + 18);
+          ctx.font = '14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+          ctx.fillText(p.name, px, py + 15);
         }
-
         ctx.restore();
-
-        drawLensOutline(ctx, w, h, frameOn, eye);
-        drawGuides(ctx, w, h, pupilYn);
       }
 
-      function residualErrorMagnitude(lensPower, targetPower, allowAcc, reserve){
-        const err = lensPower - targetPower;
-        if(err > 0) return err;
-        const demand = -err;
-        if(!allowAcc) return demand;
-        return Math.max(0, demand - reserve);
-      }
-
-      function peripheralMidlineDeviation(fnLensPower, y, x){
-        const ref = fnLensPower(0.0, y);
-        const cur = fnLensPower(x, y);
-        return Math.abs(cur - ref);
-      }
-
-      function dAddDyProxy(cfg, addMax){
-        const corrLen = Math.max(0.55, cfg.ySpan);
-        const slope = addMax / corrLen;
-        const addSteepnessFactor = 1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.15);
-        return slope * (0.85 + 0.55*(cfg.hardness - 1.0)) * addSteepnessFactor;
-      }
-
-      function ramp01AtY(cfg, y){
-        const yCross = -0.24;
-        const yStart = yCross - 0.05;
-        const yEnd   = yCross + cfg.ySpan;
-        const p = clamp((y - yStart) / (yEnd - yStart), 0, 1);
-        return rampSigmoid(p, cfg.rampMid, cfg.rampSharp);
-      }
-
-      function minkwitzUnwantedCylProxy(x, y, cfg, addMax){
-        const r = ramp01AtY(cfg, y);
-        const midEmphasis = 4 * r * (1 - r);
-        const slope = dAddDyProxy(cfg, addMax);
-
-        const addCylBoost = 1.0 + (clamp(addMax - 1.0, 0, 2.0) * 0.35);
-        const lateral = Math.pow(Math.abs(x), 1.32) * addCylBoost;
-
-        const addScale = (0.65 + 0.35*clamp(addMax/2.5, 0, 1));
-        return slope * lateral * midEmphasis * addScale;
-      }
-
-      function drawResidualHeatmap(canvas, fnLensPower, targetPower, allowAcc, reserve, distOn, distW, minkW, cfg, addMax, frameOn, pupilYn, eye){
-        if(!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if(!ctx) return;
-
-        const w = canvas.width, h = canvas.height;
-        const img = ctx.createImageData(w, h);
-        const data = img.data;
-
-        const frameMask = frameOn ? getFrameMask(w,h,eye) : null;
-
-        const wDist = clamp(distW, 0, 3) * cfg.periphBoost;
-        const wMink = clamp(minkW, 0, 3) * cfg.minkBoost;
-
-        for(let py=0; py<h; py++){
-          const yn = (py/(h-1))*2 - 1;
-
-          for(let px=0; px<w; px++){
-            const xn = (px/(w-1))*2 - 1;
-            const idx = (py*w + px)*4;
-
-            if(!maskInside(xn, yn, frameOn, w, h, frameMask)){
-              data[idx+0]=255; data[idx+1]=255; data[idx+2]=255; data[idx+3]=0;
-              continue;
-            }
-
-            const lensP = fnLensPower(xn, yn);
-            const residMag = residualErrorMagnitude(lensP, targetPower, allowAcc, reserve);
-
-            let mag = residMag;
-
-            if(distOn){
-              const dev = peripheralMidlineDeviation(fnLensPower, yn, xn);
-              const mink = minkwitzUnwantedCylProxy(xn, yn, cfg, addMax);
-              const periph = Math.max(wDist * dev, wMink * mink);
-              mag = Math.max(residMag, periph);
-            }
-
-            mag = clamp(mag, 0, MAX_OFF);
-            const c = absColor(mag);
-
-            data[idx+0]=c.r; data[idx+1]=c.g; data[idx+2]=c.b; data[idx+3]=255;
-          }
-        }
-
-        ctx.putImageData(img, 0, 0);
-        drawLensOutline(ctx, w, h, frameOn, eye);
-        drawGuides(ctx, w, h, pupilYn);
-      }
-
-      function drawBinoDisparity(canvas, fnLensOD, fnLensOS, targetOD, targetOS, allowAcc, reserve, distOn, distW, minkW, cfgOD, cfgOS, addOD, addOS, frameOn, pupilYn){
-        if(!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if(!ctx) return;
-
-        const w = canvas.width, h = canvas.height;
-        const img = ctx.createImageData(w, h);
-        const data = img.data;
-
-        const frameMask = frameOn ? getFrameMask(w,h,'OD') : null;
-
-        const wDistOD = clamp(distW, 0, 3) * cfgOD.periphBoost;
-        const wMinkOD = clamp(minkW, 0, 3) * cfgOD.minkBoost;
-        const wDistOS = clamp(distW, 0, 3) * cfgOS.periphBoost;
-        const wMinkOS = clamp(minkW, 0, 3) * cfgOS.minkBoost;
-
-        for(let py=0; py<h; py++){
-          const yn = (py/(h-1))*2 - 1;
-
-          for(let px=0; px<w; px++){
-            const xn = (px/(w-1))*2 - 1;
-            const idx = (py*w + px)*4;
-
-            if(!maskInside(xn, yn, frameOn, w, h, frameMask)){
-              data[idx+0]=255; data[idx+1]=255; data[idx+2]=255; data[idx+3]=0;
-              continue;
-            }
-
-            const pod = fnLensOD(xn, yn);
-            const pos = fnLensOS(xn, yn);
-
-            const rod = residualErrorMagnitude(pod, targetOD, allowAcc, reserve);
-            const ros = residualErrorMagnitude(pos, targetOS, allowAcc, reserve);
-
-            let mod = rod, mos = ros;
-
-            if(distOn){
-              const devOD = peripheralMidlineDeviation(fnLensOD, yn, xn);
-              const devOS = peripheralMidlineDeviation(fnLensOS, yn, xn);
-              const minkOD = minkwitzUnwantedCylProxy(xn, yn, cfgOD, addOD);
-              const minkOS = minkwitzUnwantedCylProxy(xn, yn, cfgOS, addOS);
-
-              mod = Math.max(rod, Math.max(wDistOD*devOD, wMinkOD*minkOD));
-              mos = Math.max(ros, Math.max(wDistOS*devOS, wMinkOS*minkOS));
-            }
-
-            const disp = Math.abs(mod - mos);
-            const mag = clamp(disp, 0, MAX_OFF);
-            const c = absColor(mag);
-
-            if(disp < BINO_ALERT){
-              const base = absColor(0);
-              const tt = disp / BINO_ALERT;
-              const cc = rgb(lerp(base.r,c.r,tt), lerp(base.g,c.g,tt), lerp(base.b,c.b,tt));
-              data[idx+0]=cc.r; data[idx+1]=cc.g; data[idx+2]=cc.b; data[idx+3]=255;
-            } else {
-              data[idx+0]=c.r; data[idx+1]=c.g; data[idx+2]=c.b; data[idx+3]=255;
-            }
-          }
-        }
-
-        ctx.putImageData(img, 0, 0);
-        drawLensOutline(ctx, w, h, frameOn, 'OD');
-        drawGuides(ctx, w, h, pupilYn);
-      }
-
+      // ---------- Strain ----------
       function strainBand(frac){
         if(frac < STRAIN_NONE_MAX) return "No strain";
         if(frac < STRAIN_MILD_MAX) return "Mild";
@@ -1636,53 +1884,48 @@
         return "No meaningful accommodative effort required.";
       }
 
-      const ZONES = [
-        {key:"Top",    x:0.00, y:-0.85},
-        {key:"Middle", x:0.00, y: 0.35},
-        {key:"Bottom", x:0.00, y: 0.72},
-      ];
-
-      function zoneAverageLensPower(fnLensPower, x, y){
-        const pts = [
-          [x, y],
-          [x, y-0.06],
-          [x, y+0.06],
-          [x-0.06, y],
-          [x+0.06, y],
-        ];
+      function zoneAverageLensPower(lens, x, y){
+        const d = mm(1.8);
+        const pts = [[x, y],[x, y-d],[x, y+d],[x-d, y],[x+d, y]];
         let sum = 0, n = 0;
         for(const [px,py] of pts){
           if(!insideCircle(px,py)) continue;
-          sum += fnLensPower(px,py);
+          sum += lens.powerAt(px,py);
           n += 1;
         }
-        return n ? (sum/n) : fnLensPower(x,y);
+        return n ? (sum/n) : lens.powerAt(x,y);
       }
 
-      function buildZoneStrainHTML(label, fnLensPower, targetPower, allowAcc, reserve){
+      function zonesFor(lens){
+        const half = lens.yAtRamp(0.5);
+        return [
+          {key:"Distance (FC)",   x: lens.fcX, y: lens.fcY},
+          {key:"Intermediate",    x: lens.centerX(half), y: half},
+          {key:"Near",            x: lens.centerX(lens.nrpY), y: lens.nrpY},
+        ];
+      }
+
+      function buildZoneStrainHTML(label, lens, targetPower, allowAcc, reserve){
         const r = Math.max(0.01, reserve);
-
-        if(!allowAcc){
-          return '<div class="hdr">' + label + '</div>' +
-                 '<div class="line"><div>Top</div><div>Accommodation not applied</div></div>' +
-                 '<div class="line"><div>Middle</div><div>Accommodation not applied</div></div>' +
-                 '<div class="line"><div>Bottom</div><div>Accommodation not applied</div></div>' +
-                 '<small>Turn on Allow accommodation to estimate demand vs usable reserve.</small>';
-        }
-
         let lines = '<div class="hdr">' + label + '</div>';
-        for(const z of ZONES){
-          const lensP = zoneAverageLensPower(fnLensPower, z.x, z.y);
+
+        for(const z of zonesFor(lens)){
+          const lensP = zoneAverageLensPower(lens, z.x, z.y);
           const err = lensP - targetPower;
 
-          if(err > OVERPLUS_BLUR){
-            lines += '<div class="line"><div>' + z.key + '</div><div>No strain but blurry</div></div>';
+          if(err > CLEAR_TOL){
+            lines += '<div class="line"><div>' + z.key + '</div><div>Blurred by ' + fmtD(err) + ' D over plus (no accommodative effort)</div></div>';
             continue;
           }
 
           const demand = Math.max(0, targetPower - lensP);
-          if(demand < 0.01){
-            lines += '<div class="line"><div>' + z.key + '</div><div>No strain</div></div>';
+          if(demand <= CLEAR_TOL){
+            lines += '<div class="line"><div>' + z.key + '</div><div>Clear, no strain</div></div>';
+            continue;
+          }
+
+          if(!allowAcc){
+            lines += '<div class="line"><div>' + z.key + '</div><div>Blurred by ' + demand.toFixed(2) + ' D short (accommodation off)</div></div>';
             continue;
           }
 
@@ -1690,14 +1933,15 @@
           const band = strainBand(ratio);
           const pct = Math.round(ratio * 100);
           const detail = strainBandDetail(band);
+          const covered = demand <= reserve;
 
           lines += '<div class="line"><div>' + z.key +
-                   '</div><div>' + band +
-                   ' (' + demand.toFixed(2) + ' D, ' + pct + '%)</div></div>' +
-                   '<div style="color:#718096;font-size:0.75rem;margin:2px 0 6px 0">' + detail + '</div>';
+                   '</div><div>' + band + (covered ? '' : ', still blurred by ' + (demand - reserve).toFixed(2) + ' D') +
+                   ' (' + demand.toFixed(2) + ' D, ' + pct + '% of reserve)</div></div>' +
+                   '<div class="detail">' + detail + '</div>';
         }
 
-        lines += '<small>Predicted eyestrain through each lens zone for this prescription. Ratio = demand divided by usable reserve.</small>';
+        lines += '<small>Predicted eyestrain through each lens zone for this prescription at the active target. Ratio = demand divided by usable reserve' + (allowAcc ? '' : '. Turn on Allow accommodation to let the eye cover extra minus') + '.</small>';
         return lines;
       }
 
@@ -1709,7 +1953,7 @@
 
       function syncDesignUI(which){
         const design = els(which + '_design') ? els(which + '_design').value : 'gen_avg';
-        const generic = (design.indexOf('gen_') === 0);
+        const generic = isGeneric(design);
         const isHoya = (design === 'hoya_mystyle3');
 
         if(els(which + '_premium_controls')) els(which + '_premium_controls').classList.toggle('hidden', generic);
@@ -1718,124 +1962,41 @@
         if(els(which + '_generic_note')) els(which + '_generic_note').classList.toggle('hidden', !generic);
       }
 
-
-function calculateMetrics(habLensOD, habLensOS, optLensOD, optLensOS, targetOD, targetOS, frameOn){
-        // Pixel-based metrics that match the heatmap logic:
-        // Usable Area: residual/peripheral magnitude < 0.50 D
-        // Excellent Area: residual/peripheral magnitude < 0.25 D
-        // No Strain Area: (demand / usable reserve) < 0.10 and not "over-plus blurry"
-        const can = els('can_del_od');
-        const w = can ? can.width : 520;
-        const h = can ? can.height : 520;
-
-        const allowAcc = !!(els('acc_on') && els('acc_on').checked);
-        const age = parseNum(els('acc_age') ? els('acc_age').value : 50);
-        const accModel = (els('acc_model') ? els('acc_model').value : 'min');
-        const accPct = parseNum(els('acc_pct') ? els('acc_pct').value : 30);
-        const reserve = usableAccommodationReserve(age, accModel, accPct);
+      // ---------- Metrics from the computed fields ----------
+      function calculateMetrics(fields, allowAcc, reserve){
         const rsv = Math.max(0.01, reserve);
+        const out = {total:0, habUsable:0, optUsable:0, habExcellent:0, optExcellent:0, habNoStrain:0, optNoStrain:0};
 
-        const distOn = !!(els('dist_on') && els('dist_on').checked);
-        const distW = parseNum(els('dist_w') ? els('dist_w').value : 1.25);
-        const minkW = parseNum(els('mink_w') ? els('mink_w').value : 1.10);
-
-        const habCfg = getDesignConfig('hab');
-        const optCfg = getDesignConfig('opt');
-        const habOD = readRx('hab_od');
-        const habOS = readRx('hab_os');
-        const optOD = readRx('opt_od');
-        const optOS = readRx('opt_os');
-
-        function magAt(fnLensPower, targetPower, cfg, addMax, xn, yn){
-          const lensP = fnLensPower(xn, yn);
-
-          const residMag = residualErrorMagnitude(lensP, targetPower, allowAcc, reserve);
-          let mag = residMag;
-
-          if(distOn){
-            const dev = peripheralMidlineDeviation(fnLensPower, yn, xn);
-            const mink = minkwitzUnwantedCylProxy(xn, yn, cfg, addMax);
-            const periph = Math.max(
-              clamp(distW, 0, 3) * (cfg.periphBoost || 1) * dev,
-              clamp(minkW, 0, 3) * (cfg.minkBoost || 1) * mink
-            );
-            mag = Math.max(residMag, periph);
-          }
-          return {lensP, mag};
+        function noStrain(lensP, target){
+          const err = lensP - target;
+          if(err > CLEAR_TOL) return false;
+          const demand = Math.max(0, -err);
+          return (demand / rsv) < STRAIN_NONE_MAX;
         }
 
-        function noStrainAt(lensP, targetPower){
-          const err = lensP - targetPower;
-
-          // Over-plus blur: no strain but not usable for clarity. Exclude from "No strain area".
-          if(err > OVERPLUS_BLUR) return false;
-
-          const demand = Math.max(0, targetPower - lensP);
-          const ratio = demand / rsv;
-          return ratio < STRAIN_NONE_MAX;
-        }
-
-        function runForEye(eye){
-          const frameMask = frameOn ? getFrameMask(w, h, eye) : null;
-
-          const habLens = (eye === 'OD') ? habLensOD : habLensOS;
-          const optLens = (eye === 'OD') ? optLensOD : optLensOS;
-          const target = (eye === 'OD') ? targetOD : targetOS;
-
-          const habAdd = (eye === 'OD') ? habOD.add : habOS.add;
-          const optAdd = (eye === 'OD') ? optOD.add : optOS.add;
-
-          const totalKey = 'total';
-
-          const out = {
-            total: 0,
-            habUsable: 0, optUsable: 0,
-            habExcellent: 0, optExcellent: 0,
-            habNoStrain: 0, optNoStrain: 0
-          };
-
-          for(let py = 0; py < h; py++){
-            const yn = (py/(h-1))*2 - 1;
-            for(let px = 0; px < w; px++){
-              const xn = (px/(w-1))*2 - 1;
-
-              if(!maskInside(xn, yn, frameOn, w, h, frameMask)) continue;
-
-              out.total += 1;
-
-              const hab = magAt(habLens, target, habCfg, habAdd, xn, yn);
-              const opt = magAt(optLens, target, optCfg, optAdd, xn, yn);
-
-              if(hab.mag < 0.50) out.habUsable += 1;
-              if(opt.mag < 0.50) out.optUsable += 1;
-
-              if(hab.mag < 0.25) out.habExcellent += 1;
-              if(opt.mag < 0.25) out.optExcellent += 1;
-
-              if(noStrainAt(hab.lensP, target)) out.habNoStrain += 1;
-              if(noStrainAt(opt.lensP, target)) out.optNoStrain += 1;
+        for(const eye of ['OD','OS']){
+          const hab = fields.hab[eye], opt = fields.opt[eye];
+          const N = hab.N;
+          for(let i=0;i<N*N;i++){
+            if(!hab.mask[i]) continue;
+            out.total++;
+            if(hab.mag[i] < 0.50) out.habUsable++;
+            if(opt.mask[i] && opt.mag[i] < 0.50) out.optUsable++;
+            if(hab.mag[i] < 0.25) out.habExcellent++;
+            if(opt.mask[i] && opt.mag[i] < 0.25) out.optExcellent++;
+            if(allowAcc){
+              if(noStrain(hab.lensP[i], hab.target)) out.habNoStrain++;
+              if(opt.mask[i] && noStrain(opt.lensP[i], opt.target)) out.optNoStrain++;
             }
           }
-
-          return out;
         }
-
-        const od = runForEye('OD');
-        const os = runForEye('OS');
-
-        const total = Math.max(1, od.total + os.total);
-
-        function pct(n){ return (n / total) * 100; }
-
+        const total = Math.max(1, out.total);
+        const pct = (n)=>(n/total)*100;
         return {
-          habUsablePct: pct(od.habUsable + os.habUsable),
-          optUsablePct: pct(od.optUsable + os.optUsable),
-
-          habExcellentPct: pct(od.habExcellent + os.habExcellent),
-          optExcellentPct: pct(od.optExcellent + os.optExcellent),
-
-          habNoStrainPct: pct(od.habNoStrain + os.habNoStrain),
-          optNoStrainPct: pct(od.optNoStrain + os.optNoStrain)
+          habUsablePct: pct(out.habUsable), optUsablePct: pct(out.optUsable),
+          habExcellentPct: pct(out.habExcellent), optExcellentPct: pct(out.optExcellent),
+          habNoStrainPct: allowAcc ? pct(out.habNoStrain) : null,
+          optNoStrainPct: allowAcc ? pct(out.optNoStrain) : null
         };
       }
 
@@ -1843,30 +2004,22 @@ function calculateMetrics(habLensOD, habLensOS, optLensOD, optLensOS, targetOD, 
         const box = els('comparison-metrics');
         if(!box) return;
 
-        box.innerHTML = '';
-
-        function deltaPts(curPct, newPct){
+        function buildCard(label, curPct, newPct, note){
+          if(curPct === null || newPct === null){
+            return '<div class="metric-card"><div class="metric-label">' + label + '</div>' +
+                   '<div class="metric-value" style="font-size:0.95rem;color:#718096">' + note + '</div></div>';
+          }
           const d = newPct - curPct;
-          const sign = d >= 0 ? '+' : '';
-          return { text: sign + d.toFixed(1) + ' pts', val: d };
-        }
-
-        function clsFrom(delta){
-          if(Math.abs(delta) <= 0.5) return 'neutral';
-          return delta > 0 ? 'positive' : 'negative';
-        }
-
-        function buildCard(label, curPct, newPct){
-          const d = deltaPts(curPct, newPct);
-          const cls = clsFrom(d.val);
-          const progress = Math.max(0, Math.min(100, newPct));
+          const cls = Math.abs(d) <= 0.5 ? 'neutral' : (d > 0 ? 'positive' : 'negative');
+          const text = (d >= 0 ? '+' : '') + d.toFixed(1) + ' pts';
+          const progress = clamp(newPct, 0, 100);
 
           return '' +
             '<div class="metric-card">' +
               '<div class="metric-label">' + label + '</div>' +
               '<div class="metric-value">' +
                 '<span>' + curPct.toFixed(1) + '% → ' + newPct.toFixed(1) + '%</span>' +
-                '<span class="metric-change ' + cls + '">' + d.text + '</span>' +
+                '<span class="metric-change ' + cls + '">' + text + '</span>' +
               '</div>' +
               '<div class="progress-bar-container">' +
                 '<div class="progress-bar" style="width: ' + progress.toFixed(1) + '%"></div>' +
@@ -1874,27 +2027,135 @@ function calculateMetrics(habLensOD, habLensOS, optLensOD, optLensOS, targetOD, 
             '</div>';
         }
 
-        // Guard against missing keys (keeps page from breaking if metrics object changes)
-        const habUsable = Number(metrics.habUsablePct ?? 0);
-        const optUsable = Number(metrics.optUsablePct ?? 0);
-        const habExcellent = Number(metrics.habExcellentPct ?? 0);
-        const optExcellent = Number(metrics.optExcellentPct ?? 0);
-        const habNoStrain = Number(metrics.habNoStrainPct ?? 0);
-        const optNoStrain = Number(metrics.optNoStrainPct ?? 0);
-
-        const html =
-          buildCard('Usable Area', habUsable, optUsable) +
-          buildCard('Excellent Area', habExcellent, optExcellent) +
-          buildCard('No Strain Area', habNoStrain, optNoStrain);
-
-        box.insertAdjacentHTML('beforeend', html);
+        box.innerHTML =
+          buildCard('Usable Area (under 0.50 D)', metrics.habUsablePct, metrics.optUsablePct) +
+          buildCard('Excellent Area (under 0.25 D)', metrics.habExcellentPct, metrics.optExcellentPct) +
+          buildCard('No Strain Area', metrics.habNoStrainPct, metrics.optNoStrainPct, 'Turn on Allow accommodation');
       }
 
-      function setInputValue(id, val){
-        const el = els(id);
-        if(!el) return;
-        el.value = val;
-        el.dispatchEvent(new Event('change', {bubbles:true}));
+      // ---------- Fit and gaze ----------
+      function readFit(){
+        return {
+          heightMm: parseNum(els('fit_h').value),
+          pdMm: parseNum(els('fit_pd').value)
+        };
+      }
+      function readGaze(){
+        return {
+          downMm: parseNum(els('gaze_y').value),
+          rightMm: parseNum(els('gaze_x').value)
+        };
+      }
+      // Pupil position in eye coordinates. +x is the patient's right in both maps.
+      function pupilFor(gaze){
+        return {x: mm(gaze.rightMm), y: FC_Y + mm(gaze.downMm)};
+      }
+      function chinLiftDeg(downMm){
+        return Math.atan2(downMm, EYE_ROT_MM) * 180 / Math.PI;
+      }
+
+      function verdictFor(lens, target, pupil, allowAcc, reserve){
+        const P = lens.powerAt(pupil.x, pupil.y);
+        const s = signedResidual(P, target, allowAcc, reserve);
+        const demand = Math.max(0, target - P);
+        let cls = 'clear', text = 'Clear';
+        if(s > CLEAR_TOL){
+          cls = s > 0.5 ? 'bad' : 'mild';
+          text = 'Blur ' + fmtD(s) + ' D (over plus)';
+        } else if(s < -CLEAR_TOL){
+          cls = -s > 0.5 ? 'bad' : 'mild';
+          text = 'Blur ' + fmtD(s) + ' D (short of plus)';
+        } else if(demand > CLEAR_TOL && allowAcc){
+          const band = strainBand(demand / Math.max(0.01, reserve));
+          cls = (band === 'No strain' || band === 'Mild') ? 'clear' : 'mild';
+          text = 'Clear using ' + demand.toFixed(2) + ' D accommodation (' + band.toLowerCase() + ')';
+        }
+        return {P, s, cls, text};
+      }
+
+      // Walk the pupil down the lens along the current horizontal gaze and find where the
+      // target comes into focus. Returns mm below the fitting cross.
+      function findClearGaze(lensOD, lensOS, tOD, tOS, rightMm, allowAcc, reserve){
+        // Prefer the clear point closest to primary gaze; otherwise the least-blurred point.
+        let best = {downMm: 0, worst: Infinity};
+        let nearest = null;
+        const x = mm(rightMm);
+        for(let d = -6; d <= 20; d += 0.25){
+          const y = FC_Y + mm(d);
+          if(!insideCircle(x, y)) continue;
+          const sOD = Math.abs(signedResidual(lensOD.powerAt(x, y), tOD, allowAcc, reserve));
+          const sOS = Math.abs(signedResidual(lensOS.powerAt(x, y), tOS, allowAcc, reserve));
+          const worst = Math.max(sOD, sOS);
+          if(worst < best.worst) best = {downMm: d, worst};
+          if(worst <= CLEAR_TOL && (nearest === null || Math.abs(d) < Math.abs(nearest.downMm))) nearest = {downMm: d, worst};
+        }
+        return nearest || best;
+      }
+
+      function headSVG(angleDeg, good){
+        // Side profile facing right. Rotation is about the eye. Chin up = nose rises.
+        const col = good ? '#2d5f3d' : '#2c5364';
+        const rot = (-angleDeg).toFixed(2);
+        return '' +
+          '<svg viewBox="0 0 150 150" aria-hidden="true">' +
+            '<defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">' +
+              '<path d="M0,0 L8,4 L0,8 z" fill="#8b2e2e"/></marker></defs>' +
+            '<line x1="0" y1="56" x2="150" y2="56" stroke="rgba(0,0,0,0.12)" stroke-dasharray="4 4"/>' +
+            '<g transform="rotate(' + rot + ' 84 56)">' +
+              '<path d="M 52 148 L 56 118 C 44 108 32 92 32 66 C 32 36 52 16 76 16 C 92 16 100 28 101 42 L 109 66 L 100 70 C 102 78 100 84 96 86 C 100 92 98 98 94 100 C 96 106 92 112 82 112 C 78 118 70 124 66 126 L 68 148 Z" ' +
+                    'fill="rgba(44,83,100,0.14)" stroke="' + col + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+              '<circle cx="84" cy="56" r="3.2" fill="#0f2027"/>' +
+              '<line x1="118" y1="30" x2="118" y2="86" stroke="#0f2027" stroke-width="3" stroke-linecap="round"/>' +
+              '<line x1="112" y1="56" x2="124" y2="56" stroke="#0f2027" stroke-width="2"/>' +
+            '</g>' +
+            '<line x1="84" y1="56" x2="146" y2="56" stroke="#8b2e2e" stroke-width="2.5" marker-end="url(#arrowhead)"/>' +
+          '</svg>';
+      }
+
+      function renderHeadCard(id, title, lensOD, lensOS, tOD, tOS, gaze, allowAcc, reserve){
+        const box = els(id);
+        if(!box) return null;
+        const pupil = pupilFor(gaze);
+        const vOD = verdictFor(lensOD, tOD, pupil, allowAcc, reserve);
+        const vOS = verdictFor(lensOS, tOS, pupil, allowAcc, reserve);
+        const found = findClearGaze(lensOD, lensOS, tOD, tOS, gaze.rightMm, allowAcc, reserve);
+        const ang = chinLiftDeg(found.downMm);
+        const clearFound = found.worst <= CLEAR_TOL;
+        const mode = modeLabel(currentMode);
+
+        let big, bigCls;
+        if(clearFound && Math.abs(found.downMm) <= 1.0){
+          big = 'Clear ' + mode + ' vision in primary gaze';
+          bigCls = 'good';
+        } else if(clearFound){
+          const dir = found.downMm > 0 ? 'chin up' : 'chin down';
+          big = 'Needs ' + Math.abs(found.downMm).toFixed(1) + ' mm of gaze drop, about ' + Math.abs(ang).toFixed(0) + '° ' + dir + ', for clear ' + mode + ' vision';
+          bigCls = Math.abs(ang) >= 8 ? 'bad' : '';
+        } else {
+          big = 'No posture gives clear ' + mode + ' vision. Best is ' + Math.abs(found.downMm).toFixed(1) + ' mm ' + (found.downMm >= 0 ? 'down' : 'up') + ', still ' + found.worst.toFixed(2) + ' D of blur';
+          bigCls = 'bad';
+        }
+
+        box.innerHTML =
+          headSVG(ang, clearFound && Math.abs(found.downMm) <= 1.0) +
+          '<div>' +
+            '<div class="ttl">' + title + '</div>' +
+            '<div class="big ' + bigCls + '">' + big + '</div>' +
+            '<div class="eye-line"><b>OD</b> ' + fmtD(vOD.P) + ' D under pupil <span class="verdict ' + vOD.cls + '">' + vOD.text + '</span></div>' +
+            '<div class="eye-line"><b>OS</b> ' + fmtD(vOS.P) + ' D under pupil <span class="verdict ' + vOS.cls + '">' + vOS.text + '</span></div>' +
+            '<div class="fine">Pupil is ' + fmtMm(gaze.downMm) + ' from the fitting cross. Target ' + mode + ' = OD ' + fmtD(tOD) + ' / OS ' + fmtD(tOS) + ' D. ' +
+              (clearFound ? '<button type="button" data-goto="' + found.downMm + '">Show me</button>' : '') +
+            '</div>' +
+          '</div>';
+        return found;
+      }
+
+      // ---------- Render ----------
+      let renderQueued = false;
+      function scheduleRender(){
+        if(renderQueued) return;
+        renderQueued = true;
+        requestAnimationFrame(()=>{ renderQueued = false; render(); });
       }
 
       function render(){
@@ -1906,112 +2167,187 @@ function calculateMetrics(habLensOD, habLensOS, optLensOD, optLensOS, targetOD, 
         const habOD = readRx('hab_od');
         const habOS = readRx('hab_os');
 
-        const allowAcc = els('acc_on') ? els('acc_on').checked : false;
-        const age = parseNum(els('acc_age') ? els('acc_age').value : 50);
-        const accModel = els('acc_model') ? els('acc_model').value : 'min';
-        const accPct = parseNum(els('acc_pct') ? els('acc_pct').value : 30);
+        const allowAcc = els('acc_on').checked;
+        const age = parseNum(els('acc_age').value);
+        const accModel = els('acc_model').value;
+        const accPct = parseNum(els('acc_pct').value);
         const reserve = usableAccommodationReserve(age, accModel, accPct);
 
-        const binoOn = els('bino_on') ? els('bino_on').checked : false;
-        if(els('bino_hab_wrap')) els('bino_hab_wrap').classList.toggle('hidden', !binoOn);
-        if(els('bino_opt_wrap')) els('bino_opt_wrap').classList.toggle('hidden', !binoOn);
+        const binoOn = els('bino_on').checked;
+        els('bino_hab_wrap').classList.toggle('hidden', !binoOn);
+        els('bino_opt_wrap').classList.toggle('hidden', !binoOn);
 
-        const frameOn = els('frame_on') ? els('frame_on').checked : true;
-        const distOn = els('dist_on') ? els('dist_on').checked : true;
-        const distW = parseNum(els('dist_w') ? els('dist_w').value : 1.25);
-        const minkW = parseNum(els('mink_w') ? els('mink_w').value : 1.10);
+        const frameOn = els('frame_on').checked;
+        const distOn = els('dist_on').checked;
+        const distW = parseNum(els('dist_w').value);
+        const minkW = parseNum(els('mink_w').value);
 
         const habCfg = getDesignConfig('hab');
         const optCfg = getDesignConfig('opt');
 
-        const ocDY = ocFitDeltaY();
-        const habPupil = pupilYN(habCfg.designId, habCfg.corridor) + ocDY;
-        const optPupil = pupilYN(optCfg.designId, optCfg.corridor) + ocDY;
+        const fit = readFit();
+        const gaze = readGaze();
+        els('fit_h_v').textContent = fmtMm(fit.heightMm);
+        els('fit_pd_v').textContent = fmtMm(fit.pdMm);
+        els('gaze_y_v').textContent = fmtMm(gaze.downMm) + (gaze.downMm ? ' (' + Math.abs(chinLiftDeg(gaze.downMm)).toFixed(0) + '°)' : '');
+        els('gaze_x_v').textContent = fmtMm(gaze.rightMm);
+        const pupil = pupilFor(gaze);
 
-        const box = els('pal-readouts');
-        if(box){
-          box.innerHTML = '';
-          function addKV(text){
-            const d = document.createElement('div');
-            d.className = 'kv';
-            d.textContent = text;
-            box.appendChild(d);
-          }
-          addKV('Mode: ' + currentMode);
-          addKV('Usable reserve: ' + reserve.toFixed(2) + ' D');
-          addKV('Frame cut: ' + (frameOn ? 'On' : 'Off'));
-          addKV('Current design: ' + habCfg.preset.name + ', pupil y ' + habPupil.toFixed(2));
-          addKV('New design: ' + optCfg.preset.name + ', pupil y ' + optPupil.toFixed(2));
-          addKV('OC fit: ' + (els('oc_fit') ? els('oc_fit').value : 'standard'));
-        }
-
-        const habLensOD = (x,y)=>palLocalSE(habOD.se, habOD.add, x, y, habCfg, 'OD');
-        const habLensOS = (x,y)=>palLocalSE(habOS.se, habOS.add, x, y, habCfg, 'OS');
-        const optLensOD = (x,y)=>palLocalSE(optOD.se, optOD.add, x, y, optCfg, 'OD');
-        const optLensOS = (x,y)=>palLocalSE(optOS.se, optOS.add, x, y, optCfg, 'OS');
-
-        drawSampleValues(els('can_hab_od'), habLensOD, frameOn, habPupil, 'OD');
-        drawSampleValues(els('can_hab_os'), habLensOS, frameOn, habPupil, 'OS');
-        drawSampleValues(els('can_opt_od'), optLensOD, frameOn, optPupil, 'OD');
-        drawSampleValues(els('can_opt_os'), optLensOS, frameOn, optPupil, 'OS');
+        const habLensOD = makeLens(habOD, habCfg, 'OD', fit);
+        const habLensOS = makeLens(habOS, habCfg, 'OS', fit);
+        const optLensOD = makeLens(optOD, optCfg, 'OD', fit);
+        const optLensOS = makeLens(optOS, optCfg, 'OS', fit);
 
         const tOD = targetSE(optOD, currentMode);
         const tOS = targetSE(optOS, currentMode);
 
-        drawResidualHeatmap(els('can_del_od'), habLensOD, tOD, allowAcc, reserve, distOn, distW, minkW, habCfg, habOD.add, frameOn, habPupil, 'OD');
-        drawResidualHeatmap(els('can_del_os'), habLensOS, tOS, allowAcc, reserve, distOn, distW, minkW, habCfg, habOS.add, frameOn, habPupil, 'OS');
+        const box = els('pal-readouts');
+        box.innerHTML = '';
+        function addKV(text){
+          const d = document.createElement('div');
+          d.className = 'kv';
+          d.textContent = text;
+          box.appendChild(d);
+        }
+        addKV('Target: ' + modeLabel(currentMode) + ' (OD ' + fmtD(tOD) + ', OS ' + fmtD(tOS) + ' D)');
+        addKV('Usable reserve: ' + reserve.toFixed(2) + ' D' + (allowAcc ? '' : ' (off)'));
+        addKV('Current: ' + habCfg.preset.name + ', ' + habCfg.corridorMm + ' mm corridor');
+        addKV('New: ' + optCfg.preset.name + ', ' + optCfg.corridorMm + ' mm corridor');
+        addKV('Fit: height ' + fmtMm(fit.heightMm) + ', PD ' + fmtMm(fit.pdMm));
+        addKV('Frame cut: ' + (frameOn ? 'On' : 'Off'));
 
-        drawResidualHeatmap(els('can_optzone_od'), optLensOD, tOD, allowAcc, reserve, distOn, distW, minkW, optCfg, optOD.add, frameOn, optPupil, 'OD');
-        drawResidualHeatmap(els('can_optzone_os'), optLensOS, tOS, allowAcc, reserve, distOn, distW, minkW, optCfg, optOS.add, frameOn, optPupil, 'OS');
+        const fo = {N: FIELD_N, allowAcc, reserve, distOn, distW, minkW, frameOn};
+        const fields = {
+          hab: {OD: computeField(habLensOD, tOD, fo), OS: computeField(habLensOS, tOS, fo)},
+          opt: {OD: computeField(optLensOD, tOD, fo), OS: computeField(optLensOS, tOS, fo)}
+        };
 
-        if(els('strain_hab_od')) els('strain_hab_od').innerHTML = buildZoneStrainHTML('Predicted eyestrain through each zone with current glasses', habLensOD, tOD, allowAcc, reserve);
-        if(els('strain_hab_os')) els('strain_hab_os').innerHTML = buildZoneStrainHTML('Predicted eyestrain through each zone with current glasses', habLensOS, tOS, allowAcc, reserve);
-        if(els('strain_opt_od')) els('strain_opt_od').innerHTML = buildZoneStrainHTML('Predicted eyestrain through each zone with new prescription', optLensOD, tOD, allowAcc, reserve);
-        if(els('strain_opt_os')) els('strain_opt_os').innerHTML = buildZoneStrainHTML('Predicted eyestrain through each zone with new prescription', optLensOS, tOS, allowAcc, reserve);
+        const pupilLabel = (lens)=>fmtD(lens.powerAt(pupil.x, pupil.y)) + ' D';
 
-        if(binoOn){
-          drawBinoDisparity(els('can_bino_hab'), habLensOD, habLensOS, tOD, tOS, allowAcc, reserve, distOn, distW, minkW, habCfg, habCfg, habOD.add, habOS.add, frameOn, habPupil);
-          drawBinoDisparity(els('can_bino_opt'), optLensOD, optLensOS, tOD, tOS, allowAcc, reserve, distOn, distW, minkW, optCfg, optCfg, optOD.add, optOS.add, frameOn, optPupil);
+        drawResidualHeatmap(els('can_del_od'), fields.hab.OD, frameOn, pupil, pupilLabel(habLensOD));
+        drawResidualHeatmap(els('can_del_os'), fields.hab.OS, frameOn, pupil, pupilLabel(habLensOS));
+        drawResidualHeatmap(els('can_optzone_od'), fields.opt.OD, frameOn, pupil, pupilLabel(optLensOD));
+        drawResidualHeatmap(els('can_optzone_os'), fields.opt.OS, frameOn, pupil, pupilLabel(optLensOS));
+
+        const subText = 'Residual blur for ' + modeLabel(currentMode) + ', 0.00 D to 2.00 D';
+        els('hm_sub_hab').textContent = subText;
+        els('hm_sub_opt').textContent = subText;
+
+        if(els('samplepoints_details').open){
+          drawSampleValues(els('can_hab_od'), habLensOD, frameOn, pupil);
+          drawSampleValues(els('can_hab_os'), habLensOS, frameOn, pupil);
+          drawSampleValues(els('can_opt_od'), optLensOD, frameOn, pupil);
+          drawSampleValues(els('can_opt_os'), optLensOS, frameOn, pupil);
         }
 
-        const metrics = calculateMetrics(habLensOD, habLensOS, optLensOD, optLensOS, tOD, tOS, frameOn);
-        renderComparisonMetrics(metrics);
+        els('strain_hab_od').innerHTML = buildZoneStrainHTML('Current glasses, OD', habLensOD, tOD, allowAcc, reserve);
+        els('strain_hab_os').innerHTML = buildZoneStrainHTML('Current glasses, OS', habLensOS, tOS, allowAcc, reserve);
+        els('strain_opt_od').innerHTML = buildZoneStrainHTML('New prescription, OD', optLensOD, tOD, allowAcc, reserve);
+        els('strain_opt_os').innerHTML = buildZoneStrainHTML('New prescription, OS', optLensOS, tOS, allowAcc, reserve);
+
+        if(binoOn){
+          const foC = Object.assign({}, fo, {frameOn: false});
+          drawBinoDisparity(els('can_bino_hab'), computeField(habLensOD, tOD, foC), computeField(habLensOS, tOS, foC), frameOn, pupil);
+          drawBinoDisparity(els('can_bino_opt'), computeField(optLensOD, tOD, foC), computeField(optLensOS, tOS, foC), frameOn, pupil);
+        }
+
+        renderComparisonMetrics(calculateMetrics(fields, allowAcc, reserve));
+
+        renderHeadCard('head_hab', 'Current glasses', habLensOD, habLensOS, tOD, tOS, gaze, allowAcc, reserve);
+        renderHeadCard('head_opt', 'New prescription', optLensOD, optLensOS, tOD, tOS, gaze, allowAcc, reserve);
       }
 
       function setMode(m){
         currentMode = m;
         modeButtons.forEach(b=>b.classList.toggle('active', b.dataset.mode === m));
-        render();
+        scheduleRender();
+      }
+
+      // Animate the vertical gaze slider to a value so the pupil visibly walks down the lens.
+      let gazeAnim = null;
+      function animateGazeTo(targetMm){
+        const el = els('gaze_y');
+        const from = parseNum(el.value);
+        const to = clamp(targetMm, parseNum(el.min), parseNum(el.max));
+        if(gazeAnim) cancelAnimationFrame(gazeAnim);
+        const t0 = performance.now();
+        const dur = 700;
+        function step(now){
+          const t = clamp((now - t0) / dur, 0, 1);
+          const e = 1 - Math.pow(1 - t, 3);
+          el.value = (from + (to - from) * e).toFixed(2);
+          render();
+          if(t < 1) gazeAnim = requestAnimationFrame(step);
+          else { el.value = to; render(); gazeAnim = null; }
+        }
+        gazeAnim = requestAnimationFrame(step);
       }
 
       function hookInputs(){
         modeButtons.forEach(b=>b.addEventListener('click', ()=>setMode(b.dataset.mode)));
-        if(els('pal-generate')) els('pal-generate').addEventListener('click', render);
+        els('pal-generate').addEventListener('click', scheduleRender);
 
-        if(els('sync_hab_to_opt')){
-          els('sync_hab_to_opt').addEventListener('click', ()=>{
-            setInputValue('hab_od_sph', els('opt_od_sph').value);
-            setInputValue('hab_od_cyl', els('opt_od_cyl').value);
-            setInputValue('hab_od_axis', els('opt_od_axis').value);
-            setInputValue('hab_od_add', els('opt_od_add').value);
+        els('sync_hab_to_opt').addEventListener('click', ()=>{
+          for(const eye of ['od','os']){
+            for(const f of ['sph','cyl','axis','add']){
+              els('hab_' + eye + '_' + f).value = els('opt_' + eye + '_' + f).value;
+            }
+          }
+          scheduleRender();
+        });
 
-            setInputValue('hab_os_sph', els('opt_os_sph').value);
-            setInputValue('hab_os_cyl', els('opt_os_cyl').value);
-            setInputValue('hab_os_axis', els('opt_os_axis').value);
-            setInputValue('hab_os_add', els('opt_os_add').value);
-
-            render();
+        Array.from(document.querySelectorAll('#pal-tool .step button')).forEach(b=>{
+          b.addEventListener('click', ()=>{
+            const inp = els(b.dataset.step);
+            const v = parseNum(inp.value) + parseNum(b.dataset.d);
+            inp.value = fmtD(roundToStep(v, 0.25)).replace('−', '-');
+            scheduleRender();
           });
-        }
+        });
 
         Array.from(document.querySelectorAll('#pal-tool input')).forEach(inp=>{
-          inp.addEventListener('change', render);
-          inp.addEventListener('keyup', (e)=>{ if(e.key === 'Enter') render(); });
+          if(inp.type === 'range'){
+            inp.addEventListener('input', scheduleRender);
+          } else {
+            inp.addEventListener('change', scheduleRender);
+            inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') inp.blur(); });
+          }
         });
 
         Array.from(document.querySelectorAll('#pal-tool select')).forEach(sel=>{
-          sel.addEventListener('change', render);
+          sel.addEventListener('change', scheduleRender);
         });
+
+        els('fit_reset').addEventListener('click', ()=>{
+          els('fit_h').value = 0; els('fit_pd').value = 0; scheduleRender();
+        });
+        els('gaze_reset').addEventListener('click', ()=>{
+          els('gaze_x').value = 0; animateGazeTo(0);
+        });
+
+        function findFor(which){
+          const fit = readFit();
+          const gaze = readGaze();
+          const allowAcc = els('acc_on').checked;
+          const reserve = usableAccommodationReserve(parseNum(els('acc_age').value), els('acc_model').value, parseNum(els('acc_pct').value));
+          const cfg = getDesignConfig(which);
+          const rxOD = readRx(which + '_od'), rxOS = readRx(which + '_os');
+          const optOD = readRx('opt_od'), optOS = readRx('opt_os');
+          const tOD = targetSE(optOD, currentMode), tOS = targetSE(optOS, currentMode);
+          const found = findClearGaze(makeLens(rxOD, cfg, 'OD', fit), makeLens(rxOS, cfg, 'OS', fit), tOD, tOS, gaze.rightMm, allowAcc, reserve);
+          animateGazeTo(found.downMm);
+        }
+        els('find_hab').addEventListener('click', ()=>findFor('hab'));
+        els('find_opt').addEventListener('click', ()=>findFor('opt'));
+
+        document.querySelectorAll('.head-card').forEach(card=>{
+          card.addEventListener('click', (e)=>{
+            const b = e.target.closest('button[data-goto]');
+            if(b) animateGazeTo(parseNum(b.dataset.goto));
+          });
+        });
+
+        els('samplepoints_details').addEventListener('toggle', ()=>{ if(els('samplepoints_details').open) scheduleRender(); });
       }
 
       setLegendBars();
