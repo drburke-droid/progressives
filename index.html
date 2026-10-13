@@ -1111,19 +1111,22 @@
       }
       return Object.assign(b, { cls, text });
     }
-    // Walk the pupil down the lens along the current horizontal gaze; prefer the clear point
-    // nearest primary gaze, otherwise the least-blurred point.
+    // Walk the pupil down the lens along the current horizontal gaze and find the sharpest
+    // point for the target (worse eye). Among points within 0.02 D of that best blur, the one
+    // closest to primary gaze wins, so a posture change is never asked for without a gain.
     function findClearGaze(lOD, lOS, needOD, needOS, rightMm, o) {
-      let best = { downMm: 0, worst: Infinity }, nearest = null;
-      const x = mm(rightMm);
+      const x = mm(rightMm), pts = [];
+      let bestBlur = Infinity;
       for (let d = -6; d <= 20; d += 0.25) {
         const y = FC_Y + mm(d);
         if (x * x + y * y > 1) continue;
         const worst = Math.max(blurAt(lOD, needOD, x, y, o).blur, blurAt(lOS, needOS, x, y, o).blur);
-        if (worst < best.worst) best = { downMm: d, worst };
-        if (worst <= CLEAR_TOL && (nearest === null || Math.abs(d) < Math.abs(nearest.downMm))) nearest = { downMm: d, worst };
+        pts.push({ downMm: d, worst });
+        if (worst < bestBlur) bestBlur = worst;
       }
-      return nearest || best;
+      let pick = null;
+      for (const p of pts) if (p.worst <= bestBlur + 0.02 && (pick === null || Math.abs(p.downMm) < Math.abs(pick.downMm))) pick = p;
+      return pick || { downMm: 0, worst: Infinity };
     }
 
     function renderHead(id, title, color, lOD, lOS, needOD, needOS, gaze, o) {
