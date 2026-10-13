@@ -53,6 +53,7 @@
       color-scheme: dark;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { -webkit-text-size-adjust: 100%; }
     body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); }
     a { color: var(--accent); }
@@ -133,6 +134,18 @@
     .bino { margin-top: 8px; }
     .bino canvas { display: block; width: 100%; max-width: 360px; height: auto; border-radius: 8px; background: var(--panel); margin: 0 auto; }
     .legend-bar { height: 10px; border-radius: 5px; margin-top: 10px; }
+    .legend-cats { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; font-size: 13.5px; }
+    .legend-cats span { display: inline-flex; align-items: center; gap: 7px; }
+    .legend-cats i { width: 16px; height: 16px; border-radius: 4px; display: inline-block; border: 1px solid rgba(233,237,244,0.2); }
+    .zones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+    .zone { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; }
+    .zone .zl { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .zone .zl i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .zone .zv { font-size: 18px; font-weight: 700; font-family: var(--mono); line-height: 1.2; margin-top: 2px; }
+    .zone .zv small { font-size: 11px; color: var(--muted); font-family: var(--font); font-weight: 400; }
+    .zone .zbar { height: 5px; background: #2a303d; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+    .zone .zbar i { display: block; height: 100%; border-radius: 3px; }
+    .zone .zn { font-size: 11px; color: var(--muted); margin-top: 3px; }
     .legend-ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px; }
     .map-caption { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
 
@@ -346,6 +359,7 @@
         <div class="stage-tools">
           <div class="opt"><span class="label" id="map-label">Show</span>
             <div class="seg" id="map-picker" role="group" aria-labelledby="map-label">
+              <button type="button" data-map="zones">Clear zones</button>
               <button type="button" data-map="blur">Blur for this distance</button>
               <button type="button" data-map="astig">Unwanted astigmatism</button>
               <button type="button" data-map="power">Mean power vs need</button>
@@ -362,6 +376,7 @@
               <div class="map"><canvas id="map_cur_os" width="560" height="560" role="img" aria-label="Current glasses, left lens"></canvas><span class="eye">OS</span></div>
               <div class="profile"><canvas id="prof_cur" width="128" height="560" role="img" aria-label="Current glasses, power along the corridor"></canvas></div>
             </div>
+            <div class="zones" id="cur_zones"></div>
             <div class="bino" id="bino_cur_wrap" hidden><canvas id="bino_cur" width="560" height="560"></canvas><p class="map-caption" style="text-align:center">Binocular mismatch: difference between the two eyes' residual blur. Alert above 0.50 D.</p></div>
           </div>
           <div class="lens-col">
@@ -371,11 +386,13 @@
               <div class="map"><canvas id="map_new_os" width="560" height="560" role="img" aria-label="New prescription, left lens"></canvas><span class="eye">OS</span></div>
               <div class="profile"><canvas id="prof_new" width="128" height="560" role="img" aria-label="New prescription, power along the corridor"></canvas></div>
             </div>
+            <div class="zones" id="new_zones"></div>
             <div class="bino" id="bino_new_wrap" hidden><canvas id="bino_new" width="560" height="560"></canvas><p class="map-caption" style="text-align:center">Binocular mismatch: difference between the two eyes' residual blur. Alert above 0.50 D.</p></div>
           </div>
         </div>
         <div class="legend-bar" id="legend_bar"></div>
         <div class="legend-ticks" id="legend_ticks"></div>
+        <div class="legend-cats" id="legend_cats" hidden></div>
         <p class="map-caption" id="map_caption"></p>
         <p class="hint">Each lens is drawn as the wearer sees it from behind: N is the nose side, T the temple side. The circle is the pupil at the chosen gaze, the small cross is the lens' fitting cross, the dashed lines mark the fitting cross, half the add and the near reference point. The strip beside each pair plots power along the corridor (OD solid, OS dashed) against what the eye needs. Drag the pupil on any map, or use the gaze sliders below.</p>
       </section>
@@ -490,7 +507,8 @@
       <ul>
         <li><strong>Prescriptions:</strong> the new prescription is taken as the eye's true refraction, and everything is measured against it. Sphere, cylinder and axis are all modelled with power vectors, so an axis change alone produces blur.</li>
         <li><strong>Looking at:</strong> pick a viewing distance. The lens needs the distance prescription plus the dioptric demand of that distance, less whatever accommodation the patient can comfortably supply. "Add needed" shows the result.</li>
-        <li><strong>Lens maps:</strong> "Blur" combines the residual spherical error, the prescription's cylinder mismatch and the lens' own unwanted astigmatism into one blur strength at every point. "Unwanted astigmatism" is the lens design on its own, as a manufacturer's plot would show it. "Mean power vs need" shows how far the local power sits from what the eye needs, minus in blue and plus in red.</li>
+        <li><strong>Clear zones:</strong> the default map colours every point of each lens by what it brings into focus for this wearer: far, mid-range (about 1 m to a few metres) or reading (45 cm and closer), with the blurred sides of the progressive in grey and any area that is too strong for every distance in violet. The zone names are written on the lens, and the width of each zone is measured through the corridor in millimetres, so two designs can be compared at a glance.</li>
+        <li><strong>Other maps:</strong> "Blur" combines the residual spherical error, the prescription's cylinder mismatch and the lens' own unwanted astigmatism into one blur strength at every point. "Unwanted astigmatism" is the lens design on its own, as a manufacturer's plot would show it. "Mean power vs need" shows how far the local power sits from what the eye needs, minus in blue and plus in red.</li>
         <li><strong>Fit and gaze:</strong> the fitting height and centration sliders move the lens relative to the eye. The gaze sliders move the pupil through the lens, and the pupil can also be dragged on any map. "Find clear view" finds the nearest posture that brings the chosen distance into focus and shows the chin lift it takes.</li>
         <li><strong>What the patient sees:</strong> a letter chart blurred by the residual error at the pupil, for the worse eye, with an approximate acuity.</li>
         <li><strong>Share:</strong> the address bar holds every setting, so "Copy link" reproduces exactly what you see. "Save image" downloads a labelled picture of both lenses.</li>
@@ -570,6 +588,16 @@
     const SEQ_STOPS = [[0, '#171c27'], [0.25, '#4a3b1f'], [0.5, '#9a6414'], [0.75, '#dc9a12'], [1, '#ffd166']];
     const DIV_STOPS = [[0, '#3987e5'], [0.5, '#383835'], [1, '#e66767']];
     const SEQ = rampLUT(SEQ_STOPS), DIV = rampLUT(DIV_STOPS);
+    // Clear-zone categories: what each point of the lens brings into focus for this wearer.
+    const ZONES = [
+      { key: 'blur', name: 'Blurred', hex: '#262c39', text: '#a9b2c3' },
+      { key: 'over', name: 'Too strong', hex: '#6f63b5', text: '#e9edf4' },
+      { key: 'far',  name: 'Far',       hex: '#3987e5', text: '#ffffff' },
+      { key: 'mid',  name: 'Mid-range', hex: '#199e70', text: '#ffffff' },
+      { key: 'near', name: 'Reading',   hex: '#d95926', text: '#ffffff' },
+    ];
+    const ZONE_RGB = ZONES.map((z) => hex(z.hex));
+    const READ_DEMAND = 2.2;          // a point that brings 45 cm into focus counts as the reading zone
     const cssGradient = (stops) => 'linear-gradient(90deg, ' + stops.map(([t, c]) => `${c} ${Math.round(t * 100)}%`).join(', ') + ')';
     const SURFACE = hex('#12151c');
 
@@ -758,6 +786,10 @@
     function computeField(lens, need, o) {
       const N = FIELD_N, mask = lensMask(N, lens.eye, o.frameOn);
       const blur = new Float32Array(N * N), signed = new Float32Array(N * N), M = new Float32Array(N * N), cyl = new Float32Array(N * N);
+      const cat = new Uint8Array(N * N);
+      const distM = need.M - (o.demand || 0);                       // the eye's true distance refraction
+      const dJ0 = lens.rx.J0 - need.J0, dJ45 = lens.rx.J45 - need.J45, Jrx2 = dJ0 * dJ0 + dJ45 * dJ45;
+      const reserve = o.allowAcc ? o.reserve : 0;
       for (let py = 0; py < N; py++) {
         const y = (py / (N - 1)) * 2 - 1;
         for (let px = 0; px < N; px++) {
@@ -766,9 +798,18 @@
           const x = (px / (N - 1)) * 2 - 1;
           const b = blurAt(lens, need, x, y, o);
           blur[i] = b.blur; signed[i] = b.dM < 0 ? -b.blur : b.blur; M[i] = b.M; cyl[i] = b.cyl;
+          // Which viewing distance this point focuses, independent of the chosen target.
+          const J2 = Jrx2 + (b.cyl / 2) * (b.cyl / 2);
+          const tolEff = Math.sqrt(Math.max(0, CLEAR_TOL * CLEAR_TOL - J2));   // sphere tolerance left after cylinder blur
+          const f = b.M - distM;                                                // demand (D) this point is focused for
+          if (tolEff < 0.02) cat[i] = 0;                                        // blurred at every distance
+          else if (f < -(tolEff + reserve)) cat[i] = 1;                         // too much minus for anything
+          else if (f <= tolEff) cat[i] = 2;                                     // far is sharp
+          else if (f + reserve + tolEff >= READ_DEMAND) cat[i] = 4;             // 45 cm is sharp: reading
+          else cat[i] = 3;                                                      // mid-range
         }
       }
-      return { N, mask, blur, signed, M, cyl, lens, need };
+      return { N, mask, blur, signed, M, cyl, cat, lens, need };
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -834,12 +875,91 @@
       }
       ctx.restore();
     }
+    function paintZones(ctx, W, H, field) {
+      const N = field.N, img = ctx.createImageData(W, H), d = img.data;
+      for (let py = 0; py < H; py++) {
+        const fy = Math.min(N - 1, Math.floor(py * N / H));
+        for (let px = 0; px < W; px++) {
+          const fx = Math.min(N - 1, Math.floor(px * N / W));
+          const i = fy * N + fx, o = (py * W + px) * 4;
+          const c = field.mask[i] ? ZONE_RGB[field.cat[i]] : SURFACE;
+          d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+    // Write each zone's name at the centre of its area (blurred side lobes are labelled separately).
+    function labelZones(ctx, w, h, field, pupil) {
+      const N = field.N, acc = {};
+      const add = (k, px, py) => { const a = acc[k] || (acc[k] = { n: 0, sx: 0, sy: 0 }); a.n++; a.sx += px; a.sy += py; };
+      let total = 0;
+      for (let py = 0; py < N; py++) for (let px = 0; px < N; px++) {
+        const i = py * N + px; if (!field.mask[i]) continue; total++;
+        const c = field.cat[i];
+        add(c === 0 ? (px < N / 2 ? 'blurL' : 'blurR') : String(c), px, py);
+      }
+      ctx.save();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `700 ${Math.round(w * 0.05)}px ${FONT()}`;
+      const ppx = pupil ? toPx(pupil.x, w) : -1e9, ppy = pupil ? toPx(pupil.y, h) : -1e9;
+      for (const [k, a] of Object.entries(acc)) {
+        const focusZone = k === '2' || k === '3' || k === '4';
+        if (a.n < total * (focusZone ? 0.012 : 0.035)) continue;      // the focus zones matter even when thin
+        const z = ZONES[k.startsWith('blur') ? 0 : Number(k)];
+        const x = (a.sx / a.n) / (N - 1) * (w - 1);
+        let y = (a.sy / a.n) / (N - 1) * (h - 1);
+        if (Math.hypot(x - ppx, y - ppy) < w * 0.09) y -= w * 0.075;    // keep clear of the pupil marker
+        ctx.lineWidth = Math.max(3, w * 0.008); ctx.strokeStyle = 'rgba(11,13,18,0.75)'; ctx.lineJoin = 'round';
+        ctx.strokeText(z.name, x, y); ctx.fillStyle = z.text; ctx.fillText(z.name, x, y);
+      }
+      ctx.restore();
+    }
+    // Width in mm of the contiguous run of one zone through the corridor centre at a given height.
+    function zoneWidthAt(field, cat, y) {
+      const N = field.N, py = Math.round((y + 1) / 2 * (N - 1));
+      if (py < 0 || py >= N) return 0;
+      const cx = Math.round((field.lens.centerX(y) + 1) / 2 * (N - 1));
+      if (field.cat[py * N + cx] !== cat || !field.mask[py * N + cx]) return 0;
+      let l = cx, r = cx;
+      while (l > 0 && field.mask[py * N + l - 1] && field.cat[py * N + l - 1] === cat) l--;
+      while (r < N - 1 && field.mask[py * N + r + 1] && field.cat[py * N + r + 1] === cat) r++;
+      return (r - l + 1) / (N - 1) * 2 * R_MM;
+    }
+    // Far, mid-range and reading zone widths for a lens, each at its own reference height;
+    // if the zone is missing at that height, the nearest height where it exists is reported.
+    function zoneSummary(field) {
+      const lens = field.lens, out = {};
+      const probe = (cat, y0, key) => {
+        let w = zoneWidthAt(field, cat, y0);
+        if (w > 0) { out[key] = { mm: w, shiftMm: 0 }; return; }
+        let best = { mm: 0, shiftMm: 0 };
+        for (let d = -20; d <= 20; d += 0.5) { const ww = zoneWidthAt(field, cat, y0 + mm(d)); if (ww > best.mm) best = { mm: ww, shiftMm: d }; }
+        out[key] = best;
+      };
+      probe(2, lens.fcY, 'far'); probe(3, lens.yAtRamp(0.5), 'mid'); probe(4, lens.nrpY, 'near');
+      return out;
+    }
+    function renderZoneSummary(id, fOD, fOS) {
+      const a = zoneSummary(fOD), b = zoneSummary(fOS);
+      const cards = [['far', 'Far zone', 'at the fitting cross', 2], ['mid', 'Mid-range zone', 'half way down the corridor', 3], ['near', 'Reading zone', 'at the near reference point', 4]].map(([k, name, where, ci]) => {
+        const z = (a[k].mm <= b[k].mm) ? a[k] : b[k];        // report the narrower eye
+        const widthTxt = z.mm > 0 ? `${z.mm.toFixed(0)}<small> mm wide</small>` : 'none';
+        const note = z.mm === 0 ? `No ${name.toLowerCase().replace(' zone', '')} focus anywhere in the lens`
+          : z.shiftMm === 0 ? `Measured ${where}`
+          : `Not ${where}: found ${Math.abs(z.shiftMm).toFixed(0)} mm ${z.shiftMm > 0 ? 'lower' : 'higher'}`;
+        return `<div class="zone"><div class="zl"><i style="background:${ZONES[ci].hex}"></i>${name}</div><div class="zv">${widthTxt}</div>
+          <div class="zbar"><i style="width:${clamp(z.mm / 50 * 100, 0, 100).toFixed(0)}%;background:${ZONES[ci].hex}"></i></div><div class="zn">${note}</div></div>`;
+      });
+      $(id).innerHTML = cards.join('');
+    }
     function drawMap(canvas, field, mode, frameOn, pupil, label) {
       const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
-      if (mode === 'astig') paint(ctx, w, h, field.N, field.mask, (i) => field.cyl[i] / MAX_D, SEQ);
+      if (mode === 'zones') paintZones(ctx, w, h, field);
+      else if (mode === 'astig') paint(ctx, w, h, field.N, field.mask, (i) => field.cyl[i] / MAX_D, SEQ);
       else if (mode === 'power') paint(ctx, w, h, field.N, field.mask, (i) => 0.5 + (field.M[i] - field.need.M) / (2 * MAX_D), DIV);
       else paint(ctx, w, h, field.N, field.mask, (i) => field.blur[i] / MAX_D, SEQ);
       outline(ctx, w, h, frameOn, field.lens.eye);
+      if (mode === 'zones') labelZones(ctx, w, h, field, pupil);
       guides(ctx, w, h, field.lens, pupil, label);
     }
     function drawBino(canvas, fOD, fOS, frameOn, pupil) {
@@ -957,7 +1077,7 @@
     // ═══════════════════════════════════════════════════════════
     // State and verdicts
     // ═══════════════════════════════════════════════════════════
-    const ui = { targetCm: 0, map: 'blur', frameOn: true, bino: false };
+    const ui = { targetCm: 0, map: 'zones', frameOn: true, bino: false };
     const chinLiftDeg = (downMm) => Math.atan2(downMm, EYE_ROT_MM) * 180 / Math.PI;
     const readFit = () => ({ heightMm: num($('fit_h').value), pdMm: num($('fit_pd').value) });
     const readGaze = () => ({ downMm: num($('gaze_y').value), rightMm: num($('gaze_x').value) });
@@ -1060,6 +1180,7 @@
       syncDesignUI('cur'); syncDesignUI('new');
       const cur = { OD: readRx('cur_od'), OS: readRx('cur_os') }, nw = { OD: readRx('new_od'), OS: readRx('new_os') };
       const o = currentO(), { allowAcc, reserve, amp } = o;
+      o.demand = demandOf(ui.targetCm);
       const age = clamp(num($('acc_age').value, 62), 0, 110);
       const pupilMm = clamp(num($('pupil_mm').value, 3.5), 1.5, 8);
       const demand = demandOf(ui.targetCm);
@@ -1095,6 +1216,7 @@
       const labelAt = (f) => {
         const i = Math.round((pupil.y + 1) / 2 * (f.N - 1)) * f.N + Math.round((pupil.x + 1) / 2 * (f.N - 1));
         if (pupil.x * pupil.x + pupil.y * pupil.y > 1 || !f.mask[i]) return null;
+        if (ui.map === 'zones') return ZONES[f.cat[i]].name;
         if (ui.map === 'astig') return f.cyl[i].toFixed(2) + ' D cyl';
         if (ui.map === 'power') return fmtD(f.M[i]) + ' D';
         return 'blur ' + f.blur[i].toFixed(2) + ' D';
@@ -1105,6 +1227,8 @@
       drawMap($('map_new_os'), fields.new.OS, ui.map, ui.frameOn, pupil, labelAt(fields.new.OS));
       drawProfile($('prof_cur'), lens.cur.OD, lens.cur.OS, need.OD, pupil);
       drawProfile($('prof_new'), lens.new.OD, lens.new.OS, need.OD, pupil);
+      renderZoneSummary('cur_zones', fields.cur.OD, fields.cur.OS);
+      renderZoneSummary('new_zones', fields.new.OD, fields.new.OS);
 
       $('bino_cur_wrap').hidden = !ui.bino; $('bino_new_wrap').hidden = !ui.bino;
       if (ui.bino) {
@@ -1114,10 +1238,14 @@
       }
 
       // Legend
-      const divg = ui.map === 'power';
+      const divg = ui.map === 'power', zonesOn = ui.map === 'zones';
+      $('legend_bar').hidden = zonesOn; $('legend_ticks').hidden = zonesOn; $('legend_cats').hidden = !zonesOn;
       $('legend_bar').style.background = cssGradient(divg ? DIV_STOPS : SEQ_STOPS);
       $('legend_ticks').innerHTML = (divg ? ['−2.00', '−1.00', '0.00', '+1.00', '+2.00 D'] : ['0.00', '0.50', '1.00', '1.50', '2.00 D']).map((t) => `<span>${t}</span>`).join('');
-      $('map_caption').textContent = divg
+      $('legend_cats').innerHTML = [ZONES[2], ZONES[3], ZONES[4], ZONES[0], ZONES[1]].map((z) => `<span><i style="background:${z.hex}"></i>${z.name === 'Far' ? 'Far: distance is sharp' : z.name === 'Mid-range' ? 'Mid-range: about 1 m to a few metres (screens, shelves, cooking)' : z.name === 'Reading' ? 'Reading: 45 cm and closer' : z.name === 'Blurred' ? 'Blurred: the soft sides of a progressive' : 'Too strong: more minus than the eye needs, blurred at every distance'}</span>`).join('');
+      $('map_caption').textContent = zonesOn
+        ? `Where each lens is sharp for this wearer, whatever they look at. The eye looks through the circle; the zone it lands in is what comes into focus${allowAcc && reserve > 0.005 ? ', with up to ' + reserve.toFixed(2) + ' D of accommodation helping toward near' : ''}. Widths below are measured through the middle of the corridor.`
+        : divg
         ? 'Mean power relative to what the eye needs at this distance. Blue: short of plus (the eye must accommodate, or sees blur). Red: too much plus (blur that cannot be cleared).'
         : ui.map === 'astig'
           ? 'Unwanted cylinder of the lens design alone, in dioptres. Dark: clean optics. Bright: astigmatic blur and swim.'
@@ -1197,7 +1325,7 @@
       if ($('acc_pct').value.trim() !== '50') p.set('ap', $('acc_pct').value.trim());
       if ($('pupil_mm').value.trim() !== '3.5') p.set('pupil', $('pupil_mm').value.trim());
       if (ui.targetCm) p.set('cm', String(ui.targetCm));
-      if (ui.map !== 'blur') p.set('map', ui.map);
+      if (ui.map !== 'zones') p.set('map', ui.map);
       if (!ui.frameOn) p.set('frame', '0');
       if (ui.bino) p.set('bino', '1');
       for (const k of ['cur', 'new']) {
@@ -1223,7 +1351,7 @@
       if (p.has('ap')) $('acc_pct').value = p.get('ap');
       if (p.has('pupil')) $('pupil_mm').value = p.get('pupil');
       ui.targetCm = clamp(Math.round(num(p.get('cm'), 0)), 0, 1000); $('target_cm').value = ui.targetCm;
-      ui.map = ['blur', 'astig', 'power'].includes(p.get('map')) ? p.get('map') : 'blur';
+      ui.map = ['zones', 'blur', 'astig', 'power'].includes(p.get('map')) ? p.get('map') : 'zones';
       ui.frameOn = p.get('frame') !== '0'; $('frame_on').checked = ui.frameOn;
       ui.bino = p.get('bino') === '1'; $('bino_on').checked = ui.bino;
       for (const k of ['cur', 'new']) {
@@ -1263,10 +1391,20 @@
       };
       tile($('map_cur_od'), 30, 'Current glasses, OD', '#ffb703');
       tile($('map_new_od'), 390, 'New prescription, OD', '#4cc9f0');
-      const lb = g.createLinearGradient(30, 0, 730, 0);
-      for (const [t, c] of (ui.map === 'power' ? DIV_STOPS : SEQ_STOPS)) lb.addColorStop(t, c);
-      g.fillStyle = lb; g.fillRect(30, 430, 700, 10);
-      text(ui.map === 'power' ? 'Mean power vs need, −2 to +2 D' : ui.map === 'astig' ? 'Unwanted astigmatism, 0 to 2 D' : `Blur for ${last.what}: dark is clear, bright is 2 D of blur`, 30, 462, `400 14px ${sans}`, '#a9b2c3', 700);
+      if (ui.map === 'zones') {
+        let x = 30;
+        for (const z of [ZONES[2], ZONES[3], ZONES[4], ZONES[0], ZONES[1]]) {
+          g.fillStyle = z.hex; g.fillRect(x, 432, 16, 16);
+          g.font = `500 14px ${sans}`; g.fillStyle = '#d3d9e4'; g.fillText(z.name, x + 22, 445);
+          x += 22 + g.measureText(z.name).width + 22;
+        }
+        text('Where each lens is sharp for this wearer', 30, 476, `400 14px ${sans}`, '#a9b2c3', 700);
+      } else {
+        const lb = g.createLinearGradient(30, 0, 730, 0);
+        for (const [t, c] of (ui.map === 'power' ? DIV_STOPS : SEQ_STOPS)) lb.addColorStop(t, c);
+        g.fillStyle = lb; g.fillRect(30, 430, 700, 10);
+        text(ui.map === 'power' ? 'Mean power vs need, −2 to +2 D' : ui.map === 'astig' ? 'Unwanted astigmatism, 0 to 2 D' : `Blur for ${last.what}: dark is clear, bright is 2 D of blur`, 30, 462, `400 14px ${sans}`, '#a9b2c3', 700);
+      }
       g.fillStyle = '#12151c'; g.fillRect(760, 0, 440, H); g.fillStyle = '#4cc9f0'; g.fillRect(760, 0, 4, H);
       let y = 70;
       y = text('PROGRESSIVE LENS COMPARATOR', 800, y, `600 15px ${sans}`, '#a9b2c3');
