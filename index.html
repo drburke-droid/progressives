@@ -908,7 +908,7 @@
         const z = ZONES[k.startsWith('blur') ? 0 : Number(k)];
         const x = (a.sx / a.n) / (N - 1) * (w - 1);
         let y = (a.sy / a.n) / (N - 1) * (h - 1);
-        if (Math.hypot(x - ppx, y - ppy) < w * 0.09) y -= w * 0.075;    // keep clear of the pupil marker
+        if (Math.hypot(x - ppx, y - ppy) < w * 0.07) y += (y >= ppy ? 1 : -1) * w * 0.07;    // step away from the pupil marker
         ctx.lineWidth = Math.max(3, w * 0.008); ctx.strokeStyle = 'rgba(11,13,18,0.75)'; ctx.lineJoin = 'round';
         ctx.strokeText(z.name, x, y); ctx.fillStyle = z.text; ctx.fillText(z.name, x, y);
       }
