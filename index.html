@@ -587,7 +587,9 @@
     }
     const SEQ_STOPS = [[0, '#171c27'], [0.25, '#4a3b1f'], [0.5, '#9a6414'], [0.75, '#dc9a12'], [1, '#ffd166']];
     const DIV_STOPS = [[0, '#3987e5'], [0.5, '#383835'], [1, '#e66767']];
-    const SEQ = rampLUT(SEQ_STOPS), DIV = rampLUT(DIV_STOPS);
+    // Blur map: green is sharp, through amber to red at 2 D of blur (status semantics for patients).
+    const BLUR_STOPS = [[0, '#1f9a52'], [0.25, '#8fbf3a'], [0.5, '#e6b422'], [0.75, '#e8702a'], [1, '#d03b3b']];
+    const SEQ = rampLUT(SEQ_STOPS), DIV = rampLUT(DIV_STOPS), BLUR = rampLUT(BLUR_STOPS);
     // Clear-zone categories: what each point of the lens brings into focus for this wearer.
     const ZONES = [
       { key: 'blur', name: 'Blurred', hex: '#262c39', text: '#a9b2c3' },
@@ -957,7 +959,7 @@
       if (mode === 'zones') paintZones(ctx, w, h, field);
       else if (mode === 'astig') paint(ctx, w, h, field.N, field.mask, (i) => field.cyl[i] / MAX_D, SEQ);
       else if (mode === 'power') paint(ctx, w, h, field.N, field.mask, (i) => 0.5 + (field.M[i] - field.need.M) / (2 * MAX_D), DIV);
-      else paint(ctx, w, h, field.N, field.mask, (i) => field.blur[i] / MAX_D, SEQ);
+      else paint(ctx, w, h, field.N, field.mask, (i) => field.blur[i] / MAX_D, BLUR);
       outline(ctx, w, h, frameOn, field.lens.eye);
       if (mode === 'zones') labelZones(ctx, w, h, field, pupil);
       guides(ctx, w, h, field.lens, pupil, label);
@@ -1243,7 +1245,7 @@
       // Legend
       const divg = ui.map === 'power', zonesOn = ui.map === 'zones';
       $('legend_bar').hidden = zonesOn; $('legend_ticks').hidden = zonesOn; $('legend_cats').hidden = !zonesOn;
-      $('legend_bar').style.background = cssGradient(divg ? DIV_STOPS : SEQ_STOPS);
+      $('legend_bar').style.background = cssGradient(divg ? DIV_STOPS : ui.map === 'blur' ? BLUR_STOPS : SEQ_STOPS);
       $('legend_ticks').innerHTML = (divg ? ['−2.00', '−1.00', '0.00', '+1.00', '+2.00 D'] : ['0.00', '0.50', '1.00', '1.50', '2.00 D']).map((t) => `<span>${t}</span>`).join('');
       $('legend_cats').innerHTML = [ZONES[2], ZONES[3], ZONES[4], ZONES[0], ZONES[1]].map((z) => `<span><i style="background:${z.hex}"></i>${z.name === 'Far' ? 'Far: distance is sharp' : z.name === 'Mid-range' ? 'Mid-range: about 1 m to a few metres (screens, shelves, cooking)' : z.name === 'Reading' ? 'Reading: 45 cm and closer' : z.name === 'Blurred' ? 'Blurred: the soft sides of a progressive' : 'Too strong: more minus than the eye needs, blurred at every distance'}</span>`).join('');
       $('map_caption').textContent = zonesOn
@@ -1252,7 +1254,7 @@
         ? 'Mean power relative to what the eye needs at this distance. Blue: short of plus (the eye must accommodate, or sees blur). Red: too much plus (blur that cannot be cleared).'
         : ui.map === 'astig'
           ? 'Unwanted cylinder of the lens design alone, in dioptres. Dark: clean optics. Bright: astigmatic blur and swim.'
-          : 'Blur strength at this distance after accommodation: spherical error, cylinder mismatch and the lens’ unwanted astigmatism combined. Dark: clear. Bright: blurred.';
+          : 'Blur strength at this distance after accommodation: spherical error, cylinder mismatch and the lens’ unwanted astigmatism combined. Green: sharp. Amber: softening. Red: blurred.';
 
       // Metrics
       const m = { total: 0, cur: { clear: 0, usable: 0, strain: 0 }, new: { clear: 0, usable: 0, strain: 0 } };
@@ -1404,9 +1406,9 @@
         text('Where each lens is sharp for this wearer', 30, 476, `400 14px ${sans}`, '#a9b2c3', 700);
       } else {
         const lb = g.createLinearGradient(30, 0, 730, 0);
-        for (const [t, c] of (ui.map === 'power' ? DIV_STOPS : SEQ_STOPS)) lb.addColorStop(t, c);
+        for (const [t, c] of (ui.map === 'power' ? DIV_STOPS : ui.map === 'astig' ? SEQ_STOPS : BLUR_STOPS)) lb.addColorStop(t, c);
         g.fillStyle = lb; g.fillRect(30, 430, 700, 10);
-        text(ui.map === 'power' ? 'Mean power vs need, −2 to +2 D' : ui.map === 'astig' ? 'Unwanted astigmatism, 0 to 2 D' : `Blur for ${last.what}: dark is clear, bright is 2 D of blur`, 30, 462, `400 14px ${sans}`, '#a9b2c3', 700);
+        text(ui.map === 'power' ? 'Mean power vs need, −2 to +2 D' : ui.map === 'astig' ? 'Unwanted astigmatism, 0 to 2 D' : `Blur for ${last.what}: green is sharp, red is 2 D of blur`, 30, 462, `400 14px ${sans}`, '#a9b2c3', 700);
       }
       g.fillStyle = '#12151c'; g.fillRect(760, 0, 440, H); g.fillStyle = '#4cc9f0'; g.fillRect(760, 0, 4, H);
       let y = 70;
