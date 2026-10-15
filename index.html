@@ -408,7 +408,7 @@
               <button class="btn small" id="fit_reset" type="button">Perfect fit</button>
             </div>
             <div>
-              <div class="slider"><label for="gaze_y">Vertical gaze <b id="gaze_y_v">0.0 mm</b></label><input type="range" id="gaze_y" min="-6" max="20" step="0.5" value="0"><div class="ends"><span>Looking up</span><span>Looking down (chin up)</span></div></div>
+              <div class="slider"><label for="gaze_y">Vertical gaze <b id="gaze_y_v">0.0 mm</b></label><input type="range" id="gaze_y" min="-6" max="20" step="0.1" value="0"><div class="ends"><span>Looking up</span><span>Looking down (chin up)</span></div></div>
               <div class="slider"><label for="gaze_x">Horizontal gaze <b id="gaze_x_v">0.0 mm</b></label><input type="range" id="gaze_x" min="-15" max="15" step="0.5" value="0"><div class="ends"><span>Patient's left</span><span>Patient's right</span></div></div>
               <div class="options">
                 <button class="btn small" id="gaze_reset" type="button">Primary gaze</button>
@@ -421,7 +421,7 @@
             <div class="head-card" id="head_cur" aria-live="polite"></div>
             <div class="head-card" id="head_new" aria-live="polite"></div>
           </div>
-          <p class="hint">"Find clear view" walks the pupil down the lens until the chosen distance comes into focus. For distance the head tilts by the angle that takes; for reading and screens the head stays level and the eyes drop (25 mm from lens to the eye's centre of rotation, so 1 mm is about 2.3&deg;).</p>
+          <p class="hint">"Find clear view" searches the whole lens for the sharpest point for the chosen distance and moves the pupil there. A relaxed glance already drops the eyes about 6 mm for a monitor and 11 mm for reading; the head tilts only by the extra drop the lens demands beyond that (25 mm from lens to the eye's centre of rotation, so 1 mm is about 2.3&deg;).</p>
         </section>
 
         <!-- What the patient sees -->
@@ -509,7 +509,7 @@
         <li><strong>Looking at:</strong> pick a viewing distance. The lens needs the distance prescription plus the dioptric demand of that distance, less whatever accommodation the patient can comfortably supply. "Add needed" shows the result.</li>
         <li><strong>Clear zones:</strong> the default map colours every point of each lens by what it brings into focus for this wearer: far, mid-range (about 1 m to a few metres) or reading (45 cm and closer), with the blurred sides of the progressive in grey and any area that is too strong for every distance in violet. The zone names are written on the lens, and the width of each zone is measured through the corridor in millimetres, so two designs can be compared at a glance.</li>
         <li><strong>Other maps:</strong> "Blur" combines the residual spherical error, the prescription's cylinder mismatch and the lens' own unwanted astigmatism into one blur strength at every point. "Unwanted astigmatism" is the lens design on its own, as a manufacturer's plot would show it. "Mean power vs need" shows how far the local power sits from what the eye needs, minus in blue and plus in red.</li>
-        <li><strong>Fit and gaze:</strong> the fitting height and centration sliders move the lens relative to the eye. The gaze sliders move the pupil through the lens, and the pupil can also be dragged on any map. "Find clear view" finds the nearest posture that brings the chosen distance into focus and shows the chin lift it takes.</li>
+        <li><strong>Fit and gaze:</strong> the fitting height and centration sliders move the lens relative to the eye. The gaze sliders move the pupil through the lens, and the pupil can also be dragged on any map. "Find clear view" searches the whole lens for the sharpest point for the chosen distance; a relaxed glance already drops the eyes about 6 mm for a monitor and 11 mm for reading, and the head silhouette tilts only by the extra the lens demands.</li>
         <li><strong>What the patient sees:</strong> a letter chart blurred by the residual error at the pupil, for the worse eye, with an approximate acuity.</li>
         <li><strong>Share:</strong> the address bar holds every setting, so "Copy link" reproduces exactly what you see. "Save image" downloads a labelled picture of both lenses.</li>
       </ul>
@@ -1060,9 +1060,10 @@
     // Side profile of a head facing right, rotated about the eye. Chin up = nose rises.
     // mode 'head': the head tilts so a horizontal gaze passes through the lens lower down.
     // mode 'eyes': the head stays level and the eyes drop into the near zone.
-    function headSVG(angleDeg, good, mode) {
+    // The head tilts by the chin angle (+ chin up); the gaze arrow drops by the task's relaxed glance.
+    function headSVG(chinDeg, gazeDownDeg, good) {
       const col = good ? '#7ee0b5' : '#a9b2c3';
-      const headRot = mode === 'eyes' ? 0 : -angleDeg, gazeRot = mode === 'eyes' ? angleDeg : 0;
+      const headRot = -chinDeg, gazeRot = gazeDownDeg;
       return `<svg viewBox="0 0 150 150" aria-hidden="true">
         <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#ff6b85"/></marker></defs>
         <line x1="0" y1="56" x2="150" y2="56" stroke="rgba(233,237,244,0.15)" stroke-dasharray="4 4"/>
@@ -1081,6 +1082,14 @@
     // ═══════════════════════════════════════════════════════════
     const ui = { targetCm: 0, map: 'zones', frameOn: true, bino: false };
     const chinLiftDeg = (downMm) => Math.atan2(downMm, EYE_ROT_MM) * 180 / Math.PI;
+    // How far down the lens a relaxed glance already lands for a task: straight ahead for
+    // distance, about 6 mm (14 degrees) for a monitor, 12 mm (26 degrees) for reading, 14 mm for a phone.
+    function naturalDropMm(cm) {
+      const d = demandOf(cm), pts = [[0, 0], [0.5, 1], [1.54, 6], [2.5, 12], [3.0, 14]];
+      if (d >= 3) return 14;
+      for (let i = 1; i < pts.length; i++) if (d <= pts[i][0]) { const [d0, m0] = pts[i - 1], [d1, m1] = pts[i]; return m0 + (m1 - m0) * (d - d0) / (d1 - d0); }
+      return 14;
+    }
     const readFit = () => ({ heightMm: num($('fit_h').value), pdMm: num($('fit_pd').value) });
     const readGaze = () => ({ downMm: num($('gaze_y').value), rightMm: num($('gaze_x').value) });
     const pupilFor = (g) => ({ x: mm(g.rightMm), y: FC_Y + mm(g.downMm) });
@@ -1116,39 +1125,52 @@
     // Walk the pupil down the lens along the current horizontal gaze and find the sharpest
     // point for the target (worse eye). Among points within 0.02 D of that best blur, the one
     // closest to primary gaze wins, so a posture change is never asked for without a gain.
-    function findClearGaze(lOD, lOS, needOD, needOS, rightMm, o) {
-      const x = mm(rightMm), pts = [];
+    // Search the whole lens (both eyes, worse eye counts) for the sharpest point for the target.
+    // Among points within 0.02 D of that best blur, the one closest to the natural glance for
+    // the task wins, so no posture change is asked for without a gain in sharpness.
+    function findClearGaze(lOD, lOS, needOD, needOS, o) {
+      const natural = naturalDropMm(ui.targetCm), pts = [];
       let bestBlur = Infinity;
-      for (let d = -6; d <= 20; d += 0.25) {
-        const y = FC_Y + mm(d);
-        if (x * x + y * y > 1) continue;
-        const worst = Math.max(blurAt(lOD, needOD, x, y, o).blur, blurAt(lOS, needOS, x, y, o).blur);
-        pts.push({ downMm: d, worst });
+      const worstAt = (r, d) => { const x = mm(r), y = FC_Y + mm(d); return x * x + y * y > 1 ? Infinity : Math.max(blurAt(lOD, needOD, x, y, o).blur, blurAt(lOS, needOS, x, y, o).blur); };
+      for (let r = -12; r <= 12; r += 1) for (let d = -6; d <= 20; d += 0.25) {
+        const worst = worstAt(r, d);
+        if (worst === Infinity) continue;
+        pts.push({ downMm: d, rightMm: r, worst });
         if (worst < bestBlur) bestBlur = worst;
       }
       let pick = null;
-      for (const p of pts) if (p.worst <= bestBlur + 0.02 && (pick === null || Math.abs(p.downMm) < Math.abs(pick.downMm))) pick = p;
-      return pick || { downMm: 0, worst: Infinity };
+      const cost = (p) => Math.hypot(p.rightMm * 1.5, p.downMm - natural);
+      for (const p of pts) if (p.worst <= bestBlur + 0.05 && (pick === null || cost(p) < cost(pick))) pick = p;
+      if (!pick) return { downMm: 0, rightMm: 0, worst: Infinity };
+      // Refine vertically to 0.1 mm around the pick.
+      for (let d = pick.downMm - 0.25; d <= pick.downMm + 0.25; d += 0.1) {
+        const worst = worstAt(pick.rightMm, Math.round(d * 10) / 10);
+        if (worst < pick.worst - 0.005) pick = { downMm: Math.round(d * 10) / 10, rightMm: pick.rightMm, worst };
+      }
+      return pick;
     }
 
     function renderHead(id, title, color, lOD, lOS, needOD, needOS, gaze, o) {
       const pupil = pupilFor(gaze);
       const vOD = verdictFor(lOD, needOD, pupil, o), vOS = verdictFor(lOS, needOS, pupil, o);
-      const found = findClearGaze(lOD, lOS, needOD, needOS, gaze.rightMm, o);
-      const ang = chinLiftDeg(found.downMm), clear = found.worst <= CLEAR_TOL, primary = clear && Math.abs(found.downMm) <= 0.5;
+      const found = findClearGaze(lOD, lOS, needOD, needOS, o);
+      const natural = naturalDropMm(ui.targetCm);
+      const eyeAng = chinLiftDeg(natural);                           // the relaxed downward glance for this task
+      const chin = chinLiftDeg(found.downMm) - eyeAng;               // head tilt beyond that glance (+ chin up)
+      const clear = found.worst <= CLEAR_TOL, relaxed = clear && Math.abs(chin) < 3;
       const what = targetName(ui.targetCm);
-      const nearTask = demandOf(ui.targetCm) >= 1.0;      // reading and screens: the eyes drop, the head stays level
+      const side = Math.abs(found.rightMm) >= 2 ? `, ${Math.abs(found.rightMm).toFixed(0)} mm to the ${found.rightMm > 0 ? 'right' : 'left'}` : '';
+      const where = `eyes ${found.downMm.toFixed(1)} mm ${found.downMm >= 0 ? 'down' : 'up'} the lens${side}`;
       let big, cls = '';
-      if (primary) { big = `Clear for ${what} in primary gaze`; cls = 'good'; }
-      else if (clear && nearTask) { big = `Clear for ${what} with the eyes ${Math.abs(found.downMm).toFixed(1)} mm ${found.downMm > 0 ? 'down' : 'up'} the lens, about ${Math.abs(ang).toFixed(0)}° of eye drop`; cls = Math.abs(found.downMm) > 17 ? 'bad' : 'good'; }
-      else if (clear) { big = `Needs ${Math.abs(found.downMm).toFixed(1)} mm of gaze drop, about ${Math.abs(ang).toFixed(0)}° ${found.downMm > 0 ? 'chin up' : 'chin down'}, to clear ${what}`; cls = Math.abs(ang) >= 8 ? 'bad' : ''; }
-      else { big = `No posture clears ${what}. Best is ${Math.abs(found.downMm).toFixed(1)} mm ${found.downMm >= 0 ? 'down' : 'up'}, still ${found.worst.toFixed(2)} D of blur`; cls = 'bad'; }
-      $(id).innerHTML = headSVG(ang, primary || (clear && nearTask), nearTask ? 'eyes' : 'head') +
+      if (relaxed) { big = natural > 0.5 ? `Clear for ${what} with a relaxed glance (${where})` : `Clear for ${what} in primary gaze`; cls = 'good'; }
+      else if (clear) { big = `Needs about ${Math.abs(chin).toFixed(0)}° ${chin > 0 ? 'chin up' : 'chin down'} to clear ${what} (${where}, ${Math.abs(found.downMm - natural).toFixed(0)} mm ${chin > 0 ? 'more' : 'less'} than a relaxed glance)`; cls = Math.abs(chin) >= 8 ? 'bad' : ''; }
+      else { big = `No posture clears ${what}. Best is ${where}, still ${found.worst.toFixed(2)} D of blur`; cls = 'bad'; }
+      $(id).innerHTML = headSVG(chin, eyeAng, relaxed) +
         `<div><h3><span class="dot" style="background:${color}"></span>${title}</h3>
           <div class="big ${cls}">${big}</div>
           <div class="eye-line"><b>OD</b> ${fmtD(vOD.M)} D <span class="verdict ${vOD.cls}">${vOD.text}</span></div>
           <div class="eye-line"><b>OS</b> ${fmtD(vOS.M)} D <span class="verdict ${vOS.cls}">${vOS.text}</span></div>
-          <div class="fine">Mean power under the pupil, ${fmtMm(gaze.downMm)} from the fitting cross. ${clear && !primary ? `<button type="button" class="linkish" data-goto="${found.downMm}">Show me</button>` : ''}</div>
+          <div class="fine">Mean power under the pupil, ${fmtMm(gaze.downMm)} from the fitting cross. ${clear && (Math.abs(found.downMm - gaze.downMm) > 0.3 || Math.abs(found.rightMm - gaze.rightMm) > 0.3) ? `<button type="button" class="linkish" data-goto="${found.downMm}" data-gotox="${found.rightMm}">Show me</button>` : ''}</div>
         </div>`;
       return { vOD, vOS, found, big };
     }
@@ -1438,21 +1460,23 @@
     // Input wiring
     // ═══════════════════════════════════════════════════════════
     let gazeAnim = 0;
-    function animateGazeTo(target) {
-      const el = $('gaze_y'), from = num(el.value), to = clamp(target, num(el.min), num(el.max));
+    function animateGazeTo(targetY, targetX) {
+      const ey = $('gaze_y'), ex = $('gaze_x');
+      const fromY = num(ey.value), toY = clamp(targetY, num(ey.min), num(ey.max));
+      const fromX = num(ex.value), toX = targetX === undefined ? fromX : clamp(targetX, num(ex.min), num(ex.max));
       cancelAnimationFrame(gazeAnim);
       const t0 = performance.now(), dur = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700;
       const step = (now) => {
         const t = dur ? clamp((now - t0) / dur, 0, 1) : 1, e = 1 - Math.pow(1 - t, 3);
-        el.value = (from + (to - from) * e).toFixed(2); render();
-        if (t < 1) gazeAnim = requestAnimationFrame(step); else { el.value = to; render(); }
+        ey.value = (fromY + (toY - fromY) * e).toFixed(2); ex.value = (fromX + (toX - fromX) * e).toFixed(2); render();
+        if (t < 1) gazeAnim = requestAnimationFrame(step); else { ey.value = toY; ex.value = toX; render(); }
       };
       gazeAnim = requestAnimationFrame(step);
     }
     function findFor(which) {
       if (!last) return;
-      const f = findClearGaze(last.lens[which].OD, last.lens[which].OS, last.need.OD, last.need.OS, readGaze().rightMm, currentO());
-      animateGazeTo(f.downMm);
+      const f = findClearGaze(last.lens[which].OD, last.lens[which].OS, last.need.OD, last.need.OS, currentO());
+      animateGazeTo(f.downMm, f.rightMm);
     }
 
     for (const b of document.querySelectorAll('[data-step]')) b.addEventListener('click', () => {
@@ -1474,10 +1498,10 @@
     $('copy-rx').addEventListener('click', () => { for (const e of ['od', 'os']) for (const f of RX_FIELDS) $(`cur_${e}_${f}`).value = $(`new_${e}_${f}`).value; scheduleRender(); toast('New prescription copied to current'); });
     $('swap-rx').addEventListener('click', () => { for (const e of ['od', 'os']) for (const f of RX_FIELDS) { const a = $(`cur_${e}_${f}`), b = $(`new_${e}_${f}`); [a.value, b.value] = [b.value, a.value]; } scheduleRender(); });
     $('fit_reset').addEventListener('click', () => { $('fit_h').value = 0; $('fit_pd').value = 0; scheduleRender(); });
-    $('gaze_reset').addEventListener('click', () => { $('gaze_x').value = 0; animateGazeTo(0); });
+    $('gaze_reset').addEventListener('click', () => animateGazeTo(0, 0));
     $('find_cur').addEventListener('click', () => findFor('cur'));
     $('find_new').addEventListener('click', () => findFor('new'));
-    document.addEventListener('click', (e) => { const b = e.target.closest('button[data-goto]'); if (b) animateGazeTo(num(b.dataset.goto)); });
+    document.addEventListener('click', (e) => { const b = e.target.closest('button[data-goto]'); if (b) animateGazeTo(num(b.dataset.goto), num(b.dataset.gotox)); });
     $('samples_details').addEventListener('toggle', () => { if ($('samples_details').open) scheduleRender(); });
 
     // Drag the pupil on any map
