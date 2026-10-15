@@ -639,11 +639,11 @@
     // Lens designs
     // ═══════════════════════════════════════════════════════════
     const PRESETS = {
-      gen_hard:      { name: 'Generic PAL, hard',     short: 'generic hard',    hardness: 1.15, corrWidth: 0.15, baseSharp: 12.2, baseMid: 0.52, fixed: true },
-      gen_avg:       { name: 'Generic PAL, average',  short: 'generic average', hardness: 1.00, corrWidth: 0.16, baseSharp: 11.4, baseMid: 0.52, fixed: true },
-      gen_soft:      { name: 'Generic PAL, soft',     short: 'generic soft',    hardness: 0.88, corrWidth: 0.17, baseSharp: 10.6, baseMid: 0.52, fixed: true },
-      nikon_seemax:  { name: 'Nikon SeeMax Ultimate', short: 'SeeMax Ultimate', hardness: 0.70, corrWidth: 0.30, baseSharp: 8.6,  baseMid: 0.52, fixed: false },
-      hoya_mystyle3: { name: 'Hoya MyStyle 3',        short: 'MyStyle 3',       hardness: 0.68, corrWidth: 0.30, baseSharp: 8.6,  baseMid: 0.52, fixed: false },
+      gen_hard:      { name: 'Generic PAL, hard',     short: 'generic hard',    hardness: 1.15, corrWidth: 0.15, baseSharp: 8.6, baseMid: 0.52, fixed: true },
+      gen_avg:       { name: 'Generic PAL, average',  short: 'generic average', hardness: 1.00, corrWidth: 0.16, baseSharp: 7.8, baseMid: 0.52, fixed: true },
+      gen_soft:      { name: 'Generic PAL, soft',     short: 'generic soft',    hardness: 0.88, corrWidth: 0.17, baseSharp: 7.2, baseMid: 0.52, fixed: true },
+      nikon_seemax:  { name: 'Nikon SeeMax Ultimate', short: 'SeeMax Ultimate', hardness: 0.70, corrWidth: 0.30, baseSharp: 6.6,  baseMid: 0.52, fixed: false },
+      hoya_mystyle3: { name: 'Hoya MyStyle 3',        short: 'MyStyle 3',       hardness: 0.68, corrWidth: 0.30, baseSharp: 6.6,  baseMid: 0.52, fixed: false },
     };
     const CORRIDOR = { short: { lenMm: 11, sharpMult: 1.22 }, medium: { lenMm: 14, sharpMult: 1.0 }, long: { lenMm: 17, sharpMult: 0.88 } };
     const EMPH_SHIFT = { balanced: 0, distance: 0.06, intermediate: 0.03, near: -0.06 };
@@ -1070,7 +1070,7 @@
         <g transform="rotate(${headRot.toFixed(2)} 84 56)">
           <path d="M 52 148 L 56 118 C 44 108 32 92 32 66 C 32 36 52 16 76 16 C 92 16 100 28 101 42 L 109 66 L 100 70 C 102 78 100 84 96 86 C 100 92 98 98 94 100 C 96 106 92 112 82 112 C 78 118 70 124 66 126 L 68 148 Z" fill="rgba(233,237,244,0.08)" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
           <circle cx="84" cy="56" r="3.2" fill="#e9edf4"/>
-          <line x1="118" y1="30" x2="118" y2="86" stroke="#4cc9f0" stroke-width="3" stroke-linecap="round"/>
+          <line x1="122" y1="30" x2="114" y2="84" stroke="#4cc9f0" stroke-width="3" stroke-linecap="round"/>
           <line x1="112" y1="56" x2="124" y2="56" stroke="#4cc9f0" stroke-width="2"/>
         </g>
         <line x1="84" y1="56" x2="146" y2="56" stroke="#ff6b85" stroke-width="2.5" marker-end="url(#ah)" transform="rotate(${gazeRot.toFixed(2)} 84 56)"/>
@@ -1157,7 +1157,7 @@
       const natural = naturalDropMm(ui.targetCm);
       const eyeAng = chinLiftDeg(natural);                           // the relaxed downward glance for this task
       const chin = chinLiftDeg(found.downMm) - eyeAng;               // head tilt beyond that glance (+ chin up)
-      const clear = found.worst <= CLEAR_TOL, relaxed = clear && Math.abs(chin) < 3;
+      const clear = found.worst <= CLEAR_TOL, relaxed = clear && Math.abs(chin) < 5;
       const what = targetName(ui.targetCm);
       const side = Math.abs(found.rightMm) >= 2 ? `, ${Math.abs(found.rightMm).toFixed(0)} mm to the ${found.rightMm > 0 ? 'right' : 'left'}` : '';
       const where = `eyes ${found.downMm.toFixed(1)} mm ${found.downMm >= 0 ? 'down' : 'up'} the lens${side}`;
